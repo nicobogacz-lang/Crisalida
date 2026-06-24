@@ -473,7 +473,7 @@ function showResults(){
   };
   for(var a in mapping)mapping[a].forEach(function(d){areaScores[a]+=(GS.scores[d]||0);});
   // Each area scored independently against its own ceiling (not sum-to-100%)
-  var areaCap={salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+  var areaCap={salud:220,exactas:240,ing:300,sociales:320,eco:310,arte:160,agro:160,edu:230};
   var sorted=AREAS.slice().sort(function(a,b){return areaScores[b.id]-areaScores[a.id];});
   var c=document.getElementById('resAreas');c.innerHTML='';
   document.getElementById('resName').textContent=GS.name+', así se ve tu forma de construir';
@@ -1440,7 +1440,7 @@ var PF_MAPPING = {
   eco:['hE','mEco','D','hC'], arte:['hA','mEst','mAut'],
   agro:['hR','pdcC','mTra'], edu:['mTra','pdcP','mSoc','S']
 };
-var PF_CAPS = {salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+var PF_CAPS = {salud:220,exactas:240,ing:300,sociales:320,eco:310,arte:160,agro:160,edu:230};
 
 function pfComputeAreas(rawScores) {
   var result = {};

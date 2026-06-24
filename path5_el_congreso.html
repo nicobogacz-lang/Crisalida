@@ -465,7 +465,7 @@ function showResults(){
     agro:['hR','pdcC','mTra'],edu:['mTra','pdcP','mSoc','S'],
   };
   for(var a in mapping)mapping[a].forEach(function(d){areaScores[a]+=(GS.scores[d]||0);});
-  var areaCap={salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+  var areaCap={salud:280,exactas:290,ing:270,sociales:360,eco:290,arte:120,agro:130,edu:260};
   var sorted=AREAS.slice().sort(function(a,b){return areaScores[b.id]-areaScores[a.id];});
   var c=document.getElementById('resAreas');c.innerHTML='';
   document.getElementById('resName').textContent=GS.name+', así se ve tu forma de proyectarte';
@@ -1454,7 +1454,7 @@ var PF_MAPPING = {
   eco:['hE','mEco','D','hC'], arte:['hA','mEst','mAut'],
   agro:['hR','pdcC','mTra'], edu:['mTra','pdcP','mSoc','S']
 };
-var PF_CAPS = {salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+var PF_CAPS = {salud:280,exactas:290,ing:270,sociales:360,eco:290,arte:120,agro:130,edu:260};
 
 function pfComputeAreas(rawScores) {
   var result = {};
