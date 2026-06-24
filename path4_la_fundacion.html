@@ -295,8 +295,8 @@ body{font-family:'Nunito',sans-serif;display:flex;flex-direction:column;position
     <input type="email" id="pfEmail" placeholder="nombre@email.com" maxlength="60" autocomplete="email">
   </div>
   <div class="intro-input">
-    <label>Código del colegio</label>
-    <input type="text" id="pfSchoolCode" placeholder="Ej: SJB-2025" maxlength="20" autocomplete="off">
+    <label>Código de sesión</label>
+    <input type="text" id="pfSchoolCode" placeholder="Ej: S-K7X9AB" maxlength="20" autocomplete="off">
   </div>
 
   </div>
@@ -1480,7 +1480,7 @@ function pfSyncResults() {
   .then(function(r){ return r.json(); })
   .then(function(data){
     if (syncEl) {
-      if (data && data.success) {
+      if (data && data.error) { syncEl.textContent = '⚠ ' + data.error; } else if (data && data.success) {
         syncEl.innerHTML = '✓ Resultados guardados · <a href="dashboard-alumno.html?email=' + encodeURIComponent(GS.email) + '" style="color:var(--warm,#f5a623);text-decoration:underline;">Ver mi evolución →</a>';
       } else {
         syncEl.textContent = '✓ Resultados guardados';

@@ -8,429 +8,343 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Gabarito:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
-:root{
-  --bg:#1a1a2e;--card:#24243e;--border:#3a3a5c;
-  --text:#e8e6e0;--muted:#9a98a0;
-  --warm:#f5a623;--warm-soft:rgba(245,166,35,.12);
-}
+:root{--bg:#1a1a2e;--card:#24243e;--border:#3a3a5c;--text:#e8e6e0;--muted:#9a98a0;--warm:#f5a623;--warm-soft:rgba(245,166,35,.12);--danger:#f06050;--danger-soft:rgba(240,96,80,.12);--success:#4ecb71;--success-soft:rgba(78,203,113,.12);}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Nunito,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px;}
 .container{max-width:900px;margin:0 auto;}
-h1{font-family:Gabarito,sans-serif;font-size:24px;font-weight:900;margin-bottom:4px;}
+h1{font-family:Gabarito,sans-serif;font-size:24px;font-weight:900;}
 h2{font-family:Gabarito,sans-serif;font-size:18px;font-weight:700;}
-.subtitle{color:var(--muted);font-size:13px;margin-bottom:24px;}
-
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:20px;}
 .login-wrap{display:flex;flex-direction:column;align-items:center;padding-top:60px;}
-.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:360px;width:100%;text-align:center;display:flex;flex-direction:column;gap:16px;align-items:center;}
-.login-card label{font-size:12px;color:var(--muted);text-align:left;width:100%;}
-.login-card input{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-family:Nunito,sans-serif;font-size:16px;color:var(--text);outline:none;width:100%;}
-.login-card input:focus{border-color:var(--warm);}
-.btn{font-family:Gabarito,sans-serif;font-weight:700;border:none;border-radius:12px;padding:12px 24px;font-size:16px;cursor:pointer;transition:all .2s;}
-.btn-warm{background:var(--warm);color:#1a1a2e;}
-.btn-warm:hover{filter:brightness(1.1);}
-.btn-warm:disabled{opacity:.4;cursor:not-allowed;}
-.btn-sm{padding:6px 14px;font-size:13px;border-radius:8px;}
-
-.dashboard{display:none;}
-.dashboard.active{display:block;}
-
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;}
-.card-title{font-family:Gabarito,sans-serif;font-size:16px;font-weight:700;margin-bottom:4px;}
-.card-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
-
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
-.stat-box{background:var(--bg);border-radius:12px;padding:16px;text-align:center;}
-.stat-num{font-family:Gabarito,sans-serif;font-size:28px;font-weight:900;color:var(--warm);}
-.stat-label{font-size:11px;color:var(--muted);margin-top:4px;}
-
-.filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
-.filter-btn{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:Nunito,sans-serif;font-size:12px;color:var(--muted);cursor:pointer;transition:all .2s;}
-.filter-btn.active{background:var(--warm-soft);border-color:var(--warm);color:var(--warm);}
-
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:360px;width:100%;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center;}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;text-align:left;}
+input,select{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:Nunito,sans-serif;font-size:15px;color:var(--text);outline:none;width:100%;}
+input:focus,select:focus{border-color:var(--warm);}
+.btn{font-family:Gabarito,sans-serif;font-weight:700;border:none;border-radius:10px;padding:10px 20px;font-size:15px;cursor:pointer;transition:all .15s;}
+.btn-warm{background:var(--warm);color:#1a1a2e;}.btn-warm:hover{filter:brightness(1.1);}.btn-warm:disabled{opacity:.4;cursor:not-allowed;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}.btn-outline:hover{border-color:var(--warm);color:var(--warm);}
+.btn-danger{background:var(--danger-soft);color:var(--danger);border:1px solid transparent;}.btn-danger:hover{border-color:var(--danger);}
+.btn-success{background:var(--success-soft);color:var(--success);border:1px solid transparent;}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px;}
+.dashboard{display:none;}.dashboard.active{display:block;}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);}
+.tab{padding:10px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.tab.active{color:var(--warm);border-bottom-color:var(--warm);}.tab:hover{color:var(--text);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
+.stat{background:var(--bg);border-radius:10px;padding:14px;text-align:center;}
+.stat-num{font-family:Gabarito,sans-serif;font-size:26px;font-weight:900;color:var(--warm);}.stat-label{font-size:11px;color:var(--muted);margin-top:2px;}
+.session-item{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.session-info{flex:1;min-width:200px;}
+.session-name{font-weight:700;font-size:14px;}
+.session-code{font-family:monospace;font-size:16px;color:var(--warm);background:var(--warm-soft);padding:3px 10px;border-radius:6px;display:inline-block;margin-top:4px;letter-spacing:.1em;cursor:pointer;}
+.session-meta{font-size:11px;color:var(--muted);margin-top:4px;}
+.session-status{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:700;}
+.session-status.open{background:var(--success-soft);color:var(--success);}
+.session-status.closed{background:var(--danger-soft);color:var(--danger);}
+.session-actions{display:flex;gap:6px;}
 .students-table{width:100%;border-collapse:collapse;font-size:13px;}
-.students-table th{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
-.students-table td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.04);}
+.students-table th{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;}
+.students-table td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;}
 .students-table tr:hover td{background:rgba(255,255,255,.02);}
-.students-table .name-cell{font-weight:700;}
-.students-table .paths-cell{display:flex;gap:4px;}
-.path-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#1a1a2e;}
-.path-dot.done{background:var(--warm);}
-.path-dot.pending{background:var(--border);color:var(--muted);}
-.top-area{font-size:12px;padding:3px 8px;border-radius:6px;display:inline-block;}
-
+.path-dot{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#1a1a2e;margin:0 2px;}
+.path-dot.done{background:var(--warm);}.path-dot.pending{background:var(--border);color:var(--muted);}
 .chart-container{max-width:600px;margin:0 auto;}
-
-.student-detail{display:none;}
-.student-detail.active{display:block;}
-.back-link{font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;margin-bottom:12px;display:inline-block;}
-
-.area-colors{display:flex;gap:4px;align-items:center;}
-.area-mini-bar{height:14px;border-radius:3px;min-width:2px;transition:width .5s;}
-
-#loginError{font-size:12px;color:#f06050;display:none;}
-
-@media(max-width:600px){
-  body{padding:12px;}
-  .card{padding:16px;}
-  .students-table{font-size:11px;}
-  .students-table th,.students-table td{padding:6px 4px;}
-}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;}
+.modal h2{margin-bottom:16px;}
+.form-group{margin-bottom:14px;}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;}
+.detail-card{display:none;}.detail-card.active{display:block;}
+.result-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.result-areas{display:flex;gap:4px;flex-wrap:wrap;}
+.area-tag{font-size:10px;padding:2px 6px;border-radius:4px;}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
+.toast.show{opacity:1;}.toast.success{border-color:var(--success);color:var(--success);}.toast.error{border-color:var(--danger);color:var(--danger);}
+.empty{text-align:center;padding:24px;color:var(--muted);font-size:13px;}
+#loginError{font-size:12px;color:var(--danger);display:none;}
+@media(max-width:600px){body{padding:12px;}.card{padding:14px;}.session-item{flex-direction:column;align-items:flex-start;}.students-table{font-size:11px;}}
 </style>
 </head>
 <body>
 <div class="container">
-
-<!-- LOGIN -->
 <div id="loginScreen" class="login-wrap">
-  <h1>🧭 PathFinder</h1>
-  <p class="subtitle">Panel del orientador</p>
+  <h1>🧭 PathFinder</h1><p class="subtitle">Panel del orientador</p>
   <div class="login-card">
-    <div style="width:100%">
-      <label>Código del colegio</label>
-      <input type="text" id="codeInput" placeholder="Ej: SJB-2025" autocomplete="off" style="text-transform:uppercase;">
-    </div>
-    <button class="btn btn-warm" id="loginBtn" disabled onclick="loadSchool()">Ingresar →</button>
+    <div style="width:100%"><label>Código del colegio</label><input type="text" id="codeInput" placeholder="Ej: SJB-2025" style="text-transform:uppercase;"></div>
+    <button class="btn btn-warm" style="width:100%;" id="loginBtn" disabled onclick="loadSchool()">Ingresar →</button>
     <div id="loginError"></div>
   </div>
 </div>
-
-<!-- DASHBOARD -->
 <div id="dashboard" class="dashboard">
-  <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
-    <div>
-      <h1 id="schoolName">Colegio</h1>
-      <p class="subtitle" id="schoolCode"></p>
-    </div>
-    <button class="btn btn-warm btn-sm" onclick="showLogin()">Cambiar colegio</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+    <div><h1 id="schoolName">Colegio</h1><p class="subtitle" style="margin-bottom:0;" id="schoolCode"></p></div>
+    <button class="btn btn-outline btn-sm" onclick="showLogin()">Cambiar colegio</button>
   </div>
-
-  <!-- Stats -->
-  <div class="stats-grid" id="statsGrid"></div>
-
-  <!-- Aggregate chart -->
-  <div class="card">
-    <div class="card-title">Promedio del grupo por área</div>
-    <div class="card-sub">Seleccioná un path para ver el promedio de esa cohorte</div>
-    <div class="filters" id="pathFilters"></div>
-    <div class="chart-container">
-      <canvas id="avgChart"></canvas>
+  <div class="stats-row" id="statsRow"></div>
+  <div class="tabs">
+    <div class="tab active" data-tab="sessions" onclick="switchTab('sessions')">📋 Sesiones</div>
+    <div class="tab" data-tab="students" onclick="switchTab('students')">👥 Alumnos</div>
+    <div class="tab" data-tab="chart" onclick="switchTab('chart')">📊 Estadísticas</div>
+  </div>
+  <div class="tab-content" id="tab-sessions">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h2>Sesiones</h2><button class="btn btn-warm btn-sm" onclick="openNewSession()">+ Nueva sesión</button>
+      </div>
+      <div id="sessionsList"></div>
     </div>
   </div>
-
-  <!-- Students list -->
-  <div class="card" id="studentsCard">
-    <div class="card-title">Alumnos</div>
-    <div class="card-sub" id="studentCount"></div>
-    <div style="overflow-x:auto;">
-      <table class="students-table" id="studentsTable">
-        <thead><tr>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Paths</th>
-          <th>Área principal</th>
-          <th>Detalle</th>
-        </tr></thead>
-        <tbody id="studentsBody"></tbody>
-      </table>
+  <div class="tab-content" id="tab-students" style="display:none;">
+    <div class="card" id="studentsCard">
+      <h2>Alumnos</h2><div class="subtitle" id="studentCount"></div>
+      <div style="overflow-x:auto;"><table class="students-table"><thead><tr><th>Nombre</th><th>Email</th><th>Paths</th><th>Acciones</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
+    </div>
+    <div class="card detail-card" id="studentDetail">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div><h2 id="detailName"></h2><div class="subtitle" style="margin-bottom:0;" id="detailEmail"></div></div>
+        <button class="btn btn-outline btn-sm" onclick="hideDetail()">← Volver</button>
+      </div>
+      <div class="chart-container" style="margin-bottom:16px;"><canvas id="detailRadar"></canvas></div>
+      <h2 style="font-size:14px;margin-bottom:8px;">Resultados por path</h2>
+      <div id="detailResults"></div>
     </div>
   </div>
-
-  <!-- Individual student detail (shows when clicking "ver") -->
-  <div class="card student-detail" id="studentDetail">
-    <div class="back-link" onclick="hideStudentDetail()">← Volver a la lista</div>
-    <h2 id="detailName"></h2>
-    <div class="card-sub" id="detailEmail"></div>
-    <div class="chart-container" style="margin-bottom:16px;">
-      <canvas id="detailRadar"></canvas>
+  <div class="tab-content" id="tab-chart" style="display:none;">
+    <div class="card">
+      <h2>Promedio del grupo por área</h2><div class="subtitle">Filtrar por sesión</div>
+      <div id="chartFilters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;"></div>
+      <div class="chart-container"><canvas id="avgChart"></canvas></div>
     </div>
-    <div id="detailBars"></div>
   </div>
 </div>
-
+<div class="modal-overlay" id="sessionModal"><div class="modal">
+  <h2>Nueva sesión</h2>
+  <div class="form-group"><label>Nombre (ej: "3ero A - Orientación Mayo")</label><input type="text" id="mSessionName" placeholder="Nombre de la sesión..." maxlength="60"></div>
+  <div class="form-group"><label>Path</label><select id="mSessionPath">
+    <option value="1">Path 1 — El Barrio (1er año)</option><option value="2">Path 2 — La Expedición (2do año)</option>
+    <option value="3">Path 3 — La Ciudad Invisible (3er año)</option><option value="4">Path 4 — La Fundación (4to año)</option>
+    <option value="5">Path 5 — El Congreso (5to año)</option>
+  </select></div>
+  <div class="form-group"><label>Año</label><select id="mSessionYear"></select></div>
+  <div id="sessionModalError" style="font-size:12px;color:var(--danger);min-height:16px;"></div>
+  <div class="form-actions"><button class="btn btn-outline" onclick="closeModal('sessionModal')">Cancelar</button><button class="btn btn-warm" id="sessionSaveBtn" onclick="createSession()">Crear sesión</button></div>
+</div></div>
+<div class="modal-overlay" id="editStudentModal"><div class="modal">
+  <h2>Editar alumno</h2>
+  <div class="form-group"><label>Nombre</label><input type="text" id="mEditName" maxlength="60"></div>
+  <div class="form-group"><label>Email</label><input type="email" id="mEditEmail" maxlength="60"></div>
+  <div id="editStudentError" style="font-size:12px;color:var(--danger);min-height:16px;"></div>
+  <div class="form-actions"><button class="btn btn-outline" onclick="closeModal('editStudentModal')">Cancelar</button><button class="btn btn-warm" onclick="saveEditStudent()">Guardar</button></div>
+</div></div>
+<div class="modal-overlay" id="confirmModal"><div class="modal">
+  <h2 id="confirmTitle">Confirmar</h2><p id="confirmMsg" style="font-size:14px;line-height:1.6;margin-bottom:16px;"></p>
+  <div class="form-actions"><button class="btn btn-outline" onclick="closeModal('confirmModal')">Cancelar</button><button class="btn btn-danger" onclick="executeConfirm()">Eliminar</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
 </div>
-
 <script>
-// ═══ CONFIG ═══
-var SUPABASE_URL = 'https://mnmdqqlppwuzejxibqso.supabase.co';
-var SUPABASE_KEY = 'sb_publishable_iWdGYjRwe18ortlRznDj9w_HpM0M1Hf';
+var SB_URL='https://mnmdqqlppwuzejxibqso.supabase.co';
+var SB_KEY='sb_publishable_iWdGYjRwe18ortlRznDj9w_HpM0M1Hf';
+var AREAS=[{id:'salud',name:'Salud',icon:'🩺',color:'#5b9bf5'},{id:'exactas',name:'Exactas',icon:'🔬',color:'#4ecb71'},{id:'ing',name:'Ingeniería',icon:'⚙️',color:'#b07af0'},{id:'sociales',name:'Sociales',icon:'🌍',color:'#f07a9a'},{id:'eco',name:'Económicas',icon:'📊',color:'#f5a623'},{id:'arte',name:'Arte',icon:'🎨',color:'#f06050'},{id:'agro',name:'Agro',icon:'🌱',color:'#7ad8b0'},{id:'edu',name:'Educación',icon:'📚',color:'#e0a860'}];
+var PATH_NAMES={1:'El Barrio',2:'La Expedición',3:'La Ciudad Invisible',4:'La Fundación',5:'El Congreso'};
+var PATH_COLORS=['#5b9bf5','#4ecb71','#b07af0','#f07a9a','#f5a623'];
+var PATH_FILES={1:'el_barrio',2:'la_expedicion',3:'la_ciudad_invisible',4:'la_fundacion',5:'el_congreso'};
+var schoolCode='',schoolData=null,currentEditStudentId=null,confirmAction=null,avgChartInstance=null,detailChartInstance=null;
 
-var AREAS = [
-  {id:'salud',name:'Salud',icon:'🩺',color:'#5b9bf5'},
-  {id:'exactas',name:'Exactas',icon:'🔬',color:'#4ecb71'},
-  {id:'ing',name:'Ingeniería',icon:'⚙️',color:'#b07af0'},
-  {id:'sociales',name:'Sociales',icon:'🌍',color:'#f07a9a'},
-  {id:'eco',name:'Económicas',icon:'📊',color:'#f5a623'},
-  {id:'arte',name:'Arte',icon:'🎨',color:'#f06050'},
-  {id:'agro',name:'Agro',icon:'🌱',color:'#7ad8b0'},
-  {id:'edu',name:'Educación',icon:'📚',color:'#e0a860'}
-];
-var PATH_NAMES = {1:'El Barrio',2:'La Expedición',3:'La Ciudad Invisible',4:'La Fundación',5:'El Congreso'};
-var PATH_COLORS = ['#5b9bf5','#4ecb71','#b07af0','#f07a9a','#f5a623'];
+function rpc(fn,params){return fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},body:JSON.stringify(params||{})}).then(function(r){return r.json();});}
+function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'');setTimeout(function(){t.className='toast';},3000);}
+function closeModal(id){document.getElementById(id).classList.remove('active');}
+document.querySelectorAll('.modal-overlay').forEach(function(el){el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('active');});});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.modal-overlay.active').forEach(function(m){m.classList.remove('active');});});
 
-var schoolData = null;
-var avgChartInstance = null;
-var detailChartInstance = null;
-
-// ═══ LOGIN ═══
-var codeIn = document.getElementById('codeInput');
-var loginBtn = document.getElementById('loginBtn');
-codeIn.addEventListener('input', function(){
-  loginBtn.disabled = codeIn.value.trim().length < 2;
-});
-
-function showLogin(){
-  document.getElementById('loginScreen').style.display = '';
-  document.getElementById('dashboard').classList.remove('active');
-}
+var codeIn=document.getElementById('codeInput');
+codeIn.addEventListener('input',function(){document.getElementById('loginBtn').disabled=codeIn.value.trim().length<2;});
+codeIn.addEventListener('keydown',function(e){if(e.key==='Enter'&&!document.getElementById('loginBtn').disabled)loadSchool();});
+function showLogin(){document.getElementById('loginScreen').style.display='';document.getElementById('dashboard').classList.remove('active');}
 
 function loadSchool(){
-  var code = codeIn.value.trim().toUpperCase();
-  var errEl = document.getElementById('loginError');
-  errEl.style.display = 'none';
-  loginBtn.disabled = true;
-  loginBtn.textContent = 'Cargando...';
+  schoolCode=codeIn.value.trim().toUpperCase();
+  var errEl=document.getElementById('loginError');errEl.style.display='none';
+  document.getElementById('loginBtn').disabled=true;
+  rpc('get_school_dashboard',{p_school_code:schoolCode}).then(function(data){
+    document.getElementById('loginBtn').disabled=false;
+    if(!data||data.error){errEl.textContent=data?.error||'Código no encontrado';errEl.style.display='';return;}
+    schoolData=data;renderDashboard();
+  }).catch(function(){document.getElementById('loginBtn').disabled=false;errEl.textContent='Error de conexión';errEl.style.display='';});
+}
 
-  fetch(SUPABASE_URL + '/rest/v1/rpc/get_school_dashboard', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY
-    },
-    body: JSON.stringify({p_school_code: code})
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(data){
-    loginBtn.textContent = 'Ingresar →';
-    loginBtn.disabled = false;
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('active',t.dataset.tab===tab);});
+  document.querySelectorAll('.tab-content').forEach(function(c){c.style.display='none';});
+  document.getElementById('tab-'+tab).style.display='';
+  if(tab==='chart')renderAvgChart('all');
+}
 
-    if (!data || data.error) {
-      errEl.textContent = 'Código no encontrado. Verificá que sea correcto.';
-      errEl.style.display = '';
-      return;
-    }
+function renderDashboard(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('dashboard').classList.add('active');
+  document.getElementById('schoolName').textContent=schoolData.school_name;
+  document.getElementById('schoolCode').textContent='Código: '+schoolCode;
+  var students=(schoolData.students||[]).filter(function(s){return s.results&&s.results.length>0;});
+  var sessions=schoolData.sessions||[];
+  var totalResults=0;students.forEach(function(s){totalResults+=s.results.length;});
+  document.getElementById('statsRow').innerHTML=
+    '<div class="stat"><div class="stat-num">'+sessions.length+'</div><div class="stat-label">Sesiones</div></div>'+
+    '<div class="stat"><div class="stat-num">'+students.length+'</div><div class="stat-label">Alumnos</div></div>'+
+    '<div class="stat"><div class="stat-num">'+totalResults+'</div><div class="stat-label">Resultados</div></div>'+
+    '<div class="stat"><div class="stat-num">'+sessions.filter(function(s){return s.status==='open';}).length+'</div><div class="stat-label">Sesiones abiertas</div></div>';
+  renderSessions(sessions);renderStudents(students);renderChartFilters(sessions);
+}
 
-    schoolData = data;
-    renderDashboard(data, code);
-  })
-  .catch(function(err){
-    loginBtn.textContent = 'Ingresar →';
-    loginBtn.disabled = false;
-    errEl.textContent = 'Error de conexión.';
-    errEl.style.display = '';
-    console.error(err);
+function renderSessions(sessions){
+  var el=document.getElementById('sessionsList');
+  if(!sessions.length){el.innerHTML='<div class="empty">No hay sesiones. Creá una para que los alumnos puedan jugar.</div>';return;}
+  el.innerHTML='';
+  sessions.forEach(function(s){
+    var pathUrl=window.location.origin+'/path'+s.path_number+'_'+PATH_FILES[s.path_number]+'.html';
+    var created=new Date(s.created_at).toLocaleDateString('es-AR');
+    var div=document.createElement('div');div.className='session-item';
+    div.innerHTML=
+      '<div class="session-info">'+
+        '<div class="session-name">'+s.name+' <span class="session-status '+s.status+'">'+(s.status==='open'?'🟢 Abierta':'🔴 Cerrada')+'</span></div>'+
+        '<div class="session-code" onclick="copyCode(\''+s.code+'\')" title="Click para copiar">'+s.code+'</div>'+
+        '<div class="session-meta">Path '+s.path_number+': '+PATH_NAMES[s.path_number]+' · Año '+(s.year||2026)+' · '+s.result_count+' resultados · '+created+'</div>'+
+        '<div class="session-meta" style="font-size:10px;word-break:break-all;">Link: '+pathUrl+'</div>'+
+      '</div>'+
+      '<div class="session-actions">'+
+        (s.status==='open'?'<button class="btn btn-outline btn-sm" onclick="toggleSession(\''+s.code+'\',\'close\')">Cerrar</button>':'<button class="btn btn-success btn-sm" onclick="toggleSession(\''+s.code+'\',\'reopen\')">Reabrir</button>')+
+        '<button class="btn btn-danger btn-sm" onclick="askDeleteSession(\''+s.id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">Eliminar</button>'+
+      '</div>';
+    el.appendChild(div);
   });
 }
 
-// ═══ RENDER ═══
-function renderDashboard(data, code) {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('dashboard').classList.add('active');
+function copyCode(code){navigator.clipboard.writeText(code).then(function(){showToast('Código copiado: '+code,'success');});}
 
-  document.getElementById('schoolName').textContent = data.school_name || 'Colegio';
-  document.getElementById('schoolCode').textContent = 'Código: ' + code;
+function openNewSession(){var ys=document.getElementById('mSessionYear');ys.innerHTML='';for(var y=2024;y<=2035;y++){var o=document.createElement('option');o.value=y;o.textContent=y;if(y===new Date().getFullYear())o.selected=true;ys.appendChild(o);}document.getElementById('mSessionName').value='';document.getElementById('sessionModalError').textContent='';document.getElementById('sessionModal').classList.add('active');}
 
-  var students = data.students || [];
-  // Filter out students with no results
-  students = students.filter(function(s){ return s.results && s.results.length > 0; });
+function createSession(){
+  var name=document.getElementById('mSessionName').value.trim();
+  var pathNum=parseInt(document.getElementById('mSessionPath').value);var year=parseInt(document.getElementById('mSessionYear').value);
+  var errEl=document.getElementById('sessionModalError');
+  if(!name){errEl.textContent='Ingresá un nombre';return;}
+  document.getElementById('sessionSaveBtn').disabled=true;
+  rpc('create_session',{p_school_code:schoolCode,p_path_number:pathNum,p_name:name,p_year:year}).then(function(data){
+    document.getElementById('sessionSaveBtn').disabled=false;
+    if(data&&data.success){closeModal('sessionModal');showToast('Sesión creada · Código: '+data.session_code,'success');reload();}
+    else errEl.textContent=data?.error||'Error';
+  }).catch(function(){document.getElementById('sessionSaveBtn').disabled=false;errEl.textContent='Error de conexión';});
+}
 
-  var totalResults = 0;
-  var pathCounts = {};
-  students.forEach(function(s){
-    s.results.forEach(function(r){
-      totalResults++;
-      pathCounts[r.path_number] = (pathCounts[r.path_number]||0) + 1;
-    });
+function toggleSession(code,action){
+  rpc(action==='close'?'close_session':'reopen_session',{p_session_code:code}).then(function(d){
+    if(d&&d.success){showToast('Sesión '+(action==='close'?'cerrada':'reabierta'),'success');reload();}
+    else showToast(d?.error||'Error','error');
   });
+}
 
-  // Stats
-  var statsEl = document.getElementById('statsGrid');
-  statsEl.innerHTML = 
-    '<div class="stat-box"><div class="stat-num">' + students.length + '</div><div class="stat-label">Alumnos</div></div>' +
-    '<div class="stat-box"><div class="stat-num">' + totalResults + '</div><div class="stat-label">Paths completados</div></div>' +
-    '<div class="stat-box"><div class="stat-num">' + Object.keys(pathCounts).length + '</div><div class="stat-label">Paths activos</div></div>' +
-    '<div class="stat-box"><div class="stat-num">' + (students.length ? Math.round(totalResults/students.length*10)/10 : 0) + '</div><div class="stat-label">Promedio paths/alumno</div></div>';
+function askDeleteSession(id,name){
+  document.getElementById('confirmTitle').textContent='Eliminar sesión';
+  document.getElementById('confirmMsg').innerHTML='¿Eliminar <strong>'+name+'</strong>? Los resultados se mantienen.';
+  confirmAction=function(){rpc('orientador_delete_session',{p_session_id:id}).then(function(d){closeModal('confirmModal');if(d&&d.success){showToast('Sesión eliminada','success');reload();}else showToast(d?.error||'Error','error');});};
+  document.getElementById('confirmModal').classList.add('active');
+}
 
-  // Path filters
-  var filtersEl = document.getElementById('pathFilters');
-  filtersEl.innerHTML = '<button class="filter-btn active" data-path="all" onclick="filterPath(\'all\',this)">Todos</button>';
-  for (var p = 1; p <= 5; p++) {
-    if (pathCounts[p]) {
-      filtersEl.innerHTML += '<button class="filter-btn" data-path="' + p + '" onclick="filterPath(' + p + ',this)">Path ' + p + ' (' + pathCounts[p] + ')</button>';
-    }
-  }
-
-  // Avg chart (all paths initially)
-  renderAvgChart(students, 'all');
-
-  // Students table
-  document.getElementById('studentCount').textContent = students.length + ' alumnos registrados';
-  var tbody = document.getElementById('studentsBody');
-  tbody.innerHTML = '';
-  students.forEach(function(s, idx){
-    var tr = document.createElement('tr');
-    
-    // Find top area from latest result
-    var latestResult = s.results[s.results.length - 1];
-    var topArea = getTopArea(latestResult.area_percentages);
-    var areaObj = AREAS.find(function(a){ return a.id === topArea.id; });
-
-    // Path dots
-    var dots = '';
-    for (var p = 1; p <= 5; p++) {
-      var done = s.results.some(function(r){ return r.path_number === p; });
-      dots += '<div class="path-dot ' + (done ? 'done' : 'pending') + '">' + p + '</div>';
-    }
-
-    tr.innerHTML = 
-      '<td class="name-cell">' + s.student_name + '</td>' +
-      '<td style="color:var(--muted);font-size:12px;">' + s.student_email + '</td>' +
-      '<td><div class="paths-cell">' + dots + '</div></td>' +
-      '<td><span class="top-area" style="background:' + areaObj.color + '22;color:' + areaObj.color + '">' + areaObj.icon + ' ' + areaObj.name + ' ' + topArea.pct + '%</span></td>' +
-      '<td><button class="btn btn-sm" style="background:var(--bg);color:var(--warm);border:1px solid var(--border);" onclick="showStudentDetail(' + idx + ')">Ver →</button></td>';
+function renderStudents(students){
+  document.getElementById('studentCount').textContent=students.length+' alumnos';
+  var tbody=document.getElementById('studentsBody');tbody.innerHTML='';
+  if(!students.length){tbody.innerHTML='<tr><td colspan="4" class="empty">Sin alumnos.</td></tr>';return;}
+  students.forEach(function(s,i){
+    var tr=document.createElement('tr');
+    var dots='';for(var p=1;p<=5;p++){var done=s.results.some(function(r){return r.path_number===p;});dots+='<span class="path-dot '+(done?'done':'pending')+'">'+p+'</span>';}
+    tr.innerHTML='<td style="font-weight:700;">'+s.student_name+'</td><td style="color:var(--muted);font-size:12px;">'+s.student_email+'</td><td>'+dots+'</td>'+
+      '<td><button class="btn btn-outline btn-sm" onclick="showDetail('+i+')">Ver</button> <button class="btn btn-outline btn-sm" onclick="openEditStudent('+i+')">Editar</button> <button class="btn btn-danger btn-sm" onclick="askDeleteStudent('+i+')">Eliminar</button></td>';
     tbody.appendChild(tr);
   });
-
-  // Store for detail view
-  window._students = students;
+  window._students=students;
 }
 
-function getTopArea(areaPercentages) {
-  var top = {id:'', pct:0};
-  AREAS.forEach(function(a){
-    var v = areaPercentages[a.id] || 0;
-    if (v > top.pct) { top = {id:a.id, pct:v}; }
-  });
-  return top;
+function openEditStudent(i){
+  var s=window._students[i];currentEditStudentId=s.id;
+  document.getElementById('mEditName').value=s.student_name;
+  document.getElementById('mEditEmail').value=s.student_email;
+  document.getElementById('editStudentError').textContent='';
+  document.getElementById('editStudentModal').classList.add('active');
 }
 
-function filterPath(pathNum, btn) {
-  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  var students = window._students || [];
-  renderAvgChart(students, pathNum);
-}
-
-function renderAvgChart(students, pathFilter) {
-  // Calculate averages per area
-  var sums = {};
-  var counts = {};
-  AREAS.forEach(function(a){ sums[a.id] = 0; counts[a.id] = 0; });
-
-  students.forEach(function(s){
-    s.results.forEach(function(r){
-      if (pathFilter !== 'all' && r.path_number !== pathFilter) return;
-      AREAS.forEach(function(a){
-        var v = r.area_percentages[a.id] || 0;
-        sums[a.id] += v;
-        counts[a.id]++;
-      });
-    });
-  });
-
-  var data = AREAS.map(function(a){
-    return counts[a.id] ? Math.round(sums[a.id] / counts[a.id]) : 0;
-  });
-
-  if (avgChartInstance) avgChartInstance.destroy();
-  avgChartInstance = new Chart(document.getElementById('avgChart'), {
-    type: 'bar',
-    data: {
-      labels: AREAS.map(function(a){ return a.icon + ' ' + a.name; }),
-      datasets: [{
-        data: data,
-        backgroundColor: AREAS.map(function(a){ return a.color + '88'; }),
-        borderColor: AREAS.map(function(a){ return a.color; }),
-        borderWidth: 1,
-        borderRadius: 6
-      }]
-    },
-    options: {
-      responsive: true,
-      indexAxis: 'y',
-      scales: {
-        x: { max: 100, grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#9a98a0', callback: function(v){ return v+'%'; } } },
-        y: { grid: { display: false }, ticks: { color: '#e8e6e0', font: { size: 12, family: 'Nunito' } } }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: function(ctx){ return ctx.raw + '% promedio'; } } }
-      }
-    }
+function saveEditStudent(){
+  var name=document.getElementById('mEditName').value.trim(),email=document.getElementById('mEditEmail').value.trim();
+  if(!name||!email){document.getElementById('editStudentError').textContent='Completá nombre y email';return;}
+  rpc('orientador_edit_student',{p_student_id:currentEditStudentId,p_name:name,p_email:email}).then(function(d){
+    if(d&&d.success){closeModal('editStudentModal');showToast('Alumno actualizado','success');reload();}
+    else document.getElementById('editStudentError').textContent=d?.error||'Error';
   });
 }
 
-// ═══ STUDENT DETAIL ═══
-function showStudentDetail(idx) {
-  var s = window._students[idx];
-  if (!s) return;
+function askDeleteStudent(i){
+  var s=window._students[i];
+  document.getElementById('confirmTitle').textContent='Eliminar alumno';
+  document.getElementById('confirmMsg').innerHTML='¿Eliminar a <strong>'+s.student_name+'</strong> y todos sus resultados?';
+  confirmAction=function(){rpc('orientador_delete_student',{p_student_id:s.id}).then(function(d){closeModal('confirmModal');if(d&&d.success){showToast('Alumno eliminado','success');reload();}else showToast(d?.error||'Error','error');});};
+  document.getElementById('confirmModal').classList.add('active');
+}
 
-  document.getElementById('studentsCard').style.display = 'none';
-  var detail = document.getElementById('studentDetail');
-  detail.classList.add('active');
-  detail.scrollIntoView({behavior:'smooth'});
+function executeConfirm(){if(confirmAction)confirmAction();}
 
-  document.getElementById('detailName').textContent = s.student_name;
-  document.getElementById('detailEmail').textContent = s.student_email;
-
-  // Radar
-  var datasets = s.results.map(function(r){
-    return {
-      label: 'Path ' + r.path_number,
-      data: AREAS.map(function(a){ return r.area_percentages[a.id] || 0; }),
-      borderColor: PATH_COLORS[r.path_number - 1],
-      backgroundColor: PATH_COLORS[r.path_number - 1] + '22',
-      borderWidth: 2,
-      pointRadius: 3,
-      pointBackgroundColor: PATH_COLORS[r.path_number - 1]
-    };
-  });
-
-  if (detailChartInstance) detailChartInstance.destroy();
-  detailChartInstance = new Chart(document.getElementById('detailRadar'), {
-    type: 'radar',
-    data: {
-      labels: AREAS.map(function(a){ return a.icon + ' ' + a.name; }),
-      datasets: datasets
-    },
-    options: {
-      responsive: true,
-      scales: {
-        r: {
-          beginAtZero: true, max: 100,
-          ticks: { stepSize: 25, color: '#9a98a0', backdropColor: 'transparent', font: { size: 9 } },
-          grid: { color: 'rgba(255,255,255,.08)' },
-          pointLabels: { color: '#e8e6e0', font: { size: 10, family: 'Nunito' } },
-          angleLines: { color: 'rgba(255,255,255,.06)' }
-        }
-      },
-      plugins: {
-        legend: { position: 'bottom', labels: { color: '#e8e6e0', font: { size: 11 }, usePointStyle: true, pointStyle: 'circle' } }
-      }
-    }
-  });
-
-  // Detail bars
-  var barsEl = document.getElementById('detailBars');
-  barsEl.innerHTML = '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Evolución por área y path</div>';
-  AREAS.forEach(function(a){
-    var row = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">';
-    row += '<span style="min-width:24px;text-align:center;">' + a.icon + '</span>';
-    row += '<span style="min-width:70px;font-size:11px;color:var(--muted);">' + a.name + '</span>';
-    row += '<div style="flex:1;display:flex;gap:2px;height:16px;background:var(--bg);border-radius:4px;overflow:hidden;">';
-    s.results.forEach(function(r){
-      var pct = r.area_percentages[a.id] || 0;
-      row += '<div style="width:' + Math.max(pct, 3) + '%;background:' + PATH_COLORS[r.path_number-1] + ';border-radius:3px;display:flex;align-items:center;justify-content:center;transition:width .5s;"><span style="font-size:8px;font-weight:700;color:rgba(0,0,0,.7);">' + pct + '</span></div>';
-    });
-    row += '</div></div>';
-    barsEl.innerHTML += row;
+function showDetail(i){
+  var s=window._students[i];
+  document.getElementById('studentsCard').style.display='none';
+  document.getElementById('studentDetail').classList.add('active');
+  document.getElementById('detailName').textContent=s.student_name;
+  document.getElementById('detailEmail').textContent=s.student_email;
+  var datasets=s.results.map(function(r){return{label:'Path '+r.path_number,data:AREAS.map(function(a){return r.area_percentages[a.id]||0;}),borderColor:PATH_COLORS[r.path_number-1],backgroundColor:PATH_COLORS[r.path_number-1]+'22',borderWidth:2,pointRadius:3};});
+  if(detailChartInstance)detailChartInstance.destroy();
+  detailChartInstance=new Chart(document.getElementById('detailRadar'),{type:'radar',data:{labels:AREAS.map(function(a){return a.icon+' '+a.name;}),datasets:datasets},options:{responsive:true,scales:{r:{beginAtZero:true,max:100,ticks:{stepSize:25,color:'#9a98a0',backdropColor:'transparent',font:{size:9}},grid:{color:'rgba(255,255,255,.08)'},pointLabels:{color:'#e8e6e0',font:{size:10}},angleLines:{color:'rgba(255,255,255,.06)'}}},plugins:{legend:{position:'bottom',labels:{color:'#e8e6e0',font:{size:11},usePointStyle:true}}}}});
+  var el=document.getElementById('detailResults');el.innerHTML='';
+  s.results.forEach(function(r){
+    var tags='';AREAS.forEach(function(a){var v=r.area_percentages[a.id]||0;tags+='<span class="area-tag" style="background:'+a.color+'22;color:'+a.color+'">'+a.icon+' '+v+'%</span>';});
+    var completed=r.completed_at?new Date(r.completed_at).toLocaleDateString('es-AR'):'';
+    var div=document.createElement('div');div.className='result-item';
+    div.innerHTML='<div><div style="font-weight:700;font-size:13px;">Path '+r.path_number+': '+PATH_NAMES[r.path_number]+'</div><div style="font-size:11px;color:var(--muted);">'+completed+(r.session_name?' · '+r.session_name:'')+'</div><div class="result-areas" style="margin-top:6px;">'+tags+'</div></div>'+
+      '<button class="btn btn-danger btn-sm" onclick="askDeleteResult(\''+r.id+'\','+i+','+r.path_number+')">Eliminar</button>';
+    el.appendChild(div);
   });
 }
 
-function hideStudentDetail() {
-  document.getElementById('studentDetail').classList.remove('active');
-  document.getElementById('studentsCard').style.display = '';
+function hideDetail(){document.getElementById('studentDetail').classList.remove('active');document.getElementById('studentsCard').style.display='';}
+
+function askDeleteResult(rid,si,pn){
+  var s=window._students[si];
+  document.getElementById('confirmTitle').textContent='Eliminar resultado';
+  document.getElementById('confirmMsg').innerHTML='¿Eliminar Path '+pn+' de <strong>'+s.student_name+'</strong>?';
+  confirmAction=function(){rpc('orientador_delete_result',{p_result_id:rid}).then(function(d){closeModal('confirmModal');if(d&&d.success){showToast('Resultado eliminado','success');reload();}else showToast(d?.error||'Error','error');});};
+  document.getElementById('confirmModal').classList.add('active');
 }
+
+function renderChartFilters(sessions){
+  var el=document.getElementById('chartFilters');
+  el.innerHTML='<button class="btn btn-sm" style="background:var(--warm-soft);color:var(--warm);border:1px solid var(--warm);" onclick="filterChart(\'all\',this)">Todos</button>';
+  sessions.forEach(function(s){el.innerHTML+='<button class="btn btn-outline btn-sm" onclick="filterChart(\''+s.id+'\',this)">'+(s.year?s.year+' · ':'')+s.name+'</button>';});
+}
+function filterChart(id,btn){
+  btn.parentElement.querySelectorAll('.btn').forEach(function(b){b.style.background='transparent';b.style.color='var(--muted)';b.style.borderColor='var(--border)';});
+  btn.style.background='var(--warm-soft)';btn.style.color='var(--warm)';btn.style.borderColor='var(--warm)';
+  renderAvgChart(id);
+}
+function renderAvgChart(sessionFilter){
+  var students=(schoolData.students||[]).filter(function(s){return s.results&&s.results.length>0;});
+  var sums={},counts={};AREAS.forEach(function(a){sums[a.id]=0;counts[a.id]=0;});
+  students.forEach(function(s){s.results.forEach(function(r){
+    AREAS.forEach(function(a){var v=r.area_percentages[a.id]||0;sums[a.id]+=v;counts[a.id]++;});
+  });});
+  var data=AREAS.map(function(a){return counts[a.id]?Math.round(sums[a.id]/counts[a.id]):0;});
+  if(avgChartInstance)avgChartInstance.destroy();
+  avgChartInstance=new Chart(document.getElementById('avgChart'),{type:'bar',data:{labels:AREAS.map(function(a){return a.icon+' '+a.name;}),datasets:[{data:data,backgroundColor:AREAS.map(function(a){return a.color+'88';}),borderColor:AREAS.map(function(a){return a.color;}),borderWidth:1,borderRadius:6}]},options:{responsive:true,indexAxis:'y',scales:{x:{max:100,grid:{color:'rgba(255,255,255,.06)'},ticks:{color:'#9a98a0',callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{color:'#e8e6e0',font:{size:12}}}},plugins:{legend:{display:false}}}});
+}
+
+function reload(){rpc('get_school_dashboard',{p_school_code:schoolCode}).then(function(d){if(d&&!d.error){schoolData=d;renderDashboard();}});}
 </script>
 </body>
 </html>
