@@ -635,7 +635,7 @@ function showResults(){
     agro:['hR','pdcC','mTra'],edu:['mTra','pdcP','mSoc','S'],
   };
   for(var a in mapping)mapping[a].forEach(function(d){areaScores[a]+=(GS.scores[d]||0);});
-  var areaCap={salud:350,exactas:290,ing:250,sociales:410,eco:260,arte:120,agro:130,edu:310};
+  var areaCap={salud:420,exactas:290,ing:250,sociales:500,eco:260,arte:120,agro:160,edu:380};
   var sorted=AREAS.slice().sort(function(a,b){return areaScores[b.id]-areaScores[a.id];});
   var c=document.getElementById('resAreas');c.innerHTML='';
   document.getElementById('resName').textContent=GS.name+', así se ve tu forma de habitar el barrio';
@@ -1931,7 +1931,7 @@ var PF_MAPPING = {
   eco:['hE','mEco','D','hC'], arte:['hA','mEst','mAut'],
   agro:['hR','pdcC','mTra'], edu:['mTra','pdcP','mSoc','S']
 };
-var PF_CAPS = {salud:350,exactas:290,ing:250,sociales:410,eco:260,arte:120,agro:130,edu:310};
+var PF_CAPS = {salud:420,exactas:290,ing:250,sociales:500,eco:260,arte:120,agro:160,edu:380};
 
 function pfComputeAreas(rawScores) {
   var result = {};
