@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Path 1 — El Barrio</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Gabarito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#0c0e18;color:#e8e4da;}
+body{font-family:'Nunito',sans-serif;display:flex;flex-direction:column;position:relative;}
+
+.screen{display:none;flex-direction:column;height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
+.screen.active{display:flex;}
+.fade-in{animation:fadeIn .45s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.7}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+:root{
+  --sky:#0c0e18;--sky2:#141828;
+  --warm:#f5a623;--warm-soft:rgba(245,166,35,.1);--warm-border:rgba(245,166,35,.2);
+  --green:#4ecb71;--green-soft:rgba(78,203,113,.08);
+  --blue:#5b9bf5;--red:#f06050;--purple:#b07af0;--pink:#f07a9a;
+  --text:#e8e4da;--muted:rgba(232,228,218,.45);--muted2:rgba(232,228,218,.25);
+  --card:rgba(255,255,255,.04);--border:rgba(255,255,255,.07);
+}
+
+/* ══ INTRO ══ */
+#intro{align-items:center;justify-content:center;gap:1.2rem;padding:2rem;text-align:center;background:radial-gradient(ellipse at 50% 80%,#1a1e30,#0c0e18);}
+.intro-badge{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.18em;color:var(--warm);background:var(--warm-soft);padding:5px 16px;border-radius:20px;border:1px solid var(--warm-border);}
+.intro-icon{font-size:64px;animation:float 3s ease-in-out infinite;}
+.intro-title{font-family:Gabarito,sans-serif;font-size:30px;font-weight:700;color:#fff;line-height:1.2;}
+.intro-sub{font-size:15px;color:var(--muted);line-height:1.6;max-width:300px;}
+.intro-input{display:flex;flex-direction:column;gap:6px;width:100%;max-width:260px;}
+.intro-input label{font-size:12px;color:var(--muted);text-align:left;}
+.intro-input input{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-family:Nunito,sans-serif;font-size:16px;color:#fff;outline:none;width:100%;}
+
+.intro-input-group{display:flex;flex-direction:column;gap:10px;width:100%;max-width:260px;}
+.intro-input-group .intro-input{margin:0;}
+#pf-sync-status{font-size:11px;color:var(--muted,#888);text-align:center;margin-top:8px;min-height:16px;}
+.intro-input input:focus{border-color:var(--warm);}
+.btn{font-family:Gabarito,sans-serif;font-size:14px;font-weight:600;padding:11px 28px;border-radius:12px;border:none;cursor:pointer;touch-action:manipulation;transition:all .15s;}
+.btn:active{transform:scale(.96);}
+.btn-warm{background:var(--warm);color:#1a0800;}
+.btn-warm:disabled{opacity:.25;}
+.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border);}
+
+/* ══ MAP ══ */
+#map-screen{background:var(--sky);}
+.map-top{padding:12px 16px 6px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:rgba(0,0,0,.4);border-bottom:1px solid rgba(245,166,35,.08);}
+.map-top-title{font-family:Gabarito,sans-serif;font-size:12px;letter-spacing:.14em;color:var(--warm);opacity:.7;}
+.map-top-progress{font-family:Gabarito,sans-serif;font-size:13px;color:var(--muted);}
+.map-top-progress span{color:var(--warm);font-weight:700;}
+.map-bar{height:3px;background:rgba(255,255,255,.05);flex-shrink:0;}
+.map-bar-fill{height:100%;background:var(--warm);transition:width .5s ease;}
+.map-greeting{padding:10px 16px 4px;flex-shrink:0;}
+.map-greeting h2{font-family:Gabarito,sans-serif;font-size:17px;font-weight:600;color:#fff;}
+.map-greeting p{font-size:12px;color:var(--muted);margin-top:2px;}
+
+.map-canvas{flex:1;position:relative;overflow:hidden;}
+.map-bg{position:absolute;inset:0;}
+
+/* Zone nodes on map */
+.zone-node{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;touch-action:manipulation;opacity:0;transition:opacity .4s ease,transform .3s;}
+.zone-node.visible{opacity:1;}
+.zone-node:active .zone-ring{transform:scale(.9);}
+.zone-node.completed{opacity:.4;pointer-events:none;}
+.zone-ring{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;transition:transform .15s;position:relative;}
+.zone-ring::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid;opacity:.4;animation:pulse 3s ease infinite;}
+.zone-label{font-family:Gabarito,sans-serif;font-size:11px;font-weight:600;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.8);white-space:nowrap;}
+.zone-check{position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;z-index:2;}
+.zone-node.completed .zone-check{display:flex;}
+
+/* Map SVG illustration */
+.map-svg{width:100%;height:100%;}
+
+/* ══ GAME ══ */
+#game-screen{background:#0c0e18;}
+.game-top{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(0,0,0,.4);border-bottom:1px solid var(--border);}
+.game-back{font-size:13px;color:var(--muted);cursor:pointer;touch-action:manipulation;}
+.game-label{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.12em;color:var(--warm);opacity:.7;}
+.game-body{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Campo: narrative */
+.campo-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.campo-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.campo-visual{text-align:center;font-size:52px;padding:4px 0;flex-shrink:0;}
+.campo-bubble{padding:8px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;}
+.campo-bubble-label{font-size:11px;color:var(--muted2);}
+.campo-bubble-text{font-size:14px;color:var(--warm);font-style:italic;margin-top:2px;}
+.campo-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.campo-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.campo-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.campo-opt:active{transform:scale(.98);}
+.campo-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+.campo-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.campo-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.campo-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* Zone result */
+.zone-result{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;text-align:center;}
+.zr-icon{font-size:56px;animation:pulse 1.5s ease infinite;}
+.zr-title{font-family:Gabarito,sans-serif;font-size:20px;font-weight:700;color:#fff;}
+.zr-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:300px;}
+.zr-bars{width:100%;max-width:280px;display:flex;flex-direction:column;gap:8px;}
+.zr-bar{display:flex;align-items:center;gap:10px;}
+.zr-bar-icon{font-size:16px;width:24px;text-align:center;}
+.zr-bar-track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.zr-bar-fill{height:100%;border-radius:3px;transition:width 1s ease .3s;}
+.zr-bar-pct{font-size:11px;color:var(--muted);min-width:32px;text-align:right;}
+
+/* ══ BIBLIOTECA ══ */
+.biblio-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.biblio-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.biblio-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.biblio-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.biblio-progress{font-size:12px;color:var(--muted);text-align:center;}
+.biblio-progress span{font-family:Gabarito,sans-serif;color:#e0a860;font-weight:700;}
+.biblio-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(224,168,96,.06);border:2px solid rgba(224,168,96,.15);text-align:left;animation:slideUp .35s ease;}
+.biblio-item-icon{font-size:28px;flex-shrink:0;}
+.biblio-item-name{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.biblio-item-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.3;}
+.biblio-shelves{display:flex;flex-direction:column;gap:8px;}
+.biblio-shelf{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.biblio-shelf:active{transform:scale(.98);}
+.biblio-shelf.picked{border-color:#e0a860;background:rgba(224,168,96,.08);}
+.biblio-shelf-icon{font-size:22px;flex-shrink:0;}
+.biblio-shelf-info{flex:1;}
+.biblio-shelf-name{font-size:13px;font-weight:600;color:#fff;}
+.biblio-shelf-count{font-size:11px;color:var(--muted);margin-top:2px;}
+.biblio-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.biblio-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.biblio-opt:active{transform:scale(.98);}
+.biblio-opt.picked{border-color:#e0a860;background:rgba(224,168,96,.08);}
+.biblio-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.biblio-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.biblio-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ ESQUINA ══ */
+.esquina-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 16px;gap:14px;overflow:hidden;}
+.esquina-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.esquina-counter{font-family:Gabarito,sans-serif;font-size:13px;color:var(--muted);}
+.esquina-counter span{color:#7ad8b0;font-weight:700;}
+.esquina-prompt{font-family:Gabarito,sans-serif;font-size:15px;font-weight:600;color:#fff;text-align:center;line-height:1.4;}
+.esquina-vs{display:flex;align-items:stretch;gap:12px;width:100%;max-width:340px;animation:fadeIn .3s ease;}
+.esquina-card{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 10px;border-radius:16px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;text-align:center;}
+.esquina-card:active{transform:scale(.95);}
+.esquina-card.picked{border-color:#7ad8b0;background:rgba(122,216,176,.08);transform:scale(1.03);}
+.esquina-card.not-picked{opacity:.25;transform:scale(.95);}
+.esquina-card-icon{font-size:40px;}
+.esquina-card-name{font-family:Gabarito,sans-serif;font-size:14px;font-weight:600;color:#fff;}
+.esquina-or{font-family:Gabarito,sans-serif;font-size:12px;color:var(--muted2);align-self:center;}
+.esquina-bar{width:100%;max-width:340px;height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+.esquina-bar-fill{height:100%;background:#7ad8b0;border-radius:2px;transition:width .3s ease;}
+.esquina-opts{display:flex;flex-direction:column;gap:8px;width:100%;max-width:340px;}
+.esquina-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.esquina-opt:active{transform:scale(.98);}
+.esquina-opt.picked{border-color:#7ad8b0;background:rgba(122,216,176,.08);}
+.esquina-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.esquina-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.esquina-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ RECREO ══ */
+.recreo-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.recreo-chat{flex:1;display:flex;flex-direction:column;gap:8px;padding:14px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.recreo-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;padding:4px 0;}
+.recreo-scene{font-size:12px;color:var(--muted);text-align:center;font-style:italic;padding:4px 12px;line-height:1.5;}
+.recreo-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;animation:slideUp .35s ease;}
+.recreo-msg.them{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;}
+.recreo-msg.them .recreo-msg-name{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:3px;}
+.recreo-msg.me{align-self:flex-end;background:rgba(91,155,245,.12);border:1px solid rgba(91,155,245,.2);color:#fff;border-bottom-right-radius:4px;}
+.recreo-msg.narrator{align-self:center;max-width:90%;background:none;border:none;font-size:12px;color:var(--muted);text-align:center;font-style:italic;padding:6px 0;}
+.recreo-choices{padding:10px 16px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;border-top:1px solid var(--border);background:rgba(0,0,0,.3);}
+.recreo-choice{padding:11px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;font-size:13px;color:var(--text);line-height:1.4;}
+.recreo-choice:active{transform:scale(.98);}
+.recreo-choice.picked{border-color:var(--blue);background:rgba(91,155,245,.1);color:#fff;}
+.recreo-choice-hint{font-size:11px;color:var(--muted);margin-top:3px;}
+.recreo-typing{align-self:flex-start;padding:8px 14px;font-size:12px;color:var(--muted);animation:pulse 1s ease infinite;}
+
+/* ══ AULA ══ */
+.aula-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.aula-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.aula-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.aula-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.aula-wall{position:relative;width:100%;aspect-ratio:5/3;border-radius:14px;background:linear-gradient(180deg,#1a1410 0%,#1e1814 100%);border:2px solid rgba(240,96,80,.15);overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:12px;}
+.aula-wall-label{position:absolute;top:6px;left:10px;font-size:10px;color:rgba(240,96,80,.35);font-family:Gabarito,sans-serif;letter-spacing:.1em;}
+.aula-wall-item{font-size:28px;animation:slideUp .4s ease;opacity:0;animation-fill-mode:forwards;}
+.aula-wall-item:nth-child(2){animation-delay:.1s;}
+.aula-wall-item:nth-child(3){animation-delay:.2s;}
+.aula-wall-item:nth-child(4){animation-delay:.3s;}
+.aula-palette{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.aula-elem{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.aula-elem:active{transform:scale(.96);}
+.aula-elem.selected{border-color:#f06050;background:rgba(240,96,80,.08);}
+.aula-elem.disabled{opacity:.3;pointer-events:none;}
+.aula-elem-icon{font-size:24px;flex-shrink:0;}
+.aula-elem-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3;}
+.aula-elem-check{width:18px;height:18px;border-radius:50%;background:#f06050;display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;margin-left:auto;flex-shrink:0;}
+.aula-elem.selected .aula-elem-check{display:flex;}
+.aula-confirm{align-self:center;margin-top:4px;}
+.aula-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.aula-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.aula-opt:active{transform:scale(.98);}
+.aula-opt.picked{border-color:#f06050;background:rgba(240,96,80,.08);}
+.aula-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.aula-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.aula-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ APAGÓN ══ */
+.apagon-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.apagon-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.apagon-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.apagon-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.apagon-timer{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);}
+.apagon-timer-icon{font-size:18px;}
+.apagon-timer-bar{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;max-width:180px;}
+.apagon-timer-fill{height:100%;background:var(--purple);border-radius:3px;transition:width 1s linear;}
+.apagon-timer-fill.urgent{background:var(--red);}
+.apagon-timer-val{font-family:Gabarito,sans-serif;font-size:16px;font-weight:700;color:var(--purple);min-width:28px;text-align:right;}
+.apagon-timer-val.urgent{color:var(--red);}
+.apagon-problems{display:flex;flex-direction:column;gap:8px;}
+.apagon-problem{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.apagon-problem:active{transform:scale(.98);}
+.apagon-problem.target{border-color:var(--purple);background:rgba(176,122,240,.08);}
+.apagon-problem.assigned{border-color:var(--green);background:var(--green-soft);opacity:.7;pointer-events:none;}
+.apagon-problem-icon{font-size:26px;flex-shrink:0;}
+.apagon-problem-text{flex:1;}
+.apagon-problem-title{font-size:13px;font-weight:600;color:#fff;line-height:1.3;}
+.apagon-problem-hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.apagon-problem-assigned{font-size:11px;color:var(--green);font-weight:600;margin-top:3px;}
+.apagon-vecinos{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.apagon-vecino{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;font-size:13px;color:var(--text);line-height:1.3;}
+.apagon-vecino:active{transform:scale(.95);}
+.apagon-vecino.selected{border-color:var(--purple);background:rgba(176,122,240,.12);color:#fff;}
+.apagon-vecino.used{opacity:.3;pointer-events:none;text-decoration:line-through;}
+.apagon-vecino-icon{font-size:22px;flex-shrink:0;}
+.apagon-progress{font-size:12px;color:var(--muted);text-align:center;}
+.apagon-progress span{color:var(--purple);font-family:Gabarito,sans-serif;font-weight:700;}
+.apagon-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.apagon-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.apagon-opt:active{transform:scale(.98);}
+.apagon-opt.picked{border-color:var(--purple);background:rgba(176,122,240,.08);}
+.apagon-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.apagon-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.apagon-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ TERRAZA ══ */
+.terraza-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.terraza-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.terraza-visual{text-align:center;font-size:52px;padding:4px 0;flex-shrink:0;transition:all .4s;}
+.terraza-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.terraza-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.terraza-vars{display:flex;flex-direction:column;gap:10px;}
+.terraza-var{padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);}
+.terraza-var-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.terraza-var-icon{font-size:20px;}
+.terraza-var-name{font-family:Gabarito,sans-serif;font-size:13px;font-weight:600;color:#fff;}
+.terraza-var-fb{margin-left:auto;font-size:16px;opacity:0;transition:opacity .3s;}
+.terraza-var-fb.show{opacity:1;}
+.terraza-var-opts{display:flex;gap:6px;}
+.terraza-var-opt{flex:1;padding:8px 4px;border-radius:10px;background:rgba(255,255,255,.03);border:1.5px solid var(--border);text-align:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.terraza-var-opt:active{transform:scale(.95);}
+.terraza-var-opt.sel{border-color:var(--green);color:var(--green);background:var(--green-soft);}
+.terraza-var-opt.locked{pointer-events:none;opacity:.6;}
+.terraza-attempts{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);}
+.terraza-attempts span{font-family:Gabarito,sans-serif;color:var(--green);font-weight:700;}
+.terraza-history{display:flex;flex-direction:column;gap:6px;}
+.terraza-history-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);font-size:11px;color:var(--muted);}
+.terraza-history-row .fb{margin-left:auto;font-size:14px;letter-spacing:2px;}
+.terraza-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.terraza-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.terraza-opt:active{transform:scale(.98);}
+.terraza-opt.picked{border-color:var(--green);background:var(--green-soft);}
+.terraza-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.terraza-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.terraza-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ KIOSCO ══ */
+.kiosco-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.kiosco-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.kiosco-budget{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:var(--card);border:1px solid var(--warm-border);}
+.kiosco-budget-icon{font-size:22px;}
+.kiosco-budget-info{flex:1;}
+.kiosco-budget-label{font-size:11px;color:var(--muted2);}
+.kiosco-budget-bar{height:6px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:4px;overflow:hidden;}
+.kiosco-budget-fill{height:100%;background:var(--warm);border-radius:3px;transition:width .6s ease;}
+.kiosco-budget-val{font-family:Gabarito,sans-serif;font-size:20px;font-weight:700;color:var(--warm);}
+.kiosco-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.kiosco-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.kiosco-products{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.kiosco-product{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border-radius:14px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;text-align:center;position:relative;}
+.kiosco-product:active{transform:scale(.96);}
+.kiosco-product.selected{border-color:var(--warm);background:var(--warm-soft);}
+.kiosco-product.disabled{opacity:.3;pointer-events:none;}
+.kiosco-product-icon{font-size:32px;}
+.kiosco-product-name{font-size:13px;font-weight:600;color:#fff;line-height:1.3;}
+.kiosco-product-price{font-family:Gabarito,sans-serif;font-size:14px;font-weight:700;color:var(--warm);}
+.kiosco-product-hint{font-size:11px;color:var(--muted);line-height:1.3;}
+.kiosco-product-check{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:var(--warm);display:none;align-items:center;justify-content:center;font-size:11px;color:#1a0800;font-weight:700;}
+.kiosco-product.selected .kiosco-product-check{display:flex;}
+.kiosco-confirm{align-self:center;margin-top:4px;}
+.kiosco-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.kiosco-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.kiosco-opt:active{transform:scale(.98);}
+.kiosco-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+.kiosco-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.kiosco-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.kiosco-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.kiosco-receipt{display:flex;flex-direction:column;gap:6px;padding:10px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);}
+.kiosco-receipt-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);}
+.kiosco-receipt-item span:first-child{font-size:18px;}
+
+/* ══ RESULTS ══ */
+#results-screen{background:radial-gradient(ellipse at 50% 30%,#1a1e30,#0c0e18);align-items:center;padding:20px;overflow-y:auto;gap:14px;}
+.res-h{text-align:center;}
+.res-h h2{font-family:Gabarito,sans-serif;font-size:20px;font-weight:700;color:#fff;}
+.res-h p{font-size:13px;color:var(--muted);margin-top:4px;}
+.res-areas{width:100%;max-width:340px;display:flex;flex-direction:column;gap:8px;}
+.res-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);}
+.res-row-icon{font-size:20px;flex-shrink:0;}
+.res-row-info{flex:1;}
+.res-row-name{font-size:12px;font-weight:600;color:#fff;}
+.res-row-track{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:4px;overflow:hidden;}
+.res-row-fill{height:100%;border-radius:2px;transition:width 1.2s ease .2s;}
+.res-row-pct{font-family:Gabarito,sans-serif;font-size:14px;font-weight:700;min-width:34px;text-align:right;}
+.res-note{width:100%;max-width:340px;padding:12px;border-radius:12px;background:var(--warm-soft);border:1px solid var(--warm-border);}
+.res-note-label{font-family:Gabarito,sans-serif;font-size:10px;letter-spacing:.1em;color:var(--warm);margin-bottom:4px;}
+.res-note p{font-size:12px;color:var(--muted);line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div id="intro" class="screen active">
+  <div class="intro-badge">PATH 1 · AÑO 1 DE 6</div>
+  <div class="intro-icon">🏘️</div>
+  <div class="intro-title">El Barrio</div>
+  <p class="intro-sub">Tu barrio te necesita. Vas a recorrer 8 lugares y tomar decisiones — no hay respuestas correctas, solo las tuyas.</p>
+  <div class="intro-input-group">
+  <div class="intro-input">
+    <label>¿Cómo te llamás?</label>
+    <input type="text" id="pname" placeholder="Tu nombre..." maxlength="30" autocomplete="off">
+  </div>
+  <div class="intro-input">
+    <label>Tu email (para guardar tu evolución)</label>
+    <input type="email" id="pfEmail" placeholder="nombre@email.com" maxlength="60" autocomplete="email">
+  </div>
+  <div class="intro-input">
+    <label>Código del colegio</label>
+    <input type="text" id="pfSchoolCode" placeholder="Ej: SJB-2025" maxlength="20" autocomplete="off">
+  </div>
+
+  </div>
+  <button class="btn btn-warm" id="btn-start" disabled onclick="startGame()">Empezar →</button>
+</div>
+
+<div id="map-screen" class="screen">
+  <div class="map-top">
+    <div class="map-top-title">EL BARRIO</div>
+    <div class="map-top-progress"><span id="zDone">0</span> / 8</div>
+  </div>
+  <div class="map-bar"><div class="map-bar-fill" id="mBarFill" style="width:0%"></div></div>
+  <div class="map-greeting">
+    <h2 id="mGreet">¡Hola!</h2>
+    <p>Tocá un lugar para explorarlo</p>
+  </div>
+  <div class="map-canvas" id="mapCanvas"></div>
+</div>
+
+<div id="game-screen" class="screen">
+  <div class="game-top">
+    <div class="game-back" onclick="backToMap()">← Volver</div>
+    <div class="game-label" id="gLabel">ZONA</div>
+  </div>
+  <div class="game-body" id="gBody"></div>
+</div>
+
+<div id="results-screen" class="screen">
+  <div class="res-h">
+    <h2>Tu perfil — Año 1</h2>
+    <p id="resName"></p>
+  </div>
+  <div class="res-areas" id="resAreas"></div>
+  <div id="pf-sync-status"></div>
+  <div class="res-note">
+    <div class="res-note-label">NOTA PARA EL ORIENTADOR</div>
+    <p id="resNote"></p>
+  </div>
+  <button class="btn btn-ghost" onclick="location.reload()">Jugar de nuevo</button>
+</div>
+
+<script>
+// ═══ STATE ═══
+var GS={name:'',email:'',schoolCode:'',done:{},scores:{},order:[]};
+function addScores(sc){for(var k in sc)GS.scores[k]=(GS.scores[k]||0)+sc[k];}
+
+var AREAS=[
+  {id:'salud',name:'Ciencias de la Salud',icon:'🩺',color:'#5b9bf5'},
+  {id:'exactas',name:'Ciencias Exactas y Naturales',icon:'🔬',color:'#4ecb71'},
+  {id:'ing',name:'Ingeniería y Tecnología',icon:'⚙️',color:'#b07af0'},
+  {id:'sociales',name:'Ciencias Sociales y Humanas',icon:'🌍',color:'#f07a9a'},
+  {id:'eco',name:'Ciencias Económicas',icon:'📊',color:'#f5a623'},
+  {id:'arte',name:'Arte, Diseño y Arquitectura',icon:'🎨',color:'#f06050'},
+  {id:'agro',name:'Ciencias Agropecuarias',icon:'🌱',color:'#7ad8b0'},
+  {id:'edu',name:'Educación y Pedagogía',icon:'📚',color:'#e0a860'},
+];
+
+var ZONES=[
+  {id:'calle',  icon:'👦',name:'La Calle',      x:18,y:22,color:'#f07a9a',glow:'rgba(240,122,154,.15)',desc:'Un nene solo y asustado'},
+  {id:'kiosco', icon:'🛒',name:'El Kiosco',     x:75,y:18,color:'#f5a623',glow:'rgba(245,166,35,.15)',desc:'Hay plata en juego'},
+  {id:'terraza',icon:'🌿',name:'La Terraza',    x:22,y:45,color:'#4ecb71',glow:'rgba(78,203,113,.15)',desc:'La huerta necesita ayuda'},
+  {id:'apagon', icon:'💡',name:'El Apagón',     x:78,y:42,color:'#b07af0',glow:'rgba(176,122,240,.15)',desc:'Se cortó la luz'},
+  {id:'aula',   icon:'🎨',name:'El Aula',       x:15,y:68,color:'#f06050',glow:'rgba(240,96,80,.15)',desc:'Una pared para vos'},
+  {id:'recreo', icon:'💬',name:'El Recreo',     x:72,y:65,color:'#5b9bf5',glow:'rgba(91,155,245,.15)',desc:'Un compañero está solo'},
+  {id:'biblio', icon:'📖',name:'La Biblioteca', x:38,y:82,color:'#e0a860',glow:'rgba(224,168,96,.15)',desc:'Libros para ordenar'},
+  {id:'esquina',icon:'🔀',name:'La Esquina',    x:65,y:85,color:'#7ad8b0',glow:'rgba(122,216,176,.15)',desc:'Decisiones rápidas'},
+];
+
+// ═══ SCREENS ═══
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById(id);el.classList.add('active');el.classList.add('fade-in');
+}
+
+// ═══ INTRO ═══
+var pnameEl=document.getElementById('pname');
+var pfEmailEl=document.getElementById('pfEmail');
+var pfSchoolEl=document.getElementById('pfSchoolCode');
+function pfCheckStart(){document.getElementById('btn-start').disabled=!(pnameEl.value.trim().length>=2&&pfEmailEl.value.includes('@')&&pfSchoolEl.value.trim().length>=2);}
+pnameEl.addEventListener('input',pfCheckStart);
+pfEmailEl.addEventListener('input',pfCheckStart);
+pfSchoolEl.addEventListener('input',pfCheckStart);
+function startGame(){
+  GS.name=pnameEl.value.trim();
+  GS.email=pfEmailEl.value.trim().toLowerCase();
+  GS.schoolCode=pfSchoolEl.value.trim().toUpperCase();
+  document.getElementById('mGreet').textContent='¡Hola, '+GS.name+'!';
+  buildMap();showScreen('map-screen');
+}
+
+// ═══ MAP ═══
+function buildMap(){
+  var canvas=document.getElementById('mapCanvas');
+  canvas.innerHTML='';
+
+  // SVG background: barrio illustration
+  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 400 500');
+  svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  svg.style.cssText='position:absolute;inset:0;width:100%;height:100%;';
+  svg.innerHTML=
+    // Sky gradient
+    '<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0%" stop-color="#0c0e18"/><stop offset="100%" stop-color="#141828"/>'+
+    '</linearGradient></defs>'+
+    '<rect width="400" height="500" fill="url(#sky)"/>'+
+    // Stars
+    '<circle cx="30" cy="25" r=".8" fill="#fff" opacity=".25"/>'+
+    '<circle cx="90" cy="15" r=".6" fill="#fff" opacity=".3"/>'+
+    '<circle cx="180" cy="30" r=".7" fill="#fff" opacity=".2"/>'+
+    '<circle cx="250" cy="12" r=".5" fill="#fff" opacity=".35"/>'+
+    '<circle cx="320" cy="28" r=".8" fill="#fff" opacity=".2"/>'+
+    '<circle cx="370" cy="45" r=".6" fill="#fff" opacity=".25"/>'+
+    '<circle cx="60" cy="60" r=".5" fill="#fff" opacity=".3"/>'+
+    '<circle cx="340" cy="70" r=".7" fill="#fff" opacity=".2"/>'+
+    '<circle cx="150" cy="55" r=".6" fill="#fff" opacity=".25"/>'+
+    // Moon
+    '<circle cx="320" cy="55" r="18" fill="#f5e6b8" opacity=".08"/>'+
+    '<circle cx="315" cy="50" r="14" fill="#f5e6b8" opacity=".12"/>'+
+    // Ground
+    '<rect x="0" y="380" width="400" height="120" fill="#0a0c14"/>'+
+    '<rect x="0" y="378" width="400" height="3" fill="#1a1e30"/>'+
+    // Streets (horizontal)
+    '<rect x="0" y="200" width="400" height="8" fill="#12141e" rx="1"/>'+
+    '<line x1="0" y1="204" x2="400" y2="204" stroke="#1e2235" stroke-width=".5" stroke-dasharray="8 4"/>'+
+    '<rect x="0" y="360" width="400" height="8" fill="#12141e" rx="1"/>'+
+    '<line x1="0" y1="364" x2="400" y2="364" stroke="#1e2235" stroke-width=".5" stroke-dasharray="8 4"/>'+
+    // Streets (vertical)
+    '<rect x="190" y="0" width="8" fill="#12141e" height="500" rx="1"/>'+
+    '<line x1="194" y1="0" x2="194" y2="500" stroke="#1e2235" stroke-width=".5" stroke-dasharray="8 4"/>'+
+    // Buildings (silhouettes)
+    '<rect x="10" y="100" width="50" height="100" rx="3" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
+    '<rect x="18" y="112" width="8" height="10" rx="1" fill="#1a1e30"/>'+
+    '<rect x="32" y="112" width="8" height="10" rx="1" fill="#f5a623" opacity=".15"/>'+
+    '<rect x="44" y="112" width="8" height="10" rx="1" fill="#1a1e30"/>'+
+    '<rect x="18" y="130" width="8" height="10" rx="1" fill="#5b9bf5" opacity=".12"/>'+
+    '<rect x="32" y="130" width="8" height="10" rx="1" fill="#1a1e30"/>'+
+    '<rect x="44" y="130" width="8" height="10" rx="1" fill="#f5a623" opacity=".1"/>'+
+    '<rect x="18" y="148" width="8" height="10" rx="1" fill="#1a1e30"/>'+
+    '<rect x="32" y="148" width="8" height="10" rx="1" fill="#4ecb71" opacity=".1"/>'+
+    '<rect x="44" y="148" width="8" height="10" rx="1" fill="#1a1e30"/>'+
+    // Building 2
+    '<rect x="70" y="130" width="40" height="70" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
+    '<rect x="78" y="140" width="7" height="8" rx="1" fill="#f07a9a" opacity=".12"/>'+
+    '<rect x="90" y="140" width="7" height="8" rx="1" fill="#1a1e30"/>'+
+    '<rect x="78" y="155" width="7" height="8" rx="1" fill="#1a1e30"/>'+
+    '<rect x="90" y="155" width="7" height="8" rx="1" fill="#b07af0" opacity=".1"/>'+
+    // Building 3 (tall)
+    '<rect x="280" y="80" width="45" height="120" rx="3" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
+    '<rect x="288" y="92" width="7" height="8" rx="1" fill="#f5a623" opacity=".12"/>'+
+    '<rect x="300" y="92" width="7" height="8" rx="1" fill="#1a1e30"/>'+
+    '<rect x="312" y="92" width="7" height="8" rx="1" fill="#5b9bf5" opacity=".1"/>'+
+    '<rect x="288" y="108" width="7" height="8" rx="1" fill="#1a1e30"/>'+
+    '<rect x="300" y="108" width="7" height="8" rx="1" fill="#f06050" opacity=".12"/>'+
+    '<rect x="312" y="108" width="7" height="8" rx="1" fill="#1a1e30"/>'+
+    '<rect x="288" y="124" width="7" height="8" rx="1" fill="#4ecb71" opacity=".1"/>'+
+    '<rect x="300" y="124" width="7" height="8" rx="1" fill="#1a1e30"/>'+
+    '<rect x="312" y="124" width="7" height="8" rx="1" fill="#f5a623" opacity=".1"/>'+
+    '<rect x="288" y="140" width="7" height="8" rx="1" fill="#1a1e30"/>'+
+    '<rect x="300" y="140" width="7" height="8" rx="1" fill="#b07af0" opacity=".1"/>'+
+    '<rect x="312" y="140" width="7" height="8" rx="1" fill="#1a1e30"/>'+
+    // Building 4
+    '<rect x="340" y="130" width="50" height="70" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
+    '<rect x="350" y="140" width="7" height="8" rx="1" fill="#f07a9a" opacity=".1"/>'+
+    '<rect x="364" y="140" width="7" height="8" rx="1" fill="#1a1e30"/>'+
+    '<rect x="378" y="140" width="7" height="8" rx="1" fill="#5b9bf5" opacity=".12"/>'+
+    // Building 5 (low)
+    '<rect x="120" y="160" width="60" height="40" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
+    '<rect x="128" y="168" width="10" height="10" rx="1" fill="#f5a623" opacity=".15"/>'+
+    '<rect x="145" y="168" width="10" height="10" rx="1" fill="#1a1e30"/>'+
+    '<rect x="162" y="168" width="10" height="10" rx="1" fill="#4ecb71" opacity=".12"/>'+
+    // Lower buildings
+    '<rect x="10" y="250" width="70" height="60" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
+    '<rect x="100" y="270" width="80" height="40" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
+    '<rect x="210" y="240" width="55" height="70" rx="3" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
+    '<rect x="300" y="260" width="90" height="50" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
+    // Trees
+    '<circle cx="140" cy="370" r="12" fill="#0a1a10" opacity=".8"/>'+
+    '<circle cx="260" cy="375" r="10" fill="#0a1a10" opacity=".7"/>'+
+    '<rect x="138" y="370" width="4" height="12" fill="#1a1208"/>'+
+    '<rect x="258" y="375" width="3" height="10" fill="#1a1208"/>'+
+    // Lampposts
+    '<rect x="98" y="180" width="2" height="22" fill="#2a2e3a"/>'+
+    '<circle cx="99" cy="178" r="3" fill="#f5a623" opacity=".15"/>'+
+    '<rect x="298" y="340" width="2" height="22" fill="#2a2e3a"/>'+
+    '<circle cx="299" cy="338" r="3" fill="#f5a623" opacity=".15"/>';
+  canvas.appendChild(svg);
+
+  // Zone nodes
+  ZONES.forEach(function(z,i){
+    var node=document.createElement('div');
+    node.className='zone-node'+(GS.done[z.id]?' completed':'');
+    node.style.left=z.x+'%';node.style.top=z.y+'%';
+    node.style.transform='translate(-50%,-50%)';
+    node.innerHTML=
+      '<div class="zone-ring" style="background:'+z.glow+';border:1.5px solid '+z.color+';">'+
+        '<span style="filter:drop-shadow(0 2px 6px '+z.glow+')">'+z.icon+'</span>'+
+        '<div class="zone-check">✓</div>'+
+      '</div>'+
+      '<div class="zone-label">'+z.name+'</div>';
+    node.style.setProperty('--c',z.color);
+    node.querySelector('.zone-ring::after');
+    var ring=node.querySelector('.zone-ring');
+    ring.style.boxShadow='0 0 20px '+z.glow;
+
+    node.addEventListener('click',function(){if(!GS.done[z.id])enterZone(z.id);});
+    canvas.appendChild(node);
+    setTimeout(function(){node.classList.add('visible');},100+i*80);
+  });
+
+  // Apply dynamic ring border animation color
+  var styleEl=document.createElement('style');
+  var css='';
+  ZONES.forEach(function(z){
+    css+='.zone-node[style*="'+z.x+'"] .zone-ring::after{border-color:'+z.color+';}';
+  });
+  styleEl.textContent=css;
+  canvas.appendChild(styleEl);
+
+  updateMapUI();
+}
+
+function updateMapUI(){
+  var n=Object.keys(GS.done).length;
+  document.getElementById('zDone').textContent=n;
+  document.getElementById('mBarFill').style.width=(n/8*100)+'%';
+}
+
+function enterZone(zoneId){
+  GS.currentZone=zoneId;
+  var z=ZONES.find(function(z){return z.id===zoneId;});
+  document.getElementById('gLabel').textContent=z.name.toUpperCase();
+  showScreen('game-screen');
+  var body=document.getElementById('gBody');body.innerHTML='';
+  switch(zoneId){
+    case 'calle':buildCalle(body);break;
+    case 'kiosco':buildKiosco(body);break;
+    case 'terraza':buildTerraza(body);break;
+    case 'apagon':buildApagon(body);break;
+    case 'aula':buildAula(body);break;
+    case 'recreo':buildRecreo(body);break;
+    case 'biblio':buildBiblio(body);break;
+    case 'esquina':buildEsquina(body);break;
+    default:buildPlaceholder(body,z);break;
+  }
+}
+
+function buildPlaceholder(c,z){
+  c.innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;">'+
+    '<div style="font-size:48px;">'+z.icon+'</div>'+
+    '<div style="font-family:Gabarito,sans-serif;font-size:18px;font-weight:600;color:#fff;">'+z.name+'</div>'+
+    '<div style="font-size:13px;color:var(--muted);">Próximamente</div>'+
+    '<button class="btn btn-ghost" onclick="backToMap()">← Volver</button></div>';
+}
+
+function backToMap(){buildMap();showScreen('map-screen');}
+
+function zoneComplete(zoneId,scores,display){
+  addScores(scores);GS.done[zoneId]=true;GS.order.push(zoneId);
+  var body=document.getElementById('gBody');
+  var barsHtml='';
+  if(display.bars)display.bars.forEach(function(b){
+    barsHtml+='<div class="zr-bar"><div class="zr-bar-icon">'+b.icon+'</div>'+
+      '<div class="zr-bar-track"><div class="zr-bar-fill" style="width:0%;background:'+b.color+'" data-pct="'+b.pct+'"></div></div>'+
+      '<div class="zr-bar-pct">'+b.pct+'%</div></div>';
+  });
+  body.innerHTML='<div class="zone-result fade-in"><div class="zr-icon">'+display.emoji+'</div>'+
+    '<div class="zr-title">'+display.title+'</div><div class="zr-sub">'+display.sub+'</div>'+
+    '<div class="zr-bars">'+barsHtml+'</div>'+
+    '<button class="btn btn-warm" onclick="afterZone()">'+(Object.keys(GS.done).length>=8?'Ver mi perfil →':'Siguiente zona →')+'</button></div>';
+  setTimeout(function(){document.querySelectorAll('.zr-bar-fill').forEach(function(el){el.style.width=el.dataset.pct+'%';});},200);
+}
+
+function afterZone(){Object.keys(GS.done).length>=8?showResults():backToMap();}
+
+// ═══ RESULTS ═══
+function showResults(){
+  var areaScores={};AREAS.forEach(function(a){areaScores[a.id]=0;});
+  var mapping={
+    salud:['S','hS','mSoc','pdcP'],exactas:['hI','mTeo','pdcD','C'],
+    ing:['hR','hC','D','pdcC'],sociales:['I','hS','S','mSoc'],
+    eco:['hE','mEco','D','hC'],arte:['hA','mEst','mAut'],
+    agro:['hR','pdcC','mTra'],edu:['mTra','pdcP','mSoc','S'],
+  };
+  for(var a in mapping)mapping[a].forEach(function(d){areaScores[a]+=(GS.scores[d]||0);});
+  var areaCap={salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+  var sorted=AREAS.slice().sort(function(a,b){return areaScores[b.id]-areaScores[a.id];});
+  var c=document.getElementById('resAreas');c.innerHTML='';
+  document.getElementById('resName').textContent=GS.name+', así se ve tu forma de habitar el barrio';
+  sorted.forEach(function(a){
+    var cap=areaCap[a.id]||160;
+    var pct=Math.min(100,Math.round(areaScores[a.id]/cap*100));
+    var r=document.createElement('div');r.className='res-row';
+    r.innerHTML='<div class="res-row-icon">'+a.icon+'</div><div class="res-row-info"><div class="res-row-name">'+a.name+'</div>'+
+      '<div class="res-row-track"><div class="res-row-fill" style="width:0%;background:'+a.color+'" data-pct="'+pct+'"></div></div></div>'+
+      '<div class="res-row-pct" style="color:'+a.color+'">'+pct+'%</div>';
+    c.appendChild(r);
+  });
+  var notes={salud:'cuidado de personas y empatía',exactas:'pensamiento analítico y curiosidad',ing:'resolución técnica de problemas',
+    sociales:'interés por las personas y la sociedad',eco:'pensamiento estratégico y resultados',arte:'expresión creativa',
+    agro:'conexión con la naturaleza',edu:'vocación de enseñanza'};
+  document.getElementById('resNote').textContent=GS.name+' muestra tendencia hacia '+notes[sorted[0].id]+
+    ', con rasgos de '+notes[sorted[1].id]+'. Perfil Año 1 — comparar en ediciones siguientes.';
+  showScreen('results-screen');
+  pfSyncResults();
+  setTimeout(function(){document.querySelectorAll('.res-row-fill').forEach(function(el){el.style.width=el.dataset.pct+'%';});},400);
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA BIBLIOTECA
+//  Clasificación — ordenar materiales
+// ═══════════════════════════════════════
+function buildBiblio(container){
+  var accum={};
+  var answered=false;
+
+  var ITEMS=[
+    {id:'cuerpo',icon:'🫀',name:'Cómo funciona el cuerpo humano',desc:'Órganos, sistemas, enfermedades.',
+      scores:{'🔬':{hI:10,S:8,hS:6},'🌍':{S:8,mSoc:6,hI:4},'🎨':{hA:6,mEst:6,hI:4},'🔧':{hR:8,D:6,hI:4}}},
+    {id:'circuitos',icon:'⚡',name:'Cómo armar circuitos eléctricos',desc:'LEDs, resistencias, protoboard.',
+      scores:{'🔬':{hI:10,hR:6,mTeo:6},'🌍':{hI:4,I:4},'🎨':{hA:6,hR:6,mAut:4},'🔧':{hR:12,pdcC:8,D:6}}},
+    {id:'historia',icon:'📜',name:'Atlas de historia argentina',desc:'Desde los pueblos originarios hasta hoy.',
+      scores:{'🔬':{hI:6,mTeo:6},'🌍':{I:12,mSoc:8,hS:6},'🎨':{hA:6,mEst:6,mSoc:4},'🔧':{C:6,mTra:4}}},
+    {id:'scifi',icon:'🚀',name:'Cuentos de ciencia ficción',desc:'Robots, viajes en el tiempo, otros mundos.',
+      scores:{'🔬':{hI:8,mTeo:8,mAut:4},'🌍':{mSoc:6,hI:4,I:4},'🎨':{hA:12,mEst:10,mAut:6},'🔧':{hR:6,hI:6,mAut:4}}},
+    {id:'auxilios',icon:'🩹',name:'Manual de primeros auxilios',desc:'Qué hacer en emergencias.',
+      scores:{'🔬':{S:10,hS:8,hI:6},'🌍':{S:8,mSoc:6,I:4},'🎨':{S:4,mEst:4},'🔧':{hR:10,D:8,hC:6}}},
+    {id:'cocina',icon:'🍳',name:'Recetas de cocina del mundo',desc:'Sushi, empanadas, pasta, curry.',
+      scores:{'🔬':{hI:6,mTeo:4,hR:4},'🌍':{I:8,mSoc:8,S:4},'🎨':{hA:10,mEst:8,mAut:6},'🔧':{hR:10,hE:6,D:6}}},
+  ];
+
+  var SHELVES=[
+    {id:'🔬',icon:'🔬',name:'Ciencia y Naturaleza',count:0},
+    {id:'🌍',icon:'🌍',name:'Sociedad e Historia',count:0},
+    {id:'🎨',icon:'🎨',name:'Arte y Creatividad',count:0},
+    {id:'🔧',icon:'🔧',name:'Técnica y Práctica',count:0},
+  ];
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  var currentItem=0;
+  var placements={};
+
+  function showItem(){
+    if(currentItem>=ITEMS.length){step2();return;}
+    container.innerHTML='';
+    var item=ITEMS[currentItem];
+    var d=document.createElement('div');d.className='biblio-wrap fade-in';
+    d.innerHTML='<div class="biblio-sub">CLASIFICACIÓN</div>'+
+      '<div class="biblio-progress"><span>'+(currentItem+1)+'</span> / '+ITEMS.length+'</div>'+
+      '<div class="biblio-item"><div class="biblio-item-icon">'+item.icon+'</div>'+
+        '<div><div class="biblio-item-name">'+item.name+'</div>'+
+        '<div class="biblio-item-desc">'+item.desc+'</div></div></div>'+
+      '<div class="biblio-prompt">¿En qué estante lo ponés?</div>'+
+      '<div class="biblio-shelves" id="bShelves"></div>';
+    container.appendChild(d);
+
+    var sEl=document.getElementById('bShelves');
+    SHELVES.forEach(function(s){
+      var shelf=document.createElement('div');shelf.className='biblio-shelf';
+      shelf.innerHTML='<div class="biblio-shelf-icon">'+s.icon+'</div>'+
+        '<div class="biblio-shelf-info"><div class="biblio-shelf-name">'+s.name+'</div>'+
+        '<div class="biblio-shelf-count">'+s.count+(s.count===1?' libro':' libros')+'</div></div>';
+      shelf.addEventListener('click',function(){
+        shelf.classList.add('picked');
+        document.querySelectorAll('.biblio-shelf').forEach(function(sh){if(sh!==shelf){sh.style.opacity='.3';sh.style.pointerEvents='none';}});
+        // Score
+        var sc=item.scores[s.id];
+        if(sc)addLocal(sc);
+        s.count++;
+        placements[item.id]=s.id;
+        currentItem++;
+        setTimeout(showItem,450);
+      });
+      sEl.appendChild(shelf);
+    });
+  }
+
+  // ── STEP 2: Reflection ──
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='biblio-wrap fade-in';
+    d.innerHTML='<div class="biblio-sub">ÚLTIMA DECISIÓN</div>'+
+      '<div style="text-align:center;font-size:48px;padding:4px 0;">📚</div>'+
+      '<div class="biblio-prompt">Ordenaste todos los materiales. La bibliotecaria te dice: "Organizaste todo de una forma que no se me hubiera ocurrido." ¿Qué le respondés?</div>'+
+      '<div class="biblio-opts" id="b2Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🤓',title:'"Cada libro tiene un lugar lógico, solo hay que pensarlo"',hint:'Para vos clasificar es encontrar el orden natural.',scores:{hI:10,C:8,mTeo:8,pdcD:6}},
+      {icon:'💡',title:'"Yo los puse donde me parecía más útil, no más correcto"',hint:'La utilidad le gana a la teoría.',scores:{hR:10,D:8,hE:8,pdcC:6}},
+      {icon:'🎨',title:'"Me dejé llevar por lo que me generaba cada libro"',hint:'La intuición también es una forma de clasificar.',scores:{hA:10,mEst:8,mAut:8,S:6}},
+      {icon:'🤷',title:'"La verdad, algunos podrían ir en cualquier estante"',hint:'Las categorías son inventos humanos. Todo está conectado.',scores:{hI:8,mSoc:6,I:8,mTeo:6}},
+    ];
+
+    var od=document.getElementById('b2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='biblio-opt';
+      btn.innerHTML='<div class="biblio-opt-icon">'+opt.icon+'</div><div><div class="biblio-opt-title">'+opt.title+'</div><div class="biblio-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.biblio-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(finishBiblio,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function finishBiblio(){
+    var ana=(accum.hI||0)+(accum.mTeo||0)+(accum.C||0);
+    var pra=(accum.hR||0)+(accum.D||0)+(accum.pdcC||0);
+    var cre=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+    var soc=(accum.S||0)+(accum.I||0)+(accum.mSoc||0);
+    var mx=Math.max(ana,pra,cre,soc,1);
+    zoneComplete('biblio',accum,{
+      emoji:'📖',title:'¡Biblioteca ordenada!',
+      sub:'Dónde ponés cada cosa revela cómo organizás el mundo en tu cabeza.',
+      bars:[
+        {icon:'🔬',color:'#5b9bf5',pct:Math.round(ana/mx*100)},
+        {icon:'🔧',color:'#e0a860',pct:Math.round(pra/mx*100)},
+        {icon:'🎨',color:'#f06050',pct:Math.round(cre/mx*100)},
+        {icon:'🤝',color:'#f07a9a',pct:Math.round(soc/mx*100)},
+      ]
+    });
+  }
+
+  showItem();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA ESQUINA
+//  Swipe binario — esto o esto
+// ═══════════════════════════════════════
+function buildEsquina(container){
+  var accum={};
+
+  var PAIRS=[
+    {prompt:'¿Qué te tira más?',a:{icon:'🤖',name:'Robótica',scores:{hR:8,hI:6,pdcC:4}},b:{icon:'🎭',name:'Teatro',scores:{hA:8,mEst:6,mSoc:4}}},
+    {prompt:'Si tuvieras que elegir...',a:{icon:'📊',name:'Datos',scores:{hI:8,mTeo:6,C:4}},b:{icon:'🎨',name:'Dibujo',scores:{hA:8,mEst:6,mAut:4}}},
+    {prompt:'¿Dónde preferirías estar?',a:{icon:'🩺',name:'Cuidando personas',scores:{S:8,hS:6,pdcP:4}},b:{icon:'🏗️',name:'Construyendo cosas',scores:{hR:8,D:6,pdcC:4}}},
+    {prompt:'Un sábado ideal...',a:{icon:'📚',name:'Leer',scores:{hI:6,C:6,mTeo:4}},b:{icon:'🏃',name:'Deportes',scores:{D:6,hR:6,S:4}}},
+    {prompt:'¿Qué aprendés primero?',a:{icon:'💻',name:'Programar',scores:{hR:8,hI:6,hC:4}},b:{icon:'🎸',name:'Música',scores:{hA:8,mEst:6,S:4}}},
+    {prompt:'¿Dónde vivís?',a:{icon:'🌾',name:'Campo',scores:{pdcC:6,hR:6,mTra:4}},b:{icon:'🏙️',name:'Ciudad',scores:{hE:6,I:6,D:4}}},
+    {prompt:'¿Cómo preferís trabajar?',a:{icon:'👥',name:'En grupo',scores:{I:8,mSoc:6,S:4}},b:{icon:'🧑',name:'Solo/a',scores:{C:6,mAut:6,hI:4}}},
+    {prompt:'¿Qué te sale más natural?',a:{icon:'📐',name:'Números',scores:{hI:8,mTeo:6,hC:4}},b:{icon:'📝',name:'Palabras',scores:{mSoc:6,hA:6,I:4}}},
+  ];
+
+  var current=0;
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  function showPair(){
+    if(current>=PAIRS.length){finishEsquina();return;}
+    container.innerHTML='';
+    var pair=PAIRS[current];
+    var d=document.createElement('div');d.className='esquina-wrap fade-in';
+    d.innerHTML='<div class="esquina-sub">DECISIONES RÁPIDAS</div>'+
+      '<div class="esquina-counter"><span>'+(current+1)+'</span> / '+PAIRS.length+'</div>'+
+      '<div class="esquina-bar"><div class="esquina-bar-fill" style="width:'+(current/PAIRS.length*100)+'%"></div></div>'+
+      '<div class="esquina-prompt">'+pair.prompt+'</div>'+
+      '<div class="esquina-vs" id="eVs">'+
+        '<div class="esquina-card" id="eA"><div class="esquina-card-icon">'+pair.a.icon+'</div><div class="esquina-card-name">'+pair.a.name+'</div></div>'+
+        '<div class="esquina-or">o</div>'+
+        '<div class="esquina-card" id="eB"><div class="esquina-card-icon">'+pair.b.icon+'</div><div class="esquina-card-name">'+pair.b.name+'</div></div>'+
+      '</div>';
+    container.appendChild(d);
+
+    var picked=false;
+    document.getElementById('eA').addEventListener('click',function(){
+      if(picked)return;picked=true;
+      this.classList.add('picked');document.getElementById('eB').classList.add('not-picked');
+      addLocal(pair.a.scores);current++;
+      setTimeout(showPair,400);
+    });
+    document.getElementById('eB').addEventListener('click',function(){
+      if(picked)return;picked=true;
+      this.classList.add('picked');document.getElementById('eA').classList.add('not-picked');
+      addLocal(pair.b.scores);current++;
+      setTimeout(showPair,400);
+    });
+  }
+
+  function finishEsquina(){
+    var tec=(accum.hR||0)+(accum.hI||0)+(accum.pdcC||0);
+    var hum=(accum.S||0)+(accum.I||0)+(accum.mSoc||0);
+    var cre=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+    var met=(accum.C||0)+(accum.mTeo||0)+(accum.hC||0);
+    var mx=Math.max(tec,hum,cre,met,1);
+    zoneComplete('esquina',accum,{
+      emoji:'🔀',title:'¡Decisiones tomadas!',
+      sub:'Las respuestas rápidas muestran lo que elegís sin pensarlo demasiado.',
+      bars:[
+        {icon:'⚙️',color:'#b07af0',pct:Math.round(tec/mx*100)},
+        {icon:'💗',color:'#f07a9a',pct:Math.round(hum/mx*100)},
+        {icon:'🎨',color:'#f06050',pct:Math.round(cre/mx*100)},
+        {icon:'🔍',color:'#5b9bf5',pct:Math.round(met/mx*100)},
+      ]
+    });
+  }
+
+  showPair();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL RECREO
+//  Mediación social — chat con compañero
+// ═══════════════════════════════════════
+function buildRecreo(container){
+  var accum={};
+  var chatEl=null;
+  var choicesEl=null;
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  // Chat sequence: array of steps
+  var SCRIPT=[
+    // ── Round 0: Opening ──
+    {messages:[
+      {type:'narrator',text:'Es el recreo. Todos juegan o charlan. Pero Manu está sentado solo en un rincón del patio, con la cabeza baja.'},
+    ],choices:[
+      {text:'Te acercás y le preguntás si está bien',hint:'Directo y cálido.',scores:{S:12,hS:10,pdcP:8},next:1},
+      {text:'Te sentás al lado sin decir nada',hint:'A veces la presencia alcanza.',scores:{S:10,hS:8,mSoc:8,C:6},next:1},
+      {text:'Le decís a otro compañero "¿Viste a Manu? ¿Le pasó algo?"',hint:'Averiguás antes de actuar.',scores:{I:10,hI:8,mSoc:6,C:6},next:1},
+    ]},
+    // ── Round 1: Manu responds ──
+    {messages:[
+      {type:'them',name:'Manu',text:'... No sé. Todo mal.'},
+      {type:'them',name:'Manu',text:'En mi casa están peleando todo el día y acá nadie me da bola.'},
+    ],choices:[
+      {text:'"Uh, qué bajón. ¿Querés contarme?"',hint:'Abrís el espacio para que hable.',scores:{S:12,hS:10,mSoc:8,pdcP:6}},
+      {text:'"En mi casa también hay quilombo a veces. No estás solo."',hint:'Compartís tu experiencia para conectar.',scores:{hS:12,S:10,mSoc:8,I:6}},
+      {text:'"¿Hablaste con alguien? ¿La orientadora, algún profe?"',hint:'Buscás ayuda profesional.',scores:{hC:10,I:8,mTra:8,hI:6}},
+    ]},
+    // ── Round 2: Deeper ──
+    {messages:[
+      {type:'them',name:'Manu',text:'Es que siento que a nadie le importa. Puedo faltar una semana y nadie pregunta.'},
+      {type:'narrator',text:'Manu tiene los ojos rojos. No te mira.'},
+    ],choices:[
+      {text:'"A mí me importa. Por eso estoy acá."',hint:'Le devolvés algo que siente que perdió.',scores:{S:14,hS:12,pdcP:10}},
+      {text:'"¿Y si armamos algo juntos? Un proyecto, lo que sea"',hint:'Le proponés un motivo para engancharse.',scores:{I:12,hE:10,D:8,mSoc:6}},
+      {text:'"Mirá, yo no soy psicólogo, pero te escucho. Dale, contame todo."',hint:'Honesto y presente. No pretendés saber más de lo que sabés.',scores:{hS:10,S:10,hI:8,C:6}},
+    ]},
+    // ── Round 3: Resolution ──
+    {messages:[
+      {type:'them',name:'Manu',text:'... Gracias. Posta, gracias. Hacía mucho que nadie me preguntaba cómo estoy.'},
+      {type:'narrator',text:'Suena el timbre. El recreo se terminó.'},
+    ],choices:[
+      {text:'"Mañana te busco en el recreo otra vez. No te vas a librar de mí."',hint:'Comprometerte a que no sea solo hoy.',scores:{S:12,I:10,mSoc:8,pdcP:8}},
+      {text:'"Vamos a hablar con la orientadora juntos, te acompaño."',hint:'Escalás a alguien que puede ayudar de verdad.',scores:{hC:12,mTra:10,I:8,hS:6}},
+      {text:'"Te paso mi número. Si alguna vez necesitás hablar, me escribís."',hint:'Le dejás un canal abierto.',scores:{hE:10,I:10,hS:8,D:6}},
+      {text:'"Le voy a decir a la profe que haga algo, esto no puede seguir así."',hint:'Buscás cambio desde las instituciones.',scores:{hC:10,hE:10,mTra:8,hI:6}},
+    ]},
+  ];
+
+  var currentStep=0;
+  var msgQueue=[];
+
+  function init(){
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='recreo-wrap';
+    d.innerHTML='<div class="recreo-chat" id="rChat"></div>'+
+      '<div class="recreo-choices" id="rChoices"></div>';
+    container.appendChild(d);
+    chatEl=document.getElementById('rChat');
+    choicesEl=document.getElementById('rChoices');
+    playStep(0);
+  }
+
+  function playStep(idx){
+    currentStep=idx;
+    var step=SCRIPT[idx];
+    choicesEl.innerHTML='';
+    // Queue messages with delays
+    msgQueue=step.messages.slice();
+    showNextMsg(function(){
+      // After all messages shown, show choices
+      renderChoices(step.choices);
+    });
+  }
+
+  function showNextMsg(cb){
+    if(msgQueue.length===0){cb();return;}
+    // Show typing indicator for "them" messages
+    var msg=msgQueue.shift();
+    if(msg.type==='them'){
+      var typing=document.createElement('div');typing.className='recreo-typing';typing.textContent='Manu está escribiendo...';
+      chatEl.appendChild(typing);chatEl.scrollTop=chatEl.scrollHeight;
+      setTimeout(function(){
+        typing.remove();
+        addMsg(msg);
+        setTimeout(function(){showNextMsg(cb);},400);
+      },800);
+    }else{
+      addMsg(msg);
+      setTimeout(function(){showNextMsg(cb);},300);
+    }
+  }
+
+  function addMsg(msg){
+    var el=document.createElement('div');
+    el.className='recreo-msg '+msg.type;
+    if(msg.type==='them')el.innerHTML='<div class="recreo-msg-name">'+msg.name+'</div>'+msg.text;
+    else el.textContent=msg.text;
+    chatEl.appendChild(el);
+    chatEl.scrollTop=chatEl.scrollHeight;
+  }
+
+  function renderChoices(choices){
+    choicesEl.innerHTML='<div class="recreo-sub">TURNO '+(currentStep+1)+' DE 4</div>';
+    choices.forEach(function(c,i){
+      var btn=document.createElement('div');btn.className='recreo-choice';
+      btn.innerHTML=c.text+'<div class="recreo-choice-hint">'+c.hint+'</div>';
+      btn.addEventListener('click',function(){
+        if(btn.classList.contains('picked'))return;
+        btn.classList.add('picked');
+        document.querySelectorAll('.recreo-choice').forEach(function(ch){if(ch!==btn){ch.style.opacity='.3';ch.style.pointerEvents='none';}});
+        addLocal(c.scores);
+        // Show player's message in chat
+        addMsg({type:'me',text:c.text});
+        setTimeout(function(){
+          if(currentStep<SCRIPT.length-1){
+            playStep(currentStep+1);
+          }else{
+            finishRecreo();
+          }
+        },600);
+      });
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  // ── FINISH ──
+  function finishRecreo(){
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.pdcP||0);
+    var con=(accum.I||0)+(accum.mSoc||0)+(accum.hE||0);
+    var sys=(accum.hC||0)+(accum.mTra||0)+(accum.hI||0);
+    var act=(accum.D||0)+(accum.C||0)+(accum.hR||0);
+    var mx=Math.max(emp,con,sys,act,1);
+    zoneComplete('recreo',accum,{
+      emoji:'💬',title:'Recreo terminado',
+      sub:'Cómo te acercás a alguien que la está pasando mal dice todo de vos.',
+      bars:[
+        {icon:'💗',color:'#f07a9a',pct:Math.round(emp/mx*100)},
+        {icon:'🤝',color:'#5b9bf5',pct:Math.round(con/mx*100)},
+        {icon:'🏗️',color:'#b07af0',pct:Math.round(sys/mx*100)},
+        {icon:'⚡',color:'#f5a623',pct:Math.round(act/mx*100)},
+      ]
+    });
+  }
+
+  init();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL AULA
+//  Canvas libre — decorá la pared
+// ═══════════════════════════════════════
+function buildAula(container){
+  var accum={};
+  var answered=false;
+  var selectedElems=[];
+
+  var ELEMS=[
+    {id:'mural',icon:'🎨',name:'Mural pintado a mano',scores:{hA:12,mEst:8,mAut:6}},
+    {id:'fotos',icon:'📸',name:'Fotos del curso',scores:{mSoc:10,S:8,I:6}},
+    {id:'calendario',icon:'📅',name:'Calendario de actividades',scores:{hC:10,mTra:8,C:6}},
+    {id:'frases',icon:'💬',name:'Frases motivacionales',scores:{hS:10,mSoc:8,pdcP:6}},
+    {id:'puzzle',icon:'🧩',name:'Rompecabezas grupal',scores:{I:10,mSoc:8,hR:6}},
+    {id:'huerta',icon:'🌱',name:'Mini huerta vertical',scores:{hR:10,pdcC:8,D:6}},
+    {id:'ranking',icon:'📊',name:'Ranking de logros',scores:{hE:10,mEco:8,D:6}},
+    {id:'playlist',icon:'🎵',name:'Playlist QR del curso',scores:{hA:8,hI:8,I:6}},
+  ];
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  // ── STEP 1: Pick 3 elements ──
+  function step1(){
+    selectedElems=[];answered=false;
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 1 — CREAR</div>'+
+      '<div class="aula-wall" id="aulaWall"><div class="aula-wall-label">TU PARED</div></div>'+
+      '<div class="aula-prompt">La profe les dio una pared del aula para decorar. Elegí 3 elementos.</div>'+
+      '<div class="aula-palette" id="aulaPalette"></div>'+
+      '<button class="btn btn-warm aula-confirm" id="aulaConfirm" disabled style="background:#f06050;">Listo, esa es mi pared →</button>';
+    container.appendChild(d);
+
+    var palette=document.getElementById('aulaPalette');
+    ELEMS.forEach(function(e){
+      var card=document.createElement('div');card.className='aula-elem';
+      card.innerHTML='<div class="aula-elem-icon">'+e.icon+'</div><div class="aula-elem-name">'+e.name+'</div><div class="aula-elem-check">✓</div>';
+      card.addEventListener('click',function(){
+        if(answered)return;
+        var idx=selectedElems.indexOf(e.id);
+        if(idx>-1){
+          selectedElems.splice(idx,1);card.classList.remove('selected');
+        }else if(selectedElems.length<3){
+          selectedElems.push(e.id);card.classList.add('selected');
+        }
+        // Disable unselected when 3 picked
+        document.querySelectorAll('.aula-elem').forEach(function(c){
+          if(selectedElems.length>=3&&!c.classList.contains('selected'))c.classList.add('disabled');
+          else c.classList.remove('disabled');
+        });
+        document.getElementById('aulaConfirm').disabled=selectedElems.length!==3;
+        // Update wall preview
+        var wall=document.getElementById('aulaWall');
+        wall.querySelectorAll('.aula-wall-item').forEach(function(i){i.remove();});
+        selectedElems.forEach(function(eid){
+          var el=ELEMS.find(function(e){return e.id===eid;});
+          var span=document.createElement('span');span.className='aula-wall-item';span.textContent=el.icon;
+          wall.appendChild(span);
+        });
+      });
+      palette.appendChild(card);
+    });
+
+    document.getElementById('aulaConfirm').addEventListener('click',function(){
+      if(answered||selectedElems.length!==3)return;answered=true;
+      selectedElems.forEach(function(eid){
+        var el=ELEMS.find(function(e){return e.id===eid;});
+        addLocal(el.scores);
+      });
+      setTimeout(step2,400);
+    });
+  }
+
+  // ── STEP 2: Style & arrangement ──
+  function step2(){
+    answered=false;container.innerHTML='';
+    var wallIcons=selectedElems.map(function(eid){return ELEMS.find(function(e){return e.id===eid;}).icon;}).join(' ');
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 2 — ESTILO</div>'+
+      '<div class="aula-wall"><div class="aula-wall-label">TU PARED</div>'+
+        '<span class="aula-wall-item" style="opacity:1;">'+wallIcons+'</span></div>'+
+      '<div class="aula-prompt">Tenés tus 3 elementos. ¿Cómo los organizás en la pared?</div>'+
+      '<div class="aula-opts" id="aula2Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'📐',title:'Simétrico y prolijo — cada cosa en su lugar',hint:'El orden también es una forma de arte.',scores:{hC:10,mTra:8,C:8,pdcD:6}},
+      {icon:'🌈',title:'Caótico y colorido — que explote de vida',hint:'Las reglas están para romperse.',scores:{hA:12,mAut:10,mEst:6,D:6}},
+      {icon:'✨',title:'Minimalista — poco pero con impacto',hint:'Menos es más, que cada elemento respire.',scores:{hA:8,C:8,hI:6,mEst:8}},
+      {icon:'🤲',title:'Interactivo — que todos puedan sumar cosas',hint:'La pared no es tuya, es de todos.',scores:{I:12,mSoc:10,S:8,hE:6}},
+    ];
+
+    var od=document.getElementById('aula2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='aula-opt';
+      btn.innerHTML='<div class="aula-opt-icon">'+opt.icon+'</div><div><div class="aula-opt-title">'+opt.title+'</div><div class="aula-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.aula-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  // ── STEP 3: Conflict & presentation ──
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">ÚLTIMA DECISIÓN</div>'+
+      '<div style="text-align:center;font-size:48px;padding:4px 0;">😬</div>'+
+      '<div class="aula-prompt">Un compañero mira tu pared y dice: "Yo lo hubiera hecho totalmente distinto". Algunos se ríen. ¿Cómo reaccionás?</div>'+
+      '<div class="aula-opts" id="aula3Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🤷',title:'"Buenísimo, hacé la tuya en otra pared"',hint:'Cada uno tiene su estilo, no hay por qué coincidir.',scores:{mAut:10,D:8,hA:6,C:6}},
+      {icon:'🎤',title:'Le explicás por qué elegiste cada cosa',hint:'Defender tu idea es parte de crearla.',scores:{hI:10,I:8,C:8,mTeo:6}},
+      {icon:'🤝',title:'"Dale, mostrame qué agregarías vos"',hint:'Tal vez su idea suma. Crear juntos es mejor.',scores:{I:12,mSoc:10,S:8,hS:6}},
+      {icon:'🔄',title:'Mirás tu pared con ojos nuevos y cambiás algo',hint:'La crítica duele, pero a veces tiene razón.',scores:{hI:8,hA:8,S:6,mEst:6,pdcP:6}},
+    ];
+
+    var od=document.getElementById('aula3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='aula-opt';
+      btn.innerHTML='<div class="aula-opt-icon">'+opt.icon+'</div><div><div class="aula-opt-title">'+opt.title+'</div><div class="aula-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.aula-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(finishAula,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  // ── FINISH ──
+  function finishAula(){
+    var cre=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+    var soc=(accum.I||0)+(accum.mSoc||0)+(accum.S||0);
+    var org=(accum.hC||0)+(accum.mTra||0)+(accum.C||0);
+    var ana=(accum.hI||0)+(accum.hR||0)+(accum.pdcD||0);
+    var mx=Math.max(cre,soc,org,ana,1);
+    zoneComplete('aula',accum,{
+      emoji:'🎨',title:'¡Pared terminada!',
+      sub:'Lo que elegís poner en una pared vacía dice mucho de cómo ves el mundo.',
+      bars:[
+        {icon:'🎨',color:'#f06050',pct:Math.round(cre/mx*100)},
+        {icon:'🤝',color:'#f07a9a',pct:Math.round(soc/mx*100)},
+        {icon:'📐',color:'#f5a623',pct:Math.round(org/mx*100)},
+        {icon:'🔍',color:'#5b9bf5',pct:Math.round(ana/mx*100)},
+      ]
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL APAGÓN
+//  Asignar vecinos a emergencias — timer
+// ═══════════════════════════════════════
+function buildApagon(container){
+  var accum={};
+  var answered=false;
+  var timerRef=null;
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  var VECINOS=[
+    {id:'carlos',icon:'👨‍⚕️',name:'Don Carlos',skill:'Médico jubilado'},
+    {id:'laura',icon:'👩‍🔧',name:'Laura',skill:'Electricista'},
+    {id:'marta',icon:'👵',name:'Marta',skill:'Maestra'},
+    {id:'tomas',icon:'🧑‍🍳',name:'Tomás',skill:'Cocinero del club'},
+    {id:'ana',icon:'👮',name:'Ana',skill:'Policía'},
+    {id:'fede',icon:'🧑‍💻',name:'Fede',skill:'Estudia ingeniería'},
+  ];
+
+  var PROBLEMS=[
+    {id:'nena',icon:'🤕',title:'Una nena se cayó en la oscuridad',hint:'Está llorando, parece que se lastimó la rodilla.',
+      best:['carlos','marta'],scores:{carlos:{S:14,hS:10,pdcP:8},laura:{hR:6,D:8,hC:6},marta:{S:12,mSoc:10,pdcP:8},tomas:{S:8,hS:6,D:6},ana:{hC:10,D:8,mTra:6},fede:{hR:6,D:6,hI:4}}},
+    {id:'chispas',icon:'⚡',title:'El tablero eléctrico hace chispas',hint:'Puede ser peligroso, hay olor a quemado.',
+      best:['laura','fede'],scores:{carlos:{hC:6,C:6},laura:{hR:14,hC:10,pdcC:8},marta:{hC:6,I:6,mTra:4},tomas:{D:6,hR:4},ana:{hC:10,D:8,mTra:8},fede:{hR:12,hI:10,pdcC:8}}},
+    {id:'abuelos',icon:'👴',title:'Los abuelos del 3°B no pueden bajar',hint:'Viven en el tercer piso y tienen miedo en la oscuridad.',
+      best:['ana','marta'],scores:{carlos:{S:10,hS:8,pdcP:6},laura:{D:6,hR:4},marta:{S:12,mSoc:10,mTra:8},tomas:{S:8,I:6,hS:6},ana:{hC:12,D:10,mTra:8},fede:{D:6,hI:4,hR:4}}},
+    {id:'comida',icon:'🍳',title:'La olla popular se está quemando',hint:'Había comida para 30 familias del barrio.',
+      best:['tomas'],scores:{carlos:{D:6,hC:4},laura:{D:6,hR:4},marta:{I:6,mTra:6,mSoc:4},tomas:{hR:14,hE:10,D:8},ana:{hC:8,D:6,mTra:6},fede:{hR:8,hI:6,D:4}}},
+  ];
+
+  var assignments={};
+  var selectedVecino=null;
+
+  // ── STEP 1: First reaction ──
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+    d.innerHTML='<div class="apagon-sub">PASO 1 — REACCIÓN</div>'+
+      '<div style="text-align:center;font-size:52px;padding:4px 0;">🌑</div>'+
+      '<div class="apagon-prompt">¡PUM! Se cortó la luz en todo el barrio. Estás en la vereda. Se escuchan gritos, una alarma, un bebé llorando. ¿Cuál es tu primer impulso?</div>'+
+      '<div class="apagon-opts" id="a1Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'📱',title:'Sacás el celular y usás la linterna',hint:'Primero ver, después actuar.',scores:{hR:10,D:8,hI:6,pdcC:6}},
+      {icon:'🗣️',title:'Gritás "¡Tranquilos, ya vuelve!" para calmar',hint:'Si todos se calman, se puede pensar mejor.',scores:{I:12,S:8,mSoc:8,hS:6}},
+      {icon:'🏃',title:'Corrés hacia donde se escuchan los gritos',hint:'Alguien puede necesitar ayuda urgente.',scores:{D:12,S:8,hR:6,hS:6}},
+      {icon:'🤔',title:'Parás, respirás, y mirás alrededor para evaluar',hint:'La calma en la crisis es un superpoder.',scores:{C:10,hI:8,hC:8,mTeo:6}},
+    ];
+
+    var od=document.getElementById('a1Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='apagon-opt';
+      btn.innerHTML='<div class="apagon-opt-icon">'+opt.icon+'</div><div><div class="apagon-opt-title">'+opt.title+'</div><div class="apagon-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.apagon-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(step2,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  // ── STEP 2: Assignment puzzle ──
+  function step2(){
+    assignments={};selectedVecino=null;
+    var timeLeft=45;
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+
+    d.innerHTML='<div class="apagon-sub">PASO 2 — ORGANIZAR</div>'+
+      '<div class="apagon-prompt">Hay 4 emergencias y 6 vecinos disponibles. Asigná un vecino a cada problema.</div>'+
+      '<div class="apagon-hint">Tocá un vecino ↓ y después tocá el problema ↓</div>'+
+      '<div class="apagon-timer"><div class="apagon-timer-icon">⏱️</div>'+
+        '<div class="apagon-timer-bar"><div class="apagon-timer-fill" id="aTimerFill" style="width:100%"></div></div>'+
+        '<div class="apagon-timer-val" id="aTimerVal">45</div></div>'+
+      '<div class="apagon-vecinos" id="aVecinos"></div>'+
+      '<div class="apagon-problems" id="aProblems"></div>'+
+      '<div class="apagon-progress"><span id="aCount">0</span> / 4 asignados</div>';
+    container.appendChild(d);
+
+    // Render vecinos
+    var vEl=document.getElementById('aVecinos');
+    VECINOS.forEach(function(v){
+      var chip=document.createElement('div');chip.className='apagon-vecino';chip.id='av-'+v.id;
+      chip.innerHTML='<span class="apagon-vecino-icon">'+v.icon+'</span><span><strong>'+v.name+'</strong><br><span style="font-size:11px;color:var(--muted);font-weight:400;">'+v.skill+'</span></span>';
+      chip.addEventListener('click',function(){
+        if(chip.classList.contains('used'))return;
+        document.querySelectorAll('.apagon-vecino').forEach(function(c){c.classList.remove('selected');});
+        chip.classList.add('selected');
+        selectedVecino=v.id;
+        // Highlight problems as targets
+        document.querySelectorAll('.apagon-problem:not(.assigned)').forEach(function(p){p.classList.add('target');});
+      });
+      vEl.appendChild(chip);
+    });
+
+    // Render problems
+    var pEl=document.getElementById('aProblems');
+    PROBLEMS.forEach(function(p){
+      var card=document.createElement('div');card.className='apagon-problem';card.id='ap-'+p.id;
+      card.innerHTML='<div class="apagon-problem-icon">'+p.icon+'</div>'+
+        '<div class="apagon-problem-text"><div class="apagon-problem-title">'+p.title+'</div>'+
+        '<div class="apagon-problem-hint">'+p.hint+'</div></div>';
+      card.addEventListener('click',function(){
+        if(!selectedVecino||card.classList.contains('assigned'))return;
+        // Assign
+        var vec=VECINOS.find(function(v){return v.id===selectedVecino;});
+        assignments[p.id]=selectedVecino;
+        card.classList.remove('target');card.classList.add('assigned');
+        card.querySelector('.apagon-problem-text').innerHTML+='<div class="apagon-problem-assigned">'+vec.icon+' '+vec.name+' asignado/a</div>';
+        document.getElementById('av-'+selectedVecino).classList.remove('selected');
+        document.getElementById('av-'+selectedVecino).classList.add('used');
+        selectedVecino=null;
+        document.querySelectorAll('.apagon-problem').forEach(function(pp){pp.classList.remove('target');});
+        var count=Object.keys(assignments).length;
+        document.getElementById('aCount').textContent=count;
+        if(count>=4){
+          document.querySelectorAll('.apagon-vecino').forEach(function(c){c.classList.add('used');});
+          clearInterval(timerRef);
+          setTimeout(finishAssignment,800);
+        }
+      });
+      pEl.appendChild(card);
+    });
+
+    // Timer
+    timerRef=setInterval(function(){
+      timeLeft--;
+      document.getElementById('aTimerVal').textContent=timeLeft;
+      document.getElementById('aTimerFill').style.width=(timeLeft/45*100)+'%';
+      if(timeLeft<=10){
+        document.getElementById('aTimerFill').classList.add('urgent');
+        document.getElementById('aTimerVal').classList.add('urgent');
+      }
+      if(timeLeft<=0){
+        clearInterval(timerRef);
+        finishAssignment();
+      }
+    },1000);
+  }
+
+  function finishAssignment(){
+    // Score each assignment
+    var assignCount=Object.keys(assignments).length;
+    var optimalCount=0;
+    PROBLEMS.forEach(function(p){
+      var vecId=assignments[p.id];
+      if(vecId){
+        var sc=p.scores[vecId];
+        if(sc)addLocal(sc);
+        if(p.best.indexOf(vecId)>-1)optimalCount++;
+      }
+    });
+    // Bonus for completing all 4
+    if(assignCount>=4)addLocal({D:6,hC:4});
+    // Bonus for optimal matches
+    if(optimalCount>=3)addLocal({hI:6,C:4});
+    setTimeout(step3,300);
+  }
+
+  // ── STEP 3: Aftermath ──
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+    d.innerHTML='<div class="apagon-sub">ÚLTIMA DECISIÓN</div>'+
+      '<div style="text-align:center;font-size:52px;padding:4px 0;">💡</div>'+
+      '<div class="apagon-prompt">Volvió la luz. Todo se resolvió gracias a cómo organizaste a los vecinos. La gente del barrio está agradecida. ¿Qué hacés?</div>'+
+      '<div class="apagon-opts" id="a3Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'📋',title:'Proponés armar un plan de emergencia para el barrio',hint:'Que la próxima vez no sea un caos.',scores:{hC:12,hE:10,mTra:8,I:6}},
+      {icon:'🫂',title:'Te quedás charlando con los vecinos, se armó una linda ronda',hint:'De las crisis nacen las mejores comunidades.',scores:{S:12,mSoc:10,I:8,hS:6}},
+      {icon:'🔧',title:'Le pedís a Laura que te enseñe sobre tableros eléctricos',hint:'Hoy aprendiste que saber de esto sirve.',scores:{hR:12,hI:10,pdcC:8,D:6}},
+      {icon:'📝',title:'Escribís en tu cuaderno todo lo que pasó, como una crónica',hint:'Las historias importan, y esta fue buenísima.',scores:{hA:10,mEst:8,C:8,mAut:6}},
+    ];
+
+    var od=document.getElementById('a3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='apagon-opt';
+      btn.innerHTML='<div class="apagon-opt-icon">'+opt.icon+'</div><div><div class="apagon-opt-title">'+opt.title+'</div><div class="apagon-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.apagon-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(finishApagon,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  // ── FINISH ──
+  function finishApagon(){
+    var org=(accum.hC||0)+(accum.mTra||0)+(accum.hE||0);
+    var acc=(accum.D||0)+(accum.hR||0)+(accum.pdcC||0);
+    var soc=(accum.S||0)+(accum.I||0)+(accum.mSoc||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var mx=Math.max(org,acc,soc,ana,1);
+    zoneComplete('apagon',accum,{
+      emoji:'💡',title:'¡Luz en el barrio!',
+      sub:'Cómo organizás a las personas en una crisis dice mucho de tu forma de liderar.',
+      bars:[
+        {icon:'🏗️',color:'#b07af0',pct:Math.round(org/mx*100)},
+        {icon:'⚡',color:'#f5a623',pct:Math.round(acc/mx*100)},
+        {icon:'🤝',color:'#f07a9a',pct:Math.round(soc/mx*100)},
+        {icon:'🔍',color:'#5b9bf5',pct:Math.round(ana/mx*100)},
+      ]
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA TERRAZA
+//  Puzzle Mastermind — la planta enferma
+// ═══════════════════════════════════════
+function buildTerraza(container){
+  var accum={};
+  var answered=false;
+  // Secret formula: [1]=Normal, [1]=Media luz, [2]=Nutritiva
+  var SECRET=[1,1,2];
+  var VARS=[
+    {icon:'💧',name:'Riego',options:['Poco','Normal','Mucho']},
+    {icon:'☀️',name:'Luz',options:['Sombra','Media luz','Directo']},
+    {icon:'🪴',name:'Tierra',options:['Seca','Húmeda','Nutritiva']},
+  ];
+  var history=[];
+  var maxAttempts=3;
+  var picks=[-1,-1,-1];
+  var solved=false;
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  function plantEmoji(){
+    if(solved)return '🌿';
+    var correct=0;
+    if(history.length>0){
+      var last=history[history.length-1];
+      last.fb.forEach(function(f){if(f==='exact')correct++;});
+    }
+    if(correct>=2)return '🌱';
+    if(history.length>=2)return '😐';
+    return '😢';
+  }
+
+  // ── STEP 1: How do you approach it? ──
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='terraza-wrap fade-in';
+    d.innerHTML='<div class="terraza-sub">PASO 1 — OBSERVACIÓN</div>'+
+      '<div class="terraza-visual">🥀</div>'+
+      '<div class="terraza-prompt">Subís a la terraza y encontrás la planta del curso completamente amarilla. Nadie sabe qué le pasa. ¿Cómo arrancás?</div>'+
+      '<div class="terraza-opts" id="t1Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'📖',title:'Googleás "planta amarilla causas" y leés',hint:'La información es poder. Primero entender, después actuar.',scores:{hI:12,mTeo:10,C:8,pdcD:6}},
+      {icon:'🧓',title:'Le preguntás a la vecina que tiene un jardín hermoso',hint:'La experiencia de otros vale oro.',scores:{I:10,S:8,mSoc:8,hS:6}},
+      {icon:'🔍',title:'Observás de cerca: las hojas, la tierra, la luz que le da',hint:'Los datos están ahí, hay que saber mirar.',scores:{hI:10,hR:8,pdcD:8,C:6}},
+      {icon:'🌊',title:'Le tirás agua por las dudas — algo hay que hacer',hint:'La acción directa a veces es la mejor respuesta.',scores:{D:12,hR:8,mAut:6,hE:6}},
+    ];
+
+    var od=document.getElementById('t1Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='terraza-opt';
+      btn.innerHTML='<div class="terraza-opt-icon">'+opt.icon+'</div><div><div class="terraza-opt-title">'+opt.title+'</div><div class="terraza-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.terraza-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(step2,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  // ── STEP 2: Mastermind puzzle ──
+  function step2(){
+    container.innerHTML='';
+    picks=[-1,-1,-1];
+    var attempt=history.length+1;
+    var d=document.createElement('div');d.className='terraza-wrap fade-in';
+
+    var histHTML='';
+    if(history.length>0){
+      histHTML='<div class="terraza-history">';
+      history.forEach(function(h,i){
+        var labels=[];
+        h.picks.forEach(function(p,vi){labels.push(VARS[vi].options[p]);});
+        histHTML+='<div class="terraza-history-row"><span>Intento '+(i+1)+':</span> '+labels.join(' · ')+
+          '<span class="fb">'+h.fb.map(function(f){return f==='exact'?'🟢':f==='close'?'🟡':'🔴';}).join('')+'</span></div>';
+      });
+      histHTML+='</div>';
+    }
+
+    d.innerHTML='<div class="terraza-sub">PASO 2 — EXPERIMENTO (INTENTO '+attempt+' DE '+maxAttempts+')</div>'+
+      '<div class="terraza-visual">'+plantEmoji()+'</div>'+
+      '<div class="terraza-prompt">Elegí qué combinación de cuidados probar</div>'+
+      '<div class="terraza-hint">🟢 = exacto · 🟡 = cerca · 🔴 = no es</div>'+
+      histHTML+
+      '<div class="terraza-vars" id="tVars"></div>'+
+      '<div class="terraza-attempts">Intentos restantes: <span>'+(maxAttempts-history.length)+'</span></div>'+
+      '<button class="btn btn-warm kiosco-confirm" id="tProbar" disabled>Probar combinación 🧪</button>';
+    container.appendChild(d);
+
+    var varsEl=document.getElementById('tVars');
+    VARS.forEach(function(v,vi){
+      var row=document.createElement('div');row.className='terraza-var';
+      row.innerHTML='<div class="terraza-var-head"><div class="terraza-var-icon">'+v.icon+'</div>'+
+        '<div class="terraza-var-name">'+v.name+'</div><div class="terraza-var-fb" id="fb'+vi+'"></div></div>'+
+        '<div class="terraza-var-opts" id="tVarOpts'+vi+'"></div>';
+      varsEl.appendChild(row);
+
+      var optsEl=document.getElementById('tVarOpts'+vi);
+      v.options.forEach(function(opt,oi){
+        var btn=document.createElement('div');btn.className='terraza-var-opt';
+        btn.textContent=opt;
+        btn.addEventListener('click',function(){
+          if(btn.classList.contains('locked'))return;
+          optsEl.querySelectorAll('.terraza-var-opt').forEach(function(b){b.classList.remove('sel');});
+          btn.classList.add('sel');picks[vi]=oi;
+          document.getElementById('tProbar').disabled=picks.indexOf(-1)!==-1;
+        });
+        optsEl.appendChild(btn);
+      });
+    });
+
+    document.getElementById('tProbar').addEventListener('click',function(){
+      if(picks.indexOf(-1)!==-1)return;
+      // Calculate feedback
+      var fb=[];
+      var correct=0;
+      picks.forEach(function(p,i){
+        if(p===SECRET[i]){fb.push('exact');correct++;}
+        else if(Math.abs(p-SECRET[i])===1){fb.push('close');}
+        else{fb.push('wrong');}
+      });
+
+      // Score based on approach: systematic changers vs random
+      if(history.length>0){
+        var prev=history[history.length-1].picks;
+        var changes=0;
+        picks.forEach(function(p,i){if(p!==prev[i])changes++;});
+        if(changes===1)addLocal({hI:6,C:4,mTeo:4}); // systematic
+        else if(changes===3)addLocal({D:6,mAut:4,hR:4}); // bold
+        else addLocal({hR:4,hI:4}); // mixed
+      }
+
+      history.push({picks:picks.slice(),fb:fb});
+
+      // Show feedback animation
+      fb.forEach(function(f,i){
+        var el=document.getElementById('fb'+i);
+        el.textContent=f==='exact'?'🟢':f==='close'?'🟡':'🔴';
+        el.classList.add('show');
+      });
+      document.querySelectorAll('.terraza-var-opt').forEach(function(b){b.classList.add('locked');});
+      document.getElementById('tProbar').disabled=true;
+
+      if(correct===3){
+        solved=true;
+        addLocal({hI:10,C:8,hR:6,pdcD:6});
+        // Bonus for fewer attempts
+        if(history.length===1)addLocal({hI:8,mTeo:6});
+        else if(history.length===2)addLocal({hI:4,mTeo:4});
+        setTimeout(step3,1200);
+      }else if(history.length>=maxAttempts){
+        // Didn't solve — still get some scores for trying
+        addLocal({D:6,hR:4,S:4});
+        setTimeout(step3,1200);
+      }else{
+        setTimeout(step2,1200);
+      }
+    });
+  }
+
+  // ── STEP 3: What now? ──
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='terraza-wrap fade-in';
+    var resultMsg=solved
+      ?'¡La planta empezó a revivir! En unos días va a estar verde de nuevo. Tus compañeros te miran impresionados.'
+      :'No encontraste la combinación perfecta, pero la planta mejoró un poco con tus intentos. Cada experimento enseña algo.';
+    d.innerHTML='<div class="terraza-sub">ÚLTIMA DECISIÓN</div>'+
+      '<div class="terraza-visual">'+(solved?'🌿':'🌱')+'</div>'+
+      '<div class="terraza-prompt">'+resultMsg+' ¿Qué hacés ahora?</div>'+
+      '<div class="terraza-opts" id="t3Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'📋',title:'Anotás todo el proceso en un cuaderno de experimentos',hint:'Si funcionó una vez, puede funcionar de nuevo. Los datos importan.',scores:{C:12,hI:10,mTeo:8,pdcD:6}},
+      {icon:'📢',title:'Le contás a todo el curso cómo lo hiciste',hint:'Compartir lo que aprendiste puede inspirar a otros.',scores:{I:10,mSoc:8,S:8,hS:6}},
+      {icon:'🌱',title:'Seguís experimentando con otras plantas de la terraza',hint:'Si una se curó, las otras también pueden mejorar.',scores:{hR:12,D:10,hI:8,mAut:6}},
+      {icon:'🏫',title:'Le proponés a la profe armar un club de huerta',hint:'Esto podría ser algo más grande que una sola planta.',scores:{hE:12,I:10,hC:8,mTra:6}},
+    ];
+
+    var od=document.getElementById('t3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='terraza-opt';
+      btn.innerHTML='<div class="terraza-opt-icon">'+opt.icon+'</div><div><div class="terraza-opt-title">'+opt.title+'</div><div class="terraza-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.terraza-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(finishTerraza,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  // ── FINISH ──
+  function finishTerraza(){
+    var met=(accum.hI||0)+(accum.mTeo||0)+(accum.C||0);
+    var exp=(accum.hR||0)+(accum.D||0)+(accum.mAut||0);
+    var soc=(accum.I||0)+(accum.S||0)+(accum.mSoc||0);
+    var org=(accum.hE||0)+(accum.hC||0)+(accum.mTra||0);
+    var mx=Math.max(met,exp,soc,org,1);
+    zoneComplete('terraza',accum,{
+      emoji:'🌿',title:'¡Terraza rescatada!',
+      sub:'Cómo experimentás y qué hacés con lo que descubrís dice mucho de vos.',
+      bars:[
+        {icon:'🔬',color:'#4ecb71',pct:Math.round(met/mx*100)},
+        {icon:'⚡',color:'#b07af0',pct:Math.round(exp/mx*100)},
+        {icon:'🤝',color:'#f07a9a',pct:Math.round(soc/mx*100)},
+        {icon:'🏗️',color:'#f5a623',pct:Math.round(org/mx*100)},
+      ]
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL KIOSCO
+//  Gestión de presupuesto — $100
+// ═══════════════════════════════════════
+function buildKiosco(container){
+  var budget=100;
+  var selected=[];
+  var accum={};
+  var answered=false;
+
+  var PRODUCTS=[
+    {id:'fig',icon:'🃏',name:'Pack de figuritas del Mundial',price:25,hint:'Te faltan pocas para completar el álbum.',scores:{C:8,mTeo:6,hI:6}},
+    {id:'juego',icon:'🎲',name:'Juego de cartas para el recreo',price:25,hint:'Uno, Memotest, o el que quieras.',scores:{I:10,S:8,mSoc:6}},
+    {id:'arte',icon:'🖊️',name:'Set de marcadores y block',price:25,hint:'36 colores, doble punta, pinta increíble.',scores:{hA:10,mEst:8,mAut:6}},
+    {id:'kit',icon:'🔧',name:'Kit de armado mini robótica',price:25,hint:'Un autito que seguí líneas en el piso.',scores:{hR:10,hI:8,pdcD:6}},
+  ];
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  function budgetHTML(){
+    var pct=Math.round(budget/100*100);
+    return '<div class="kiosco-budget">'+
+      '<div class="kiosco-budget-icon">💰</div>'+
+      '<div class="kiosco-budget-info"><div class="kiosco-budget-label">TU PLATA</div>'+
+      '<div class="kiosco-budget-bar"><div class="kiosco-budget-fill" style="width:'+pct+'%"></div></div></div>'+
+      '<div class="kiosco-budget-val">$'+budget+'</div></div>';
+  }
+
+  function receiptHTML(){
+    if(!selected.length)return '';
+    var items='';
+    selected.forEach(function(p){items+='<div class="kiosco-receipt-item"><span>'+p.icon+'</span> '+p.name+'</div>';});
+    return '<div class="kiosco-receipt">'+items+'</div>';
+  }
+
+  // ── STEP 1: Pick 2 products ──
+  function step1(){
+    selected=[];answered=false;
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 1 DE 4</div>'+budgetHTML()+
+      '<div class="kiosco-prompt">Tenés $100 en el kiosco del barrio. Elegí 2 cosas.</div>'+
+      '<div class="kiosco-hint">Tocá para elegir — solo podés llevar 2</div>'+
+      '<div class="kiosco-products" id="kProds"></div>'+
+      '<button class="btn btn-warm kiosco-confirm" id="kConfirm" disabled>Comprar →</button>';
+    container.appendChild(d);
+
+    var grid=document.getElementById('kProds');
+    var picks=[];
+
+    PRODUCTS.forEach(function(p){
+      var card=document.createElement('div');card.className='kiosco-product';
+      card.innerHTML='<div class="kiosco-product-check">✓</div>'+
+        '<div class="kiosco-product-icon">'+p.icon+'</div>'+
+        '<div class="kiosco-product-name">'+p.name+'</div>'+
+        '<div class="kiosco-product-price">$'+p.price+'</div>'+
+        '<div class="kiosco-product-hint">'+p.hint+'</div>';
+      card.addEventListener('click',function(){
+        if(answered)return;
+        var idx=picks.indexOf(p.id);
+        if(idx>-1){picks.splice(idx,1);card.classList.remove('selected');}
+        else if(picks.length<2){picks.push(p.id);card.classList.add('selected');}
+        document.getElementById('kConfirm').disabled=picks.length!==2;
+        // Disable unselected when 2 are picked
+        document.querySelectorAll('.kiosco-product').forEach(function(c,i){
+          if(picks.length>=2&&!c.classList.contains('selected'))c.classList.add('disabled');
+          else c.classList.remove('disabled');
+        });
+      });
+      grid.appendChild(card);
+    });
+
+    document.getElementById('kConfirm').addEventListener('click',function(){
+      if(answered||picks.length!==2)return;answered=true;
+      picks.forEach(function(pid){
+        var prod=PRODUCTS.find(function(p){return p.id===pid;});
+        selected.push(prod);addLocal(prod.scores);
+      });
+      budget-=50;
+      setTimeout(step2,400);
+    });
+  }
+
+  // ── STEP 2: Friend with no money ──
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 2 DE 4</div>'+budgetHTML()+receiptHTML()+
+      '<div class="kiosco-prompt">Tu amigo Santi llega al kiosco sin un peso. Mira tus cosas con cara de envidia. ¿Qué hacés?</div>'+
+      '<div class="kiosco-opts" id="k2Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🎁',title:'Le regalás una de las cosas que compraste',hint:'Total, compraste dos. Compartir está bueno.',scores:{S:12,hS:10,mSoc:8,pdcP:6}},
+      {icon:'💵',title:'Le prestás $25 para que se compre algo',hint:'"Me lo devolvés mañana, tranqui."',scores:{hE:10,I:8,mEco:8,hC:6},cost:25},
+      {icon:'🤝',title:'Le proponés compartir y usar juntos lo tuyo',hint:'No hace falta gastar más, pueden disfrutarlo entre los dos.',scores:{mSoc:10,S:8,I:8,mTra:6}},
+      {icon:'🤷',title:'"La próxima traé plata, Santi"',hint:'Cada uno se organiza con lo suyo.',scores:{D:10,hE:8,mEco:8,C:6}},
+    ];
+
+    var od=document.getElementById('k2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="kiosco-opt-icon">'+opt.icon+'</div><div><div class="kiosco-opt-title">'+opt.title+'</div><div class="kiosco-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        if(opt.cost)budget-=opt.cost;
+        setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  // ── STEP 3: Special item behind counter ──
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 3 DE 4</div>'+budgetHTML()+
+      '<div style="text-align:center;font-size:48px;padding:4px 0;">✨</div>'+
+      '<div class="kiosco-prompt">El kiosquero te muestra algo atrás del mostrador: un álbum edición especial que viene con figuritas doradas. Cuesta $40.</div>'+
+      '<div class="kiosco-hint">Tenés $'+budget+' — ¿qué hacés?</div>'+
+      '<div class="kiosco-opts" id="k3Opts"></div>';
+    container.appendChild(d);
+
+    var canBuy=budget>=40;
+    var opts=[
+      {icon:'🤩',title:'¡Lo comprás! No importa quedarse corto',hint:canBuy?'YOLO. Oportunidad única.':'Pedís fiado lo que te falta.',scores:{D:12,hR:8,mAut:8,hA:6},cost:40},
+      {icon:'🤔',title:'Le ofrecés $'+Math.min(budget,30)+' y negociás un descuento',hint:'Todo se puede charlar, ¿no?',scores:{hE:12,mEco:10,hC:8,I:6},cost:Math.min(budget,30)},
+      {icon:'✋',title:'Decís que no, preferís guardar tu plata',hint:'La plata en mano vale más que el álbum volando.',scores:{C:10,hC:8,mTra:8,pdcD:6},cost:0},
+      {icon:'📅',title:'Le preguntás si te lo puede guardar para mañana',hint:'Así juntás la plata sin apuro.',scores:{hI:10,C:8,mTeo:6,D:6},cost:0},
+    ];
+
+    var od=document.getElementById('k3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="kiosco-opt-icon">'+opt.icon+'</div><div><div class="kiosco-opt-title">'+opt.title+'</div><div class="kiosco-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        budget=Math.max(0,budget-opt.cost);
+        setTimeout(step4,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  // ── STEP 4: What to do with remaining money ──
+  function step4(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    var hasLeftover=budget>0;
+    var prompt=hasLeftover
+      ?'Te quedan $'+budget+'. Salís del kiosco y ves un heladero en la esquina, una vecina vendiendo tortas caseras, y a Santi que sigue por ahí. ¿Qué hacés con lo que te queda?'
+      :'Te gastaste toda la plata. Salís del kiosco con las manos llenas pero los bolsillos vacíos. Si pudieras volver atrás, ¿qué cambiarías?';
+    d.innerHTML='<div class="kiosco-sub">ÚLTIMA DECISIÓN</div>'+budgetHTML()+
+      '<div class="kiosco-prompt">'+prompt+'</div>'+
+      '<div class="kiosco-opts" id="k4Opts"></div>';
+    container.appendChild(d);
+
+    var opts=hasLeftover?[
+      {icon:'🏦',title:'Guardás todo para mañana',hint:'La plata ahorrada es plata ganada.',scores:{hC:10,mEco:10,mTra:8,C:6}},
+      {icon:'🍦',title:'Invitás a Santi a un helado',hint:'Hoy fue un buen día, hay que celebrar.',scores:{S:12,hS:10,mSoc:8,I:6}},
+      {icon:'🎂',title:'Le comprás una torta a alguien de tu familia',hint:'Siempre se acuerdan de vos, ahora vos de ellos.',scores:{S:10,pdcP:10,mSoc:8,hE:6}},
+      {icon:'🎯',title:'Comprás algo más que te llamó la atención',hint:'La vida es corta, las ofertas también.',scores:{hA:10,D:8,mAut:8,hR:6}},
+    ]:[
+      {icon:'🤷',title:'Nada, estuvo buenísimo gastar todo',hint:'La plata es para disfrutarla, mañana será otro día.',scores:{D:10,hA:8,mAut:8,hR:6}},
+      {icon:'📝',title:'Anotarías todo en un cuaderno para no repetir',hint:'La experiencia enseña, si la registrás.',scores:{C:12,hI:10,mTeo:8,pdcD:6}},
+      {icon:'🗣️',title:'Le pedirías consejo a alguien antes de comprar',hint:'Dos cabezas piensan más que una.',scores:{I:10,hS:8,mSoc:8,mTra:6}},
+      {icon:'💡',title:'Armarías un presupuesto la próxima vez',hint:'Planificar no es aburrido, es inteligente.',scores:{hC:12,mEco:10,hE:8,pdcC:6}},
+    ];
+
+    var od=document.getElementById('k4Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="kiosco-opt-icon">'+opt.icon+'</div><div><div class="kiosco-opt-title">'+opt.title+'</div><div class="kiosco-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(finishKiosco,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  // ── FINISH ──
+  function finishKiosco(){
+    var est=(accum.mEco||0)+(accum.hE||0)+(accum.hC||0);
+    var soc=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var dec=(accum.D||0)+(accum.hR||0)+(accum.mAut||0);
+    var ana=(accum.C||0)+(accum.hI||0)+(accum.mTeo||0);
+    var mx=Math.max(est,soc,dec,ana,1);
+    zoneComplete('kiosco',accum,{
+      emoji:'🛒',title:'¡Kiosco cerrado!',
+      sub:'Cada compra y cada decisión sobre tu plata dice algo de cómo pensás y qué valorás.',
+      bars:[
+        {icon:'💰',color:'#f5a623',pct:Math.round(est/mx*100)},
+        {icon:'🤝',color:'#f07a9a',pct:Math.round(soc/mx*100)},
+        {icon:'⚡',color:'#b07af0',pct:Math.round(dec/mx*100)},
+        {icon:'🔍',color:'#5b9bf5',pct:Math.round(ana/mx*100)},
+      ]
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA CALLE
+//  Un nene chiquito solo y llorando
+// ═══════════════════════════════════════
+function buildCalle(container){
+  var TREE={
+    s1:{visual:'😢',status:'Está llorando...',thought:'¿Dónde está mi mamá?',sub:'DECISIÓN 1 DE 4',
+      prompt:'Volvés del colegio y ves a un nene de unos 5 años sentado solo en la vereda, llorando. No hay ningún adulto cerca. ¿Qué hacés?',
+      options:[
+        {id:'a',icon:'🧎',title:'Te acercás y le preguntás qué le pasa',hint:'Lo primero es entender la situación.',next:'s2a',scores:{S:12,hS:10,pdcP:8,mSoc:6}},
+        {id:'b',icon:'🏪',title:'Entrás al negocio más cercano a pedir ayuda',hint:'Un adulto de confianza puede ayudar mejor.',next:'s2b',scores:{hC:10,I:8,mTra:8,C:6}},
+        {id:'c',icon:'👀',title:'Mirás alrededor buscando a algún familiar',hint:'Tal vez se separó de alguien que está cerca.',next:'s2c',scores:{hI:12,C:10,pdcD:8}},
+        {id:'d',icon:'📞',title:'Llamás al 911 directamente',hint:'Es una emergencia, que vengan los que saben.',next:'s2d',scores:{hC:12,D:10,mTra:8,hE:6}},
+      ]},
+    s2a:{visual:'👦',status:'Te mira con desconfianza...',thought:'No lo conozco...',sub:'DECISIÓN 2 DE 4',
+      prompt:'El nene te dice entre llantos que "mamá fue al doctor y no volvió". No sabe la dirección de su casa. ¿Qué hacés?',
+      options:[
+        {id:'a1',icon:'🍬',title:'Lo calmás, le ofrecés algo de tu mochila y le hacés preguntas tranqui',hint:'Primero que se sienta seguro.',next:'s3a',scores:{S:14,hS:12,mSoc:10,pdcP:6}},
+        {id:'a2',icon:'🔍',title:'Le preguntás el nombre de la mamá y buscás en el celular',hint:'Con datos se encuentra gente.',next:'s3b',scores:{hI:12,C:10,hC:8,pdcD:6}},
+        {id:'a3',icon:'🏥',title:'Lo llevás caminando hacia el hospital más cercano',hint:'Si la mamá fue al doctor, probablemente está ahí.',next:'s3a',scores:{D:12,hI:10,hE:8,pdcC:6}},
+      ]},
+    s2b:{visual:'🏪',status:'El kiosquero te escucha...',thought:'¿Me van a ayudar?',sub:'DECISIÓN 2 DE 4',
+      prompt:'El kiosquero dice que vio al nene hace un rato pero no conoce a la familia. Se ofrece a cuidarlo mientras vos hacés algo. ¿Qué hacés?',
+      options:[
+        {id:'b1',icon:'🏃',title:'Recorrés las cuadras cercanas buscando a alguien desesperado',hint:'La mamá no debe estar lejos.',next:'s3a',scores:{D:14,hR:10,hE:8,S:6}},
+        {id:'b2',icon:'📱',title:'Publicás en el grupo de WhatsApp del barrio con foto del nene',hint:'Las redes sociales conectan rápido.',next:'s3b',scores:{hE:12,I:10,hI:8}},
+        {id:'b3',icon:'👮',title:'Le pedís al kiosquero que llame a la policía mientras vos te quedás con el nene',hint:'Cada uno hace lo que mejor puede.',next:'s3a',scores:{hC:12,I:10,mTra:10,S:6}},
+      ]},
+    s2c:{visual:'👀',status:'Mirás alrededor...',thought:'Tiene que haber alguien...',sub:'DECISIÓN 2 DE 4',
+      prompt:'No ves a nadie buscando un nene. Pero notás que tiene puesto un guardapolvo con el nombre de un jardín que está a 3 cuadras. ¿Qué hacés con esa pista?',
+      options:[
+        {id:'c1',icon:'🏫',title:'Lo llevás al jardín — ahí van a tener datos de la familia',hint:'La institución tiene los contactos.',next:'s3b',scores:{hI:14,C:12,hC:10,mTra:6}},
+        {id:'c2',icon:'📞',title:'Googleás el jardín y llamás por teléfono',hint:'No hace falta ir, podés llamar.',next:'s3a',scores:{hI:10,hC:10,D:8,mTeo:6}},
+        {id:'c3',icon:'🧎',title:'Primero te acercás al nene — la pista puede esperar, él no',hint:'Las personas primero.',next:'s3a',scores:{S:14,hS:12,pdcP:10,mSoc:6}},
+      ]},
+    s2d:{visual:'📞',status:'Llamando...',thought:'Que vengan rápido...',sub:'DECISIÓN 2 DE 4',
+      prompt:'El 911 te dice que van a mandar un patrullero pero puede tardar. Mientras tanto el nene sigue llorando solo. ¿Qué hacés?',
+      options:[
+        {id:'d1',icon:'🧎',title:'Te sentás con él en la vereda y lo acompañás hasta que lleguen',hint:'Que sepa que no está solo.',next:'s3a',scores:{S:14,hS:12,pdcP:10}},
+        {id:'d2',icon:'🔍',title:'Aprovechás la espera para investigar: le preguntás datos, revisás su mochila',hint:'Cada minuto cuenta para encontrar a la mamá.',next:'s3b',scores:{hI:12,C:10,D:8,pdcD:8}},
+        {id:'d3',icon:'🏪',title:'Lo metés al negocio más cercano para que no esté en la calle',hint:'Adentro es más seguro.',next:'s3a',scores:{hC:10,D:10,hR:8,mTra:6}},
+      ]},
+    s3a:{visual:'👦',status:'Más tranquilo...',thought:'Gracias por quedarte...',sub:'DECISIÓN 3 DE 4',
+      prompt:'Pasaron 15 minutos. El nene se calmó pero la mamá no aparece. Una vecina se acerca y dice que conoce a la familia, viven a 5 cuadras. ¿Qué hacés?',
+      options:[
+        {id:'e1',icon:'🚶',title:'Acompañás a la vecina y al nene hasta la casa',hint:'Querés asegurarte de que llegue bien.',next:'s4',scores:{S:12,D:10,hS:8,pdcP:8}},
+        {id:'e2',icon:'📞',title:'Le pedís a la vecina que llame al familiar mientras vos te quedás con el nene',hint:'Que venga un familiar, no al revés.',next:'s4',scores:{hC:12,C:10,mTra:8,I:6}},
+        {id:'e3',icon:'📋',title:'Le dejás tu teléfono a la vecina por si necesitan algo',hint:'Ya hiciste tu parte, ella lo conoce más.',next:'s4',scores:{hE:10,I:10,C:8,mAut:6}},
+      ]},
+    s3b:{visual:'📱',status:'Tenés una pista...',thought:'Vamos a encontrarla...',sub:'DECISIÓN 3 DE 4',
+      prompt:'Conseguiste el nombre de la mamá y el jardín de infantes. Desde el jardín te confirman que la mamá está internada por un turno que se atrasó, y que el papá está en camino. ¿Qué hacés mientras llega?',
+      options:[
+        {id:'f1',icon:'🎮',title:'Le mostrás juegos en el celular para distraerlo',hint:'Que se olvide del susto un rato.',next:'s4',scores:{hA:10,S:8,mEst:8,pdcP:6}},
+        {id:'f2',icon:'🗣️',title:'Le contás un cuento improvisado para que se ría',hint:'La creatividad puede calmar más que la tecnología.',next:'s4',scores:{hA:12,mEst:10,S:8,mSoc:6}},
+        {id:'f3',icon:'📝',title:'Anotás todo lo que pasó para contarle al papá cuando llegue',hint:'La información organizada ayuda.',next:'s4',scores:{C:12,hI:10,hC:8,pdcD:8}},
+      ]},
+    s4:{visual:'👨',status:'¡Llegó el papá!',thought:'¡Papá!',sub:'ÚLTIMA DECISIÓN',
+      prompt:'El papá llega corriendo, aliviado. Te agradece y te pregunta cómo puede devolverte el favor. ¿Qué le decís?',
+      options:[
+        {id:'g1',icon:'❤️',title:'"No hace falta nada, me alegro de que esté bien"',hint:'Lo hiciste porque era lo correcto.',next:'fin',scores:{S:12,hS:10,mSoc:10,pdcP:8}},
+        {id:'g2',icon:'💡',title:'"Estaría bueno que el barrio tenga un grupo de emergencias para estas cosas"',hint:'Que no le pase a otro nene.',next:'fin',scores:{hI:12,hE:10,hC:8,mTeo:6,I:6}},
+        {id:'g3',icon:'📞',title:'"Dejame tu contacto por si necesitás algo en el futuro"',hint:'Construir red de confianza.',next:'fin',scores:{hE:12,I:10,hS:8,mSoc:6}},
+        {id:'g4',icon:'🏘️',title:'"Podríamos armar algo en el barrio para que los chicos estén más cuidados"',hint:'Pensar en grande, no solo en hoy.',next:'fin',scores:{hI:10,hE:12,mTeo:10,hC:8,pdcD:6}},
+      ]}
+  };
+
+  var accum={};var answered=false;
+
+  function render(sid){
+    var sc=TREE[sid];answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">'+sc.sub+'</div><div class="campo-visual">'+sc.visual+'</div>'+
+      '<div class="campo-bubble"><div class="campo-bubble-label">'+sc.thought+'</div><div class="campo-bubble-text">'+sc.status+'</div></div>'+
+      '<div class="campo-prompt">'+sc.prompt+'</div><div class="campo-opts" id="cOpts"></div>';
+    container.appendChild(d);
+    var od=document.getElementById('cOpts');
+    sc.options.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(function(){opt.next==='fin'?finish():render(opt.next);},550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function finish(){
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.pdcD||0);
+    var act=(accum.D||0)+(accum.hE||0)+(accum.hR||0);
+    var sys=(accum.hC||0)+(accum.mTra||0)+(accum.I||0);
+    var mx=Math.max(emp,ana,act,sys,1);
+    zoneComplete('calle',accum,{
+      emoji:'👦',title:'¡Nene encontrado!',
+      sub:'Cada decisión reveló cómo actuás cuando alguien necesita ayuda.',
+      bars:[
+        {icon:'💗',color:'#f07a9a',pct:Math.round(emp/mx*100)},
+        {icon:'🔍',color:'#5b9bf5',pct:Math.round(ana/mx*100)},
+        {icon:'⚡',color:'#f5a623',pct:Math.round(act/mx*100)},
+        {icon:'🔗',color:'#b07af0',pct:Math.round(sys/mx*100)},
+      ]
+    });
+  }
+
+  render('s1');
+}
+
+
+// ═══ PATHFINDER SYNC MODULE ═══
+var PF_SUPABASE_URL = 'https://mnmdqqlppwuzejxibqso.supabase.co';  // ← Reemplazar con tu URL de Supabase
+var PF_SUPABASE_KEY = 'sb_publishable_iWdGYjRwe18ortlRznDj9w_HpM0M1Hf';  // ← Reemplazar con tu anon key
+var PF_PATH_NUMBER = 1;
+
+var PF_MAPPING = {
+  salud:['S','hS','mSoc','pdcP'], exactas:['hI','mTeo','pdcD','C'],
+  ing:['hR','hC','D','pdcC'], sociales:['I','hS','S','mSoc'],
+  eco:['hE','mEco','D','hC'], arte:['hA','mEst','mAut'],
+  agro:['hR','pdcC','mTra'], edu:['mTra','pdcP','mSoc','S']
+};
+var PF_CAPS = {salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+
+function pfComputeAreas(rawScores) {
+  var result = {};
+  for (var area in PF_MAPPING) {
+    var sum = 0;
+    PF_MAPPING[area].forEach(function(d){ sum += (rawScores[d]||0); });
+    var cap = PF_CAPS[area] || 160;
+    result[area] = Math.min(100, Math.round(sum / cap * 100));
+  }
+  return result;
+}
+
+function pfSyncResults() {
+  var areaPercentages = pfComputeAreas(GS.scores);
+  var payload = {
+    p_email: GS.email,
+    p_name: GS.name,
+    p_school_code: GS.schoolCode,
+    p_path_number: PF_PATH_NUMBER,
+    p_raw_scores: GS.scores,
+    p_area_percentages: areaPercentages
+  };
+
+  // Show sync status
+  var syncEl = document.getElementById('pf-sync-status');
+  if (syncEl) syncEl.textContent = 'Guardando resultados...';
+
+  fetch(PF_SUPABASE_URL + '/rest/v1/rpc/upsert_path_result', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': PF_SUPABASE_KEY,
+      'Authorization': 'Bearer ' + PF_SUPABASE_KEY
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (syncEl) {
+      if (data && data.success) {
+        syncEl.innerHTML = '✓ Resultados guardados · <a href="dashboard-alumno.html?email=' + encodeURIComponent(GS.email) + '" style="color:var(--warm,#f5a623);text-decoration:underline;">Ver mi evolución →</a>';
+      } else {
+        syncEl.textContent = '✓ Resultados guardados';
+      }
+    }
+  })
+  .catch(function(err){
+    console.error('PathFinder sync error:', err);
+    if (syncEl) syncEl.textContent = 'No se pudieron guardar (sin conexión). Tus resultados están en pantalla.';
+  });
+}
+// ═══ END SYNC MODULE ═══
+
+</script>
+</body>
+</html>

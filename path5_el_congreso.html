@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Path 5 — El Congreso</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Gabarito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#0d0a10;color:#e4dfe0;}
+body{font-family:'Nunito',sans-serif;display:flex;flex-direction:column;position:relative;}
+
+.screen{display:none;flex-direction:column;height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
+.screen.active{display:flex;}
+.fade-in{animation:fadeIn .45s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 6px rgba(196,90,114,.3))}50%{filter:drop-shadow(0 0 14px rgba(196,90,114,.5))}}
+
+:root{
+  --sky:#0d0a10;--sky2:#14101a;
+  --warm:#c45a72;--warm-soft:rgba(196,90,114,.1);--warm-border:rgba(196,90,114,.2);
+  --green:#3db87a;--green-soft:rgba(61,184,122,.08);
+  --blue:#4a7ad9;--red:#d96060;--purple:#9a6cc7;--pink:#d96a8a;
+  --text:#e4dfe0;--muted:rgba(228,223,224,.45);--muted2:rgba(228,223,224,.25);
+  --card:rgba(255,255,255,.04);--border:rgba(255,255,255,.07);
+}
+
+/* ══ INTRO ══ */
+#intro{align-items:center;justify-content:center;gap:1.2rem;padding:2rem;text-align:center;background:radial-gradient(ellipse at 50% 80%,#1a1018,#0d0a10);}
+.intro-badge{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.18em;color:var(--warm);background:var(--warm-soft);padding:5px 16px;border-radius:20px;border:1px solid var(--warm-border);}
+.intro-icon{font-size:64px;animation:glow 3s ease-in-out infinite;}
+.intro-title{font-family:Gabarito,sans-serif;font-size:30px;font-weight:700;color:#fff;line-height:1.2;}
+.intro-sub{font-size:15px;color:var(--muted);line-height:1.6;max-width:300px;}
+.intro-input{display:flex;flex-direction:column;gap:6px;width:100%;max-width:260px;}
+.intro-input label{font-size:12px;color:var(--muted);text-align:left;}
+.intro-input input{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-family:Nunito,sans-serif;font-size:16px;color:#fff;outline:none;width:100%;}
+
+.intro-input-group{display:flex;flex-direction:column;gap:10px;width:100%;max-width:260px;}
+.intro-input-group .intro-input{margin:0;}
+#pf-sync-status{font-size:11px;color:var(--muted,#888);text-align:center;margin-top:8px;min-height:16px;}
+.intro-input input:focus{border-color:var(--warm);}
+.btn{font-family:Gabarito,sans-serif;font-size:14px;font-weight:600;padding:11px 28px;border-radius:12px;border:none;cursor:pointer;touch-action:manipulation;transition:all .15s;}
+.btn:active{transform:scale(.96);}
+.btn-warm{background:var(--warm);color:#fff;}
+.btn-warm:disabled{opacity:.25;}
+.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border);}
+
+/* ══ MAP ══ */
+#map-screen{background:radial-gradient(ellipse at 50% 30%,#161018,#0d0a10);}
+.map-header{padding:14px 16px 6px;flex-shrink:0;}
+.map-header-row{display:flex;justify-content:space-between;align-items:center;}
+.map-header h2{font-family:Gabarito,sans-serif;font-size:18px;font-weight:600;color:#fff;}
+.map-header-meta{display:flex;gap:8px;align-items:center;}
+.map-header-tag{font-family:Gabarito,sans-serif;font-size:10px;letter-spacing:.08em;color:var(--warm);background:var(--warm-soft);border:1px solid var(--warm-border);padding:3px 8px;border-radius:8px;}
+.map-header-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.map-header-sub span{color:var(--warm);font-weight:700;}
+.map-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 14px 20px;}
+.map-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.zone-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px 12px;border-radius:16px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .25s;text-align:center;position:relative;opacity:0;animation:fadeIn .4s ease forwards;}
+.zone-card:active{transform:scale(.95);}
+.zone-card.completed{opacity:.35;pointer-events:none;}
+.zone-card-ring{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;transition:transform .2s;}
+.zone-card-ring::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid;opacity:.3;animation:pulse 3s ease infinite;}
+.zone-card-name{font-family:Gabarito,sans-serif;font-size:12px;font-weight:700;color:#fff;line-height:1.2;}
+.zone-card-desc{font-size:10px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.zone-card-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;}
+.zone-card.completed .zone-card-check{display:flex;}
+.map-compass{grid-column:2;display:flex;align-items:center;justify-content:center;padding:10px;}
+.compass-svg{width:80px;height:80px;animation:glow 4s ease-in-out infinite;}
+
+/* ══ GAME ══ */
+#game-screen{background:#0d0a10;}
+.game-top{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(0,0,0,.4);border-bottom:1px solid var(--border);}
+.game-back{font-size:13px;color:var(--muted);cursor:pointer;touch-action:manipulation;}
+.game-label{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.12em;color:var(--warm);opacity:.7;}
+.game-body{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Narrative */
+.campo-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.campo-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.campo-visual{text-align:center;font-size:52px;padding:4px 0;flex-shrink:0;}
+.campo-bubble{padding:8px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;}
+.campo-bubble-label{font-size:11px;color:var(--muted2);}
+.campo-bubble-text{font-size:14px;color:var(--warm);font-style:italic;margin-top:2px;}
+.campo-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.campo-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.campo-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.campo-opt:active{transform:scale(.98);}
+.campo-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+.campo-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.campo-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.campo-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* Zone result */
+.zone-result{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;text-align:center;}
+.zr-icon{font-size:56px;animation:pulse 1.5s ease infinite;}
+.zr-title{font-family:Gabarito,sans-serif;font-size:20px;font-weight:700;color:#fff;}
+.zr-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:300px;}
+.zr-bars{width:100%;max-width:280px;display:flex;flex-direction:column;gap:8px;}
+.zr-bar{display:flex;align-items:center;gap:10px;}
+.zr-bar-icon{font-size:16px;width:24px;text-align:center;}
+.zr-bar-track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.zr-bar-fill{height:100%;border-radius:3px;transition:width 1s ease .3s;}
+.zr-bar-pct{font-size:11px;color:var(--muted);min-width:32px;text-align:right;}
+
+/* Budget */
+.kiosco-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.kiosco-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.kiosco-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.kiosco-hint{font-size:12px;color:var(--muted);text-align:center;}
+.kiosco-budget{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(196,90,114,.06);border:1px solid rgba(196,90,114,.15);}
+.kiosco-budget-icon{font-size:20px;}
+.kiosco-budget-info{flex:1;}
+.kiosco-budget-label{font-family:Gabarito,sans-serif;font-size:10px;letter-spacing:.08em;color:var(--muted2);}
+.kiosco-budget-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:3px;overflow:hidden;}
+.kiosco-budget-fill{height:100%;background:var(--warm);border-radius:2px;transition:width .4s;}
+.kiosco-budget-val{font-family:Gabarito,sans-serif;font-size:16px;font-weight:700;color:var(--warm);}
+.kiosco-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.kiosco-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.kiosco-opt:active{transform:scale(.98);}
+.kiosco-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+.kiosco-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.kiosco-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.kiosco-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.kiosco-products{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.kiosco-product{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;text-align:center;position:relative;}
+.kiosco-product:active{transform:scale(.96);}
+.kiosco-product.selected{border-color:var(--warm);background:var(--warm-soft);}
+.kiosco-product.disabled{opacity:.3;pointer-events:none;}
+.kiosco-product-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--warm);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;}
+.kiosco-product.selected .kiosco-product-check{display:flex;}
+.kiosco-product-icon{font-size:28px;}
+.kiosco-product-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3;}
+.kiosco-product-price{font-size:11px;color:var(--warm);font-weight:700;}
+.kiosco-product-hint{font-size:10px;color:var(--muted);line-height:1.3;}
+.kiosco-confirm{align-self:center;margin-top:4px;}
+
+/* Classification */
+.biblio-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.biblio-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.biblio-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.biblio-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.biblio-progress{font-size:12px;color:var(--muted);text-align:center;}
+.biblio-progress span{font-family:Gabarito,sans-serif;color:var(--warm);font-weight:700;}
+.biblio-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(196,90,114,.06);border:2px solid rgba(196,90,114,.15);text-align:left;animation:slideUp .35s ease;}
+.biblio-item-icon{font-size:28px;flex-shrink:0;}
+.biblio-item-name{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.biblio-item-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.3;}
+.biblio-shelves{display:flex;flex-direction:column;gap:8px;}
+.biblio-shelf{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.biblio-shelf:active{transform:scale(.98);}
+.biblio-shelf.picked{border-color:var(--warm);background:var(--warm-soft);}
+.biblio-shelf-icon{font-size:22px;flex-shrink:0;}
+.biblio-shelf-info{flex:1;}
+.biblio-shelf-name{font-size:13px;font-weight:600;color:#fff;}
+.biblio-shelf-count{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* Binary choices */
+.esquina-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 16px;gap:14px;overflow:hidden;}
+.esquina-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.esquina-counter{font-family:Gabarito,sans-serif;font-size:13px;color:var(--muted);}
+.esquina-counter span{color:var(--green);font-weight:700;}
+.esquina-prompt{font-family:Gabarito,sans-serif;font-size:15px;font-weight:600;color:#fff;text-align:center;line-height:1.4;}
+.esquina-vs{display:flex;align-items:stretch;gap:12px;width:100%;max-width:340px;animation:fadeIn .3s ease;}
+.esquina-card{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 10px;border-radius:16px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;text-align:center;}
+.esquina-card:active{transform:scale(.95);}
+.esquina-card.picked{border-color:var(--green);background:rgba(61,184,122,.08);transform:scale(1.03);}
+.esquina-card.not-picked{opacity:.25;transform:scale(.95);}
+.esquina-card-icon{font-size:40px;}
+.esquina-card-name{font-family:Gabarito,sans-serif;font-size:14px;font-weight:600;color:#fff;}
+.esquina-or{font-family:Gabarito,sans-serif;font-size:12px;color:var(--muted2);align-self:center;}
+.esquina-bar{width:100%;max-width:340px;height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+.esquina-bar-fill{height:100%;background:var(--green);border-radius:2px;transition:width .3s ease;}
+
+/* Chat */
+.recreo-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.recreo-chat{flex:1;display:flex;flex-direction:column;gap:8px;padding:14px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.recreo-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;padding:4px 0;}
+.recreo-scene{font-size:12px;color:var(--muted);text-align:center;font-style:italic;padding:4px 12px;line-height:1.5;}
+.recreo-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;animation:slideUp .35s ease;}
+.recreo-msg.them{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;}
+.recreo-msg.them .recreo-msg-name{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:3px;}
+.recreo-msg.me{align-self:flex-end;background:rgba(196,90,114,.12);border:1px solid rgba(196,90,114,.2);color:#fff;border-bottom-right-radius:4px;}
+.recreo-msg.narrator{align-self:center;max-width:90%;background:none;border:none;font-size:12px;color:var(--muted);text-align:center;font-style:italic;padding:6px 0;}
+.recreo-choices{padding:10px 16px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;border-top:1px solid var(--border);background:rgba(0,0,0,.3);}
+.recreo-choice{padding:11px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;font-size:13px;color:var(--text);line-height:1.4;}
+.recreo-choice:active{transform:scale(.98);}
+.recreo-choice.picked{border-color:var(--warm);background:rgba(196,90,114,.1);color:#fff;}
+.recreo-typing{align-self:flex-start;padding:8px 14px;font-size:12px;color:var(--muted);animation:pulse 1s ease infinite;}
+
+/* Team/Timer */
+.apagon-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.apagon-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.apagon-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.apagon-hint{font-size:12px;color:var(--muted);text-align:center;}
+.apagon-timer{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:rgba(154,108,199,.06);border:1px solid rgba(154,108,199,.15);}
+.apagon-timer-icon{font-size:16px;}
+.apagon-timer-bar{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.apagon-timer-fill{height:100%;background:var(--purple);border-radius:2px;transition:width 1s linear;}
+.apagon-timer-val{font-family:Gabarito,sans-serif;font-size:13px;color:var(--purple);min-width:24px;text-align:right;}
+.apagon-vecinos{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.apagon-vecino{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;width:90px;}
+.apagon-vecino:active{transform:scale(.96);}
+.apagon-vecino.selected{border-color:var(--purple);background:rgba(154,108,199,.08);}
+.apagon-vecino.assigned{opacity:.3;pointer-events:none;}
+.apagon-vecino-icon{font-size:24px;}
+.apagon-vecino-name{font-size:11px;font-weight:600;color:#fff;}
+.apagon-vecino-skill{font-size:10px;color:var(--muted);}
+.apagon-problems{display:flex;flex-direction:column;gap:8px;}
+.apagon-problem{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.apagon-problem:active{transform:scale(.96);}
+.apagon-problem.filled{border-color:var(--purple);background:rgba(154,108,199,.06);}
+.apagon-problem-icon{font-size:22px;}
+.apagon-problem-info{flex:1;}
+.apagon-problem-title{font-size:13px;font-weight:600;color:#fff;}
+.apagon-problem-hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.apagon-problem-assigned{font-size:11px;color:var(--purple);font-weight:600;margin-top:2px;}
+
+/* Art wall / Composition */
+.aula-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.aula-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.aula-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.aula-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.aula-wall{position:relative;width:100%;aspect-ratio:5/3;border-radius:14px;background:linear-gradient(180deg,#1a1018 0%,#1e141a 100%);border:2px solid rgba(196,90,114,.15);overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:12px;}
+.aula-wall-label{position:absolute;top:6px;left:10px;font-size:10px;color:rgba(196,90,114,.35);font-family:Gabarito,sans-serif;letter-spacing:.1em;}
+.aula-wall-item{font-size:28px;animation:slideUp .4s ease;opacity:0;animation-fill-mode:forwards;}
+.aula-wall-item:nth-child(2){animation-delay:.1s;}
+.aula-wall-item:nth-child(3){animation-delay:.2s;}
+.aula-wall-item:nth-child(4){animation-delay:.3s;}
+.aula-palette{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.aula-elem{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.aula-elem:active{transform:scale(.96);}
+.aula-elem.selected{border-color:var(--red);background:rgba(217,96,96,.08);}
+.aula-elem.disabled{opacity:.3;pointer-events:none;}
+.aula-elem-icon{font-size:24px;flex-shrink:0;}
+.aula-elem-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3;}
+.aula-elem-check{width:18px;height:18px;border-radius:50%;background:var(--red);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;margin-left:auto;flex-shrink:0;}
+.aula-elem.selected .aula-elem-check{display:flex;}
+.aula-confirm{align-self:center;margin-top:4px;}
+
+/* Autoevaluación */
+.autoeval-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;gap:14px;text-align:center;}
+.autoeval-badge{font-family:Gabarito,sans-serif;font-size:10px;letter-spacing:.14em;color:var(--warm);background:var(--warm-soft);padding:4px 12px;border-radius:16px;border:1px solid var(--warm-border);}
+.autoeval-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;max-width:300px;}
+.autoeval-hint{font-size:12px;color:var(--muted);line-height:1.5;max-width:280px;}
+.autoeval-scale{display:flex;gap:8px;width:100%;max-width:320px;}
+.autoeval-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 6px;border-radius:14px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;text-align:center;}
+.autoeval-btn:active{transform:scale(.95);}
+.autoeval-btn.picked{border-color:var(--warm);background:var(--warm-soft);}
+.autoeval-btn-icon{font-size:28px;}
+.autoeval-btn-label{font-size:11px;font-weight:600;color:#fff;line-height:1.2;}
+
+/* ══ RESULTS ══ */
+#results-screen{align-items:center;justify-content:flex-start;padding:20px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;background:radial-gradient(ellipse at 50% 20%,#1a1018,#0d0a10);}
+.res-badge{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.15em;color:var(--warm);background:var(--warm-soft);padding:5px 14px;border-radius:20px;border:1px solid var(--warm-border);margin-bottom:4px;}
+.res-icon{font-size:56px;margin:8px 0;}
+.res-title{font-family:Gabarito,sans-serif;font-size:22px;font-weight:700;color:#fff;text-align:center;}
+.res-sub{font-size:13px;color:var(--muted);text-align:center;max-width:300px;margin-bottom:8px;}
+.res-areas{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;}
+.res-row{display:flex;align-items:center;gap:10px;}
+.res-row-icon{font-size:20px;width:28px;text-align:center;}
+.res-row-info{flex:1;}
+.res-row-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:3px;}
+.res-row-track{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.res-row-fill{height:100%;border-radius:3px;transition:width 1.2s ease .5s;}
+.res-row-pct{font-size:12px;min-width:36px;text-align:right;font-weight:700;}
+.res-note{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.6;text-align:center;max-width:340px;}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div class="intro-badge">AÑO 5 · 17 AÑOS</div>
+  <div class="intro-icon">🏛️</div>
+  <div class="intro-title">El Congreso</div>
+  <div class="intro-sub">Fuiste elegido como delegado de un Congreso Juvenil. Cada decisión que tomes acá refleja cómo te parás frente al futuro. Ya no es un juego.</div>
+  <div class="intro-input-group">
+  <div class="intro-input">
+    <label>Tu nombre como delegado</label>
+    <input type="text" id="nameInput" placeholder="Escribí tu nombre..." maxlength="20">
+  </div>
+  <div class="intro-input">
+    <label>Tu email (para guardar tu evolución)</label>
+    <input type="email" id="pfEmail" placeholder="nombre@email.com" maxlength="60" autocomplete="email">
+  </div>
+  <div class="intro-input">
+    <label>Código del colegio</label>
+    <input type="text" id="pfSchoolCode" placeholder="Ej: SJB-2025" maxlength="20" autocomplete="off">
+  </div>
+
+  </div>
+  <button class="btn btn-warm" id="startBtn" disabled>Entrar al Congreso →</button>
+</div>
+
+<!-- MAP -->
+<div id="map-screen" class="screen">
+  <div class="map-header">
+    <div class="map-header-row">
+      <h2 id="mapHi">Hola</h2>
+      <div class="map-header-meta">
+        <div class="map-header-tag">v5.0</div>
+        <div class="map-header-tag" id="mapDate"></div>
+      </div>
+    </div>
+    <div class="map-header-sub">Elegí un espacio del Congreso.<br>Zonas completadas: <span id="zDone">0</span>/8</div>
+  </div>
+  <div class="map-scroll" id="mapScroll"></div>
+</div>
+
+<!-- GAME -->
+<div id="game-screen" class="screen">
+  <div class="game-top">
+    <div class="game-back" onclick="backToMap()">← Mapa</div>
+    <div class="game-label" id="gLabel"></div>
+  </div>
+  <div class="game-body" id="gBody"></div>
+</div>
+
+<!-- RESULTS -->
+<div id="results-screen" class="screen">
+  <div class="res-badge">PERFIL AÑO 5</div>
+  <div class="res-icon">🏛️</div>
+  <div class="res-title">Congreso cerrado</div>
+  <div class="res-sub" id="resName"></div>
+  <div class="res-areas" id="resAreas"></div>
+  <div id="pf-sync-status"></div>
+  <div class="res-note" id="resNote"></div>
+</div>
+
+<script>
+// ═══ STATE ═══
+var GS={name:'',email:'',schoolCode:'',done:{},scores:{},order:[]};
+function addScores(sc){for(var k in sc)GS.scores[k]=(GS.scores[k]||0)+sc[k];}
+
+var AREAS=[
+  {id:'salud',name:'Ciencias de la Salud',icon:'🩺',color:'#4a7ad9'},
+  {id:'exactas',name:'Ciencias Exactas y Naturales',icon:'🔬',color:'#3db87a'},
+  {id:'ing',name:'Ingeniería y Tecnología',icon:'⚙️',color:'#9a6cc7'},
+  {id:'sociales',name:'Ciencias Sociales y Humanas',icon:'🌍',color:'#d96a8a'},
+  {id:'eco',name:'Ciencias Económicas',icon:'📊',color:'#c98540'},
+  {id:'arte',name:'Arte, Diseño y Arquitectura',icon:'🎨',color:'#d96060'},
+  {id:'agro',name:'Ciencias Agropecuarias',icon:'🌱',color:'#5a9a6a'},
+  {id:'edu',name:'Educación y Pedagogía',icon:'📚',color:'#a67c52'},
+];
+
+var ZONES=[
+  {id:'sesion',      icon:'🏛️',name:'La Sesión',       color:'#4a7ad9',glow:'rgba(74,122,217,.15)',desc:'Tu primera propuesta frente al plenario.'},
+  {id:'presupuesto', icon:'💰',name:'El Presupuesto',   color:'#c98540',glow:'rgba(201,133,64,.15)',desc:'Fondos reales. Prioridades que pesan.'},
+  {id:'evidencia',   icon:'🔬',name:'La Evidencia',     color:'#3db87a',glow:'rgba(61,184,122,.15)',desc:'Los datos no mienten, pero hay que elegir cuáles importan.'},
+  {id:'crisis',      icon:'🚨',name:'La Crisis',        color:'#9a6cc7',glow:'rgba(154,108,199,.15)',desc:'Emergencia real. Roles contra reloj.'},
+  {id:'manifiesto',  icon:'✍️',name:'El Manifiesto',    color:'#d96060',glow:'rgba(217,96,96,.15)',desc:'Tu visión del futuro, en tus palabras.'},
+  {id:'lobby',       icon:'🤝',name:'El Lobby',         color:'#d96a8a',glow:'rgba(217,106,138,.15)',desc:'Negociación entre bambalinas.'},
+  {id:'expediente',  icon:'📑',name:'El Expediente',    color:'#a67c52',glow:'rgba(166,124,82,.15)',desc:'Carreras para evaluar: pasión o pragmatismo.'},
+  {id:'votacion',    icon:'⚡',name:'La Votación',      color:'#5a9a6a',glow:'rgba(90,154,106,.15)',desc:'Votación final. Rápido, sin volver atrás.'},
+];
+
+// ═══ SCREENS ═══
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById(id);el.classList.add('active');el.classList.add('fade-in');
+}
+
+// ═══ INTRO ═══
+var ni=document.getElementById('nameInput'),sb=document.getElementById('startBtn');
+var pfEmailEl=document.getElementById('pfEmail'),pfSchoolEl=document.getElementById('pfSchoolCode');
+function pfCheckStart(){sb.disabled=!(ni.value.trim()&&pfEmailEl.value.includes('@')&&pfSchoolEl.value.trim().length>=2);}
+ni.addEventListener('input',pfCheckStart);
+pfEmailEl.addEventListener('input',pfCheckStart);
+pfSchoolEl.addEventListener('input',pfCheckStart);
+sb.addEventListener('click',function(){
+  GS.name=ni.value.trim();
+  GS.email=pfEmailEl.value.trim().toLowerCase();
+  GS.schoolCode=pfSchoolEl.value.trim().toUpperCase();
+  document.getElementById('mapHi').textContent='Hola, '+GS.name;
+  buildMap();showScreen('map-screen');
+});
+
+// ═══ MAP ═══
+function buildMap(){
+  var scroll=document.getElementById('mapScroll');
+  scroll.innerHTML='';
+  var now=new Date();document.getElementById('mapDate').textContent=now.getDate()+'/'+(now.getMonth()+1);
+  var grid=document.createElement('div');grid.className='map-grid';
+  var layout=['sesion','presupuesto','evidencia','crisis','__compass__','manifiesto','lobby','expediente','votacion'];
+  layout.forEach(function(id,i){
+    if(id==='__compass__'){
+      var comp=document.createElement('div');comp.className='map-compass';
+      comp.innerHTML='<svg class="compass-svg" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">'+
+        '<defs><radialGradient id="cg"><stop offset="0%" stop-color="rgba(196,90,114,.2)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>'+
+        '<circle cx="40" cy="40" r="38" fill="url(#cg)" stroke="rgba(196,90,114,.15)" stroke-width=".5"/>'+
+        '<circle cx="40" cy="40" r="24" fill="none" stroke="rgba(196,90,114,.12)" stroke-width=".5"/>'+
+        '<circle cx="40" cy="40" r="12" fill="none" stroke="rgba(196,90,114,.2)" stroke-width=".5"/>'+
+        '<text x="40" y="36" text-anchor="middle" font-size="16" fill="rgba(196,90,114,.5)">🏛️</text>'+
+        '<text x="40" y="48" text-anchor="middle" font-size="5" fill="rgba(196,90,114,.4)" font-family="Gabarito,sans-serif">CONGRESO</text></svg>';
+      grid.appendChild(comp);return;
+    }
+    var z=ZONES.find(function(zone){return zone.id===id;});if(!z)return;
+    var card=document.createElement('div');
+    card.className='zone-card'+(GS.done[z.id]?' completed':'');
+    card.style.animationDelay=(i*60)+'ms';
+    card.innerHTML='<div class="zone-card-ring" style="background:'+z.glow+';border:1.5px solid '+z.color+';box-shadow:0 0 16px '+z.glow+'">'+
+      '<span style="filter:drop-shadow(0 2px 4px '+z.glow+')">'+z.icon+'</span></div>'+
+      '<div class="zone-card-name">'+z.name+'</div><div class="zone-card-desc">'+z.desc+'</div>'+
+      '<div class="zone-card-check">✓</div>';
+    card.addEventListener('click',function(){if(!GS.done[z.id])enterZone(z.id);});
+    grid.appendChild(card);
+  });
+  scroll.appendChild(grid);updateMapUI();
+}
+
+function updateMapUI(){
+  var n=Object.keys(GS.done).length;
+  document.getElementById('zDone').textContent=n;
+}
+
+function enterZone(zoneId){
+  GS.currentZone=zoneId;
+  var z=ZONES.find(function(z){return z.id===zoneId;});
+  document.getElementById('gLabel').textContent=z.name.toUpperCase();
+  showScreen('game-screen');
+  var body=document.getElementById('gBody');body.innerHTML='';
+  switch(zoneId){
+    case 'sesion':buildSesion(body);break;
+    case 'presupuesto':buildPresupuesto(body);break;
+    case 'evidencia':buildEvidencia(body);break;
+    case 'crisis':buildCrisis(body);break;
+    case 'manifiesto':buildManifiesto(body);break;
+    case 'lobby':buildLobby(body);break;
+    case 'expediente':buildExpediente(body);break;
+    case 'votacion':buildVotacion(body);break;
+    default:buildPlaceholder(body,z);break;
+  }
+}
+function buildPlaceholder(c,z){c.innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;"><div style="font-size:48px;">'+z.icon+'</div><div style="font-family:Gabarito;font-size:18px;font-weight:600;color:#fff;">'+z.name+'</div><div style="font-size:13px;color:var(--muted);">Próximamente</div><button class="btn btn-ghost" onclick="backToMap()">← Volver</button></div>';}
+function backToMap(){buildMap();showScreen('map-screen');}
+
+function zoneComplete(zoneId,scores,display){
+  addScores(scores);GS.done[zoneId]=true;GS.order.push(zoneId);
+  var body=document.getElementById('gBody');
+  var barsHtml='';
+  if(display.bars)display.bars.forEach(function(b){
+    barsHtml+='<div class="zr-bar"><div class="zr-bar-icon">'+b.icon+'</div>'+
+      '<div class="zr-bar-track"><div class="zr-bar-fill" style="width:0%;background:'+b.color+'" data-pct="'+b.pct+'"></div></div>'+
+      '<div class="zr-bar-pct">'+b.pct+'%</div></div>';
+  });
+  body.innerHTML='<div class="zone-result fade-in"><div class="zr-icon">'+display.emoji+'</div>'+
+    '<div class="zr-title">'+display.title+'</div><div class="zr-sub">'+display.sub+'</div>'+
+    '<div class="zr-bars">'+barsHtml+'</div>'+
+    '<button class="btn btn-warm" onclick="afterZone()">'+(Object.keys(GS.done).length>=8?'Ver mi perfil →':'Siguiente zona →')+'</button></div>';
+  setTimeout(function(){document.querySelectorAll('.zr-bar-fill').forEach(function(el){el.style.width=el.dataset.pct+'%';});},200);
+}
+function afterZone(){Object.keys(GS.done).length>=8?showResults():backToMap();}
+
+// ═══ RESULTS ═══
+function showResults(){
+  var areaScores={};AREAS.forEach(function(a){areaScores[a.id]=0;});
+  var mapping={
+    salud:['S','hS','mSoc','pdcP'],exactas:['hI','mTeo','pdcD','C'],
+    ing:['hR','hC','D','pdcC'],sociales:['I','hS','S','mSoc'],
+    eco:['hE','mEco','D','hC'],arte:['hA','mEst','mAut'],
+    agro:['hR','pdcC','mTra'],edu:['mTra','pdcP','mSoc','S'],
+  };
+  for(var a in mapping)mapping[a].forEach(function(d){areaScores[a]+=(GS.scores[d]||0);});
+  var areaCap={salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+  var sorted=AREAS.slice().sort(function(a,b){return areaScores[b.id]-areaScores[a.id];});
+  var c=document.getElementById('resAreas');c.innerHTML='';
+  document.getElementById('resName').textContent=GS.name+', así se ve tu forma de proyectarte';
+  sorted.forEach(function(a){
+    var cap=areaCap[a.id]||160;
+    var pct=Math.min(100,Math.round(areaScores[a.id]/cap*100));
+    var r=document.createElement('div');r.className='res-row';
+    r.innerHTML='<div class="res-row-icon">'+a.icon+'</div><div class="res-row-info"><div class="res-row-name">'+a.name+'</div>'+
+      '<div class="res-row-track"><div class="res-row-fill" style="width:0%;background:'+a.color+'" data-pct="'+pct+'"></div></div></div>'+
+      '<div class="res-row-pct" style="color:'+a.color+'">'+pct+'%</div>';
+    c.appendChild(r);
+  });
+  var notes={salud:'cuidado de personas y empatía',exactas:'pensamiento analítico y curiosidad',ing:'resolución técnica de problemas',
+    sociales:'interés por las personas y la sociedad',eco:'pensamiento estratégico y resultados',arte:'expresión creativa',
+    agro:'conexión con la naturaleza',edu:'vocación de enseñanza'};
+  document.getElementById('resNote').textContent=GS.name+' muestra tendencia hacia '+notes[sorted[0].id]+
+    ' y '+notes[sorted[1].id]+'. Este es tu último perfil antes de Pathfinder. Compará con los años anteriores para ver tu evolución.';
+  showScreen('results-screen');
+  pfSyncResults();
+  setTimeout(function(){document.querySelectorAll('.res-row-fill').forEach(function(el){el.style.width=el.dataset.pct+'%';});},300);
+}
+
+// ═══════════════════════════════════════
+//  ZONA 1: LA SESIÓN
+//  Narrativa ramificada — debate plenario
+// ═══════════════════════════════════════
+function buildSesion(container){
+  var TREE={
+    s1:{visual:'🏛️',status:'El recinto está lleno...',thought:'Todos te miran.',sub:'DECISIÓN 1 DE 4',
+      prompt:'Una multinacional quiere instalar una planta industrial en la región. Promete 2.000 empleos, pero el río que abastece a 3 pueblos va a estar en riesgo. Como delegado, tenés que fijar posición. ¿Cuál es?',
+      options:[
+        {id:'a',icon:'🏭',title:'Apoyar la planta — sin empleo no hay futuro para la región',hint:'La economía primero, después se resuelve lo ambiental.',next:'s2a',scores:{hE:12,mEco:10,D:8,hC:6}},
+        {id:'b',icon:'🌊',title:'Rechazar la planta — el río no se negocia',hint:'Hay límites que no se cruzan.',next:'s2b',scores:{S:12,pdcC:10,mSoc:8,I:6}},
+        {id:'c',icon:'⚖️',title:'Proponer condiciones ambientales estrictas como requisito',hint:'Ni todo ni nada. Negociar con exigencia.',next:'s2c',scores:{hI:12,hC:10,C:8,mTeo:6}},
+        {id:'d',icon:'💡',title:'Proponer una alternativa: un parque tecnológico verde en vez de la planta',hint:'Si el problema está mal planteado, hay que replantear.',next:'s2d',scores:{hR:12,hI:10,mAut:8,D:6}},
+      ]},
+    s2a:{visual:'🐟',status:'Un murmullo recorre la sala...',thought:'Los pescadores piden la palabra.',sub:'DECISIÓN 2 DE 4',
+      prompt:'Una delegación de pescadores sube al estrado. "Nuestras familias viven del río hace 4 generaciones. Si se contamina, no nos queda nada." La sala se divide. ¿Qué hacés?',
+      options:[
+        {id:'a1',icon:'📊',title:'Presentás datos: el empleo industrial genera 10x más ingreso que la pesca artesanal',hint:'Los números son duros, pero son reales.',next:'s3a',scores:{hE:14,mEco:10,hI:8,C:6}},
+        {id:'a2',icon:'🤝',title:'Proponés un fondo de reconversión laboral para los pescadores',hint:'Si vas a cambiar las reglas, bancá a los que pierden.',next:'s3b',scores:{S:14,hE:8,I:10,hS:6}},
+        {id:'a3',icon:'🔬',title:'Pedís un estudio de impacto ambiental independiente antes de decidir',hint:'Más datos, menos opiniones.',next:'s3a',scores:{hI:14,C:12,mTeo:8,pdcD:6}},
+      ]},
+    s2b:{visual:'🏭',status:'La bancada empresaria reacciona...',thought:'No les gustó.',sub:'DECISIÓN 2 DE 4',
+      prompt:'Un delegado empresario te enfrenta: "Es fácil decir no al progreso cuando uno no necesita trabajo. Hay 2.000 familias esperando." La sala aplaude. ¿Cómo respondés?',
+      options:[
+        {id:'b1',icon:'📖',title:'Citás ejemplos de regiones que rechazaron industrias contaminantes y prosperaron de otra forma',hint:'La historia tiene respuestas.',next:'s3b',scores:{hI:12,mTeo:10,C:8,mSoc:6}},
+        {id:'b2',icon:'🔥',title:'Le respondés: "Progreso que envenena no es progreso, es negocio"',hint:'A veces hay que ser directo.',next:'s3a',scores:{D:14,I:10,mAut:8,S:6}},
+        {id:'b3',icon:'🌱',title:'Proponés armar una mesa de trabajo con todas las partes para buscar alternativas',hint:'El diálogo, aunque sea lento, es el camino.',next:'s3b',scores:{I:12,S:10,hC:8,mSoc:6}},
+      ]},
+    s2c:{visual:'📋',status:'La comisión técnica escucha...',thought:'Quieren detalles.',sub:'DECISIÓN 2 DE 4',
+      prompt:'La comisión técnica te pide especificar tus condiciones. Tenés que elegir las 2 exigencias prioritarias de estas opciones:',
+      options:[
+        {id:'c1',icon:'💧',title:'Monitoreo del agua en tiempo real con datos públicos',hint:'Transparencia tecnológica.',next:'s3a',scores:{hI:14,hR:10,pdcC:8,C:6}},
+        {id:'c2',icon:'👥',title:'Que el 60% de los empleados sean de la región',hint:'Si la riqueza no queda acá, ¿para qué?',next:'s3b',scores:{S:12,mSoc:10,hE:8,I:6}},
+        {id:'c3',icon:'🌿',title:'Compensación ambiental: por cada hectárea afectada, 3 de reforestación',hint:'El daño se compensa, no se ignora.',next:'s3a',scores:{pdcC:14,mTra:10,C:8,S:6}},
+      ]},
+    s2d:{visual:'🔧',status:'La idea genera interés...',thought:'Pero también escepticismo.',sub:'DECISIÓN 2 DE 4',
+      prompt:'Tu propuesta del parque tecnológico verde genera debate. Un delegado pregunta: "¿Y de dónde sale la inversión? La multinacional pone la plata, ustedes ponen Power Points." ¿Cómo respondés?',
+      options:[
+        {id:'d1',icon:'📊',title:'Presentás un modelo financiero con fondos públicos, privados e internacionales',hint:'Las ideas sin números son deseos.',next:'s3a',scores:{hE:14,hI:10,mEco:8,hC:6}},
+        {id:'d2',icon:'🌍',title:'Mostrás casos reales de parques tecnológicos verdes en otros países',hint:'Si funcionó allá, puede funcionar acá.',next:'s3b',scores:{hI:14,mTeo:10,C:8,D:6}},
+        {id:'d3',icon:'🤝',title:'Proponés una alianza con universidades de la región para el desarrollo',hint:'El conocimiento local es el mejor recurso.',next:'s3a',scores:{mTra:12,I:10,pdcP:8,S:6}},
+      ]},
+    s3a:{visual:'🗳️',status:'La votación se acerca...',thought:'Tu posición quedó clara.',sub:'DECISIÓN 3 DE 4',
+      prompt:'Antes de la votación, un delegado veterano te lleva aparte: "Tu posición es buena, pero si no conseguís aliados, perdés. ¿Querés que te presente a la bancada más grande? Tienen sus condiciones." ¿Qué hacés?',
+      options:[
+        {id:'e1',icon:'🤝',title:'Aceptás la reunión — la política es el arte de lo posible',hint:'Solo no podés. Construir mayorías es parte del juego.',next:'s4',scores:{I:12,hC:10,hE:8,mSoc:6}},
+        {id:'e2',icon:'✋',title:'Rechazás — no querés comprometer tu posición por votos',hint:'Mejor perder siendo coherente.',next:'s4',scores:{mAut:14,D:10,hA:8,C:6}},
+        {id:'e3',icon:'📢',title:'Salís a hablar directo con los delegados indecisos, uno por uno',hint:'El lobby se hace en persona.',next:'s4',scores:{S:12,I:10,D:8,hS:6}},
+      ]},
+    s3b:{visual:'💬',status:'El debate se calienta...',thought:'Hay que tomar posición.',sub:'DECISIÓN 3 DE 4',
+      prompt:'Un grupo de jóvenes de la región te pide que los representes: "Acá los adultos siempre deciden por nosotros. Nosotros queremos vivir acá, pero con futuro, no con migajas." ¿Cómo canalizás su pedido?',
+      options:[
+        {id:'f1',icon:'🎤',title:'Les cedés el micrófono en el plenario — que hablen ellos',hint:'La representación de verdad es dar espacio.',next:'s4',scores:{I:14,S:10,mSoc:8,hS:6}},
+        {id:'f2',icon:'📝',title:'Incorporás sus demandas en tu propuesta escrita',hint:'Que quede en papel, no solo en discurso.',next:'s4',scores:{hI:12,hC:10,C:8,mTeo:6}},
+        {id:'f3',icon:'📱',title:'Los ayudás a grabar un video para redes — que se escuche afuera del congreso',hint:'A veces la presión pública mueve más que la interna.',next:'s4',scores:{hA:10,hR:10,D:8,mAut:6}},
+      ]},
+    s4:{visual:'🏛️',status:'Tu primera sesión terminó.',thought:'Aprendiste algo de vos.',sub:'AUTOEVALUACIÓN',
+      prompt:'Después de tu primera experiencia en el plenario, ¿qué descubriste que se te da naturalmente?',
+      options:[
+        {id:'g1',icon:'🗣️',title:'Argumentar — puedo defender una idea con convicción',hint:'Tu voz tiene peso.',next:'fin',scores:{D:10,I:8,S:6,mAut:6}},
+        {id:'g2',icon:'🧠',title:'Analizar — encuentro las debilidades de cualquier propuesta',hint:'Tu mente es tu herramienta.',next:'fin',scores:{hI:10,C:8,mTeo:8,pdcD:6}},
+        {id:'g3',icon:'🤝',title:'Negociar — puedo encontrar puntos en común entre opuestos',hint:'Construir puentes es tu fuerte.',next:'fin',scores:{I:10,hC:8,S:8,hE:6}},
+        {id:'g4',icon:'💡',title:'Innovar — se me ocurren alternativas que otros no ven',hint:'Pensás fuera de la caja.',next:'fin',scores:{hR:10,hA:8,mAut:8,D:6}},
+      ]}
+  };
+  var accum={};var answered=false;
+  function render(sid){
+    var sc=TREE[sid];answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">'+sc.sub+'</div><div class="campo-visual">'+sc.visual+'</div>'+
+      '<div class="campo-bubble"><div class="campo-bubble-label">'+sc.thought+'</div><div class="campo-bubble-text">'+sc.status+'</div></div>'+
+      '<div class="campo-prompt">'+sc.prompt+'</div><div class="campo-opts" id="cOpts"></div>';
+    container.appendChild(d);
+    var od=document.getElementById('cOpts');
+    sc.options.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(function(){opt.next==='fin'?finish():render(opt.next);},550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function finish(){
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var act=(accum.D||0)+(accum.hR||0)+(accum.hE||0);
+    var vis=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+    var mx=Math.max(emp,ana,act,vis,1);
+    zoneComplete('sesion',accum,{
+      emoji:'🏛️',title:'¡Sesión cerrada!',
+      sub:'Cómo debatís una causa revela qué tipo de líder sos.',
+      bars:[
+        {icon:'💗',color:'#d96a8a',pct:Math.round(emp/mx*100)},
+        {icon:'🔍',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'⚡',color:'#c98540',pct:Math.round(act/mx*100)},
+        {icon:'💡',color:'#d96060',pct:Math.round(vis/mx*100)},
+      ]
+    });
+  }
+  render('s1');
+}
+
+// ═══════════════════════════════════════
+//  ZONA 2: EL PRESUPUESTO
+//  Gestión de presupuesto — política pública
+// ═══════════════════════════════════════
+function buildPresupuesto(container){
+  var budget=1000;var accum={};var answered=false;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+  function budgetHTML(){
+    return '<div class="kiosco-budget"><div class="kiosco-budget-icon">💰</div>'+
+      '<div class="kiosco-budget-info"><div class="kiosco-budget-label">FONDO DEL CONGRESO (MILLONES)</div>'+
+      '<div class="kiosco-budget-bar"><div class="kiosco-budget-fill" style="width:'+(budget/1000*100)+'%"></div></div></div>'+
+      '<div class="kiosco-budget-val">$'+budget+'M</div></div>';
+  }
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 1 DE 4</div>'+budgetHTML()+
+      '<div class="kiosco-prompt">El Congreso asignó $1.000M para un programa de desarrollo regional. Elegí 2 áreas prioritarias.</div>'+
+      '<div class="kiosco-hint">Cada una cuesta $300M — Tocá para elegir</div>'+
+      '<div class="kiosco-products" id="kProds"></div>'+
+      '<button class="btn btn-warm kiosco-confirm" id="kConfirm" disabled>Asignar fondos →</button>';
+    container.appendChild(d);
+    var ITEMS=[
+      {id:'salud',icon:'🏥',name:'Red de salud primaria',price:300,hint:'Centros de salud en cada municipio.',scores:{S:10,hS:8,pdcP:6}},
+      {id:'tech',icon:'💻',name:'Conectividad y centros digitales',price:300,hint:'Internet, formación tech, inclusión digital.',scores:{hR:10,hI:8,pdcC:6}},
+      {id:'agro',icon:'🌾',name:'Desarrollo agropecuario sustentable',price:300,hint:'Créditos, capacitación, infraestructura rural.',scores:{mTra:10,pdcC:8,hE:6}},
+      {id:'edu',icon:'🎓',name:'Becas y formación profesional',price:300,hint:'Acceso a educación superior y oficios.',scores:{mTra:8,pdcP:8,I:6}},
+    ];
+    var picks=[];var grid=document.getElementById('kProds');
+    ITEMS.forEach(function(p){
+      var card=document.createElement('div');card.className='kiosco-product';
+      card.innerHTML='<div class="kiosco-product-check">✓</div><div class="kiosco-product-icon">'+p.icon+'</div>'+
+        '<div class="kiosco-product-name">'+p.name+'</div><div class="kiosco-product-price">$'+p.price+'M</div>'+
+        '<div class="kiosco-product-hint">'+p.hint+'</div>';
+      card.addEventListener('click',function(){
+        if(answered)return;
+        var idx=picks.indexOf(p.id);
+        if(idx>-1){picks.splice(idx,1);card.classList.remove('selected');}
+        else if(picks.length<2){picks.push(p.id);card.classList.add('selected');}
+        document.getElementById('kConfirm').disabled=picks.length!==2;
+        document.querySelectorAll('.kiosco-product').forEach(function(c){
+          if(picks.length>=2&&!c.classList.contains('selected'))c.classList.add('disabled');
+          else c.classList.remove('disabled');
+        });
+      });
+      grid.appendChild(card);
+    });
+    document.getElementById('kConfirm').addEventListener('click',function(){
+      if(answered||picks.length!==2)return;answered=true;
+      picks.forEach(function(pid){var it=ITEMS.find(function(i){return i.id===pid;});addLocal(it.scores);});
+      budget-=600;setTimeout(step2,400);
+    });
+  }
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 2 DE 4</div>'+budgetHTML()+
+      '<div style="text-align:center;font-size:48px;padding:4px 0;">📉</div>'+
+      '<div class="kiosco-prompt">Crisis fiscal: el gobierno nacional recorta un 30% de lo prometido. Te quedan $400M en vez de $1.000M. Las 2 áreas que elegiste piden el mismo monto. ¿Cómo distribuís lo que queda?</div>'+
+      '<div class="kiosco-opts" id="k2Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'⚖️',title:'Partes iguales — las dos son importantes',hint:'Equidad, aunque ninguna quede del todo bien.',scores:{S:12,I:10,mSoc:8,hC:6}},
+      {icon:'📊',title:'Priorizás la que tenga más impacto medible a corto plazo',hint:'Pragmatismo: lo que muestre resultados primero.',scores:{hE:14,mEco:10,hI:8,C:6}},
+      {icon:'🔥',title:'Le das todo a la más urgente y buscás otra fuente para la otra',hint:'En crisis, hay que elegir.',scores:{D:12,hR:10,hE:8,mAut:6}},
+      {icon:'🏛️',title:'Volvés al plenario a renegociar el recorte antes de ajustar',hint:'No aceptás la premisa del recorte.',scores:{I:14,D:10,S:8,hC:6}},
+    ];
+    var od=document.getElementById('k2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="kiosco-opt-icon">'+opt.icon+'</div><div><div class="kiosco-opt-title">'+opt.title+'</div><div class="kiosco-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 3 DE 4</div>'+budgetHTML()+
+      '<div class="kiosco-prompt">Un organismo internacional ofrece $500M adicionales, pero con una condición: el 40% debe ir a un programa diseñado por ellos, no por el Congreso. ¿Aceptás?</div>'+
+      '<div class="kiosco-opts" id="k3Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🤝',title:'Aceptás — la plata se necesita, aunque vengan con condiciones',hint:'Mejor con condiciones que sin fondos.',scores:{hE:14,mEco:10,hC:8,C:6}},
+      {icon:'⚖️',title:'Negociás: aceptás el dinero pero pedís voz en el diseño del programa',hint:'Aceptar no es rendirse. Es negociar.',scores:{I:12,hC:10,hE:8,hI:6}},
+      {icon:'✋',title:'Rechazás — la soberanía de las decisiones no se vende',hint:'Si no es nuestro, no nos representa.',scores:{mAut:14,D:10,I:8,S:6}},
+      {icon:'🔍',title:'Pedís los detalles del programa antes de decidir — no comprás a ciegas',hint:'Informarte no es aceptar ni rechazar.',scores:{hI:14,C:10,mTeo:8,pdcD:6}},
+    ];
+    var od=document.getElementById('k3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="kiosco-opt-icon">'+opt.icon+'</div><div><div class="kiosco-opt-title">'+opt.title+'</div><div class="kiosco-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(step4,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step4(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='autoeval-wrap fade-in';
+    d.innerHTML='<div class="autoeval-badge">AUTOEVALUACIÓN</div>'+
+      '<div style="font-size:48px;">💰</div>'+
+      '<div class="autoeval-prompt">Cuando tenés que decidir cómo usar recursos limitados, ¿cómo te sentís?</div>'+
+      '<div class="autoeval-hint">No hay respuestas correctas — esto es para vos.</div>'+
+      '<div class="autoeval-scale" id="aeScale"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'😰',label:'Me agobia la responsabilidad',scores:{S:8,hS:6,mSoc:4}},
+      {icon:'🤔',label:'Necesito más datos antes de decidir',scores:{hI:8,C:6,mTeo:4}},
+      {icon:'😎',label:'Me siento cómodo priorizando',scores:{hE:8,mEco:6,hC:4}},
+      {icon:'🔥',label:'Me activa — quiero resolver ya',scores:{D:8,hR:6,hE:4}},
+    ];
+    var sc=document.getElementById('aeScale');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='autoeval-btn';
+      btn.innerHTML='<div class="autoeval-btn-icon">'+opt.icon+'</div><div class="autoeval-btn-label">'+opt.label+'</div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.autoeval-btn').forEach(function(b){if(b!==btn)b.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(finishPresupuesto,550);
+      });
+      sc.appendChild(btn);
+    });
+  }
+  function finishPresupuesto(){
+    var est=(accum.hE||0)+(accum.mEco||0)+(accum.hC||0);
+    var soc=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var act=(accum.D||0)+(accum.hR||0)+(accum.mAut||0);
+    var mx=Math.max(est,soc,ana,act,1);
+    zoneComplete('presupuesto',accum,{
+      emoji:'💰',title:'¡Presupuesto aprobado!',
+      sub:'Cómo distribuís recursos revela qué priorizás: eficiencia, equidad o independencia.',
+      bars:[
+        {icon:'📊',color:'#c98540',pct:Math.round(est/mx*100)},
+        {icon:'🤝',color:'#d96a8a',pct:Math.round(soc/mx*100)},
+        {icon:'🔍',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'⚡',color:'#d96060',pct:Math.round(act/mx*100)},
+      ]
+    });
+  }
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 3: LA EVIDENCIA
+//  Selección de elementos — investigación
+// ═══════════════════════════════════════
+function buildEvidencia(container){
+  var accum={};var answered=false;var wallItems=[];
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 1 DE 3 — ELEGÍ LA EVIDENCIA</div>'+
+      '<div class="aula-prompt">Un equipo de investigadores descubrió un tratamiento prometedor contra una enfermedad rara. Podría salvar vidas, pero necesita 2 años más de pruebas. Elegí 3 datos que te parecen clave para la decisión.</div>'+
+      '<div class="aula-hint">Tocá 3 elementos que considerés más relevantes</div>'+
+      '<div class="aula-wall" id="eWall"><div class="aula-wall-label">EVIDENCIA</div></div>'+
+      '<div class="aula-palette" id="ePalette"></div>'+
+      '<button class="btn btn-warm aula-confirm" id="eConfirm" disabled>Confirmar selección →</button>';
+    container.appendChild(d);
+    var ELEMS=[
+      {icon:'📈',name:'Tasa de éxito: 72% en animales',scores:{hI:8,mTeo:6,C:4}},
+      {icon:'💀',name:'3 pacientes mueren por año esperando',scores:{S:8,hS:6,pdcP:4}},
+      {icon:'💰',name:'Costo del tratamiento: $50.000 por paciente',scores:{hE:8,mEco:6,hC:4}},
+      {icon:'🧬',name:'Mecanismo molecular validado por 2 laboratorios',scores:{hI:10,C:8,mTeo:6}},
+      {icon:'⚠️',name:'Efectos secundarios desconocidos a largo plazo',scores:{C:8,hI:6,pdcD:4}},
+      {icon:'🌍',name:'Otros países ya aprobaron tratamientos similares',scores:{D:8,mTeo:6,hR:4}},
+      {icon:'👨‍⚕️',name:'Los médicos del hospital lo piden urgente',scores:{S:10,hS:8,I:4}},
+      {icon:'📊',name:'Se necesitan 500 pacientes más para un ensayo confiable',scores:{hI:8,C:6,mTeo:6}},
+    ];
+    var picked=[];var pal=document.getElementById('ePalette');
+    ELEMS.forEach(function(el){
+      var btn=document.createElement('div');btn.className='aula-elem';
+      btn.innerHTML='<div class="aula-elem-icon">'+el.icon+'</div><div class="aula-elem-name">'+el.name+'</div><div class="aula-elem-check">✓</div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;
+        var idx=picked.indexOf(el);
+        if(idx>-1){picked.splice(idx,1);btn.classList.remove('selected');}
+        else if(picked.length<3){picked.push(el);btn.classList.add('selected');}
+        document.querySelectorAll('.aula-elem').forEach(function(b){
+          if(picked.length>=3&&!b.classList.contains('selected'))b.classList.add('disabled');
+          else b.classList.remove('disabled');
+        });
+        var wall=document.getElementById('eWall');
+        wall.querySelectorAll('.aula-wall-item').forEach(function(w){w.remove();});
+        picked.forEach(function(p){var sp=document.createElement('span');sp.className='aula-wall-item';sp.textContent=p.icon;wall.appendChild(sp);});
+        document.getElementById('eConfirm').disabled=picked.length!==3;
+      });
+      pal.appendChild(btn);
+    });
+    document.getElementById('eConfirm').addEventListener('click',function(){
+      if(answered||picked.length!==3)return;answered=true;
+      wallItems=picked.slice();
+      picked.forEach(function(el){addLocal(el.scores);});
+      setTimeout(step2,400);
+    });
+  }
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">PASO 2 DE 3</div>'+
+      '<div style="text-align:center;font-size:40px;padding:4px 0;">'+wallItems.map(function(w){return w.icon;}).join(' ')+'</div>'+
+      '<div class="campo-prompt">Con esa evidencia, el comité te pregunta: ¿se aprueba el tratamiento ahora o se esperan 2 años más?</div>'+
+      '<div class="campo-opts" id="e2Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'✅',title:'Aprobar ahora con seguimiento intensivo de los pacientes',hint:'El riesgo de esperar también es un riesgo.',scores:{D:14,S:10,hS:8,hR:6}},
+      {icon:'⏳',title:'Esperar los 2 años — la ciencia necesita tiempo',hint:'La prisa ha causado desastres antes.',scores:{C:14,hI:10,mTeo:8,pdcD:6}},
+      {icon:'🔀',title:'Aprobación condicional: para pacientes terminales que acepten el riesgo',hint:'Ni todo ni nada. Libertad con información.',scores:{hI:12,I:10,S:8,hC:6}},
+      {icon:'🤝',title:'Que los pacientes y sus familias participen de la decisión',hint:'No es solo ciencia. Es ética.',scores:{S:14,mSoc:10,I:8,pdcP:6}},
+    ];
+    var od=document.getElementById('e2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">AUTOEVALUACIÓN</div><div class="campo-visual">🔬</div>'+
+      '<div class="campo-prompt">Cuando la evidencia no alcanza para estar 100% seguro, ¿cómo reaccionás?</div>'+
+      '<div class="campo-opts" id="e3Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'⏳',title:'Espero hasta tener certeza — no me gusta decidir sin datos completos',hint:'La prudencia es tu forma de cuidar.',scores:{C:10,hI:8,mTeo:6,pdcD:6}},
+      {icon:'⚡',title:'Actúo con lo que tengo — la parálisis también tiene consecuencias',hint:'Decidir con incertidumbre es una habilidad.',scores:{D:10,hR:8,hE:6,mAut:6}},
+      {icon:'🤝',title:'Consulto con otros — más perspectivas, mejor decisión',hint:'La sabiduría colectiva te da confianza.',scores:{S:10,I:8,mSoc:6,hS:6}},
+      {icon:'🧪',title:'Busco un experimento rápido para reducir la incertidumbre',hint:'Hay formas de aprender sin esperar años.',scores:{hI:10,hR:8,D:6,C:6}},
+    ];
+    var od=document.getElementById('e3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(finishEvidencia,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function finishEvidencia(){
+    var rig=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var act=(accum.D||0)+(accum.hR||0)+(accum.hE||0);
+    var pru=(accum.pdcD||0)+(accum.pdcP||0)+(accum.pdcC||0);
+    var mx=Math.max(rig,emp,act,pru,1);
+    zoneComplete('evidencia',accum,{
+      emoji:'🔬',title:'¡Evidencia evaluada!',
+      sub:'Qué datos elegís y cómo decidís con incertidumbre revela tu forma de pensar.',
+      bars:[
+        {icon:'🧠',color:'#3db87a',pct:Math.round(rig/mx*100)},
+        {icon:'💗',color:'#d96a8a',pct:Math.round(emp/mx*100)},
+        {icon:'⚡',color:'#c98540',pct:Math.round(act/mx*100)},
+        {icon:'🔍',color:'#4a7ad9',pct:Math.round(pru/mx*100)},
+      ]
+    });
+  }
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 4: LA CRISIS
+//  Asignación de roles contrarreloj
+// ═══════════════════════════════════════
+function buildCrisis(container){
+  var accum={};var answered=false;var timerRef=null;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">PASO 1 DE 3</div><div class="campo-visual">🚨</div>'+
+      '<div class="campo-prompt">En medio del Congreso, llega la noticia: inundaciones graves en una región cercana. El Congreso decide armar un comité de respuesta inmediata. ¿Qué rol asumís vos?</div>'+
+      '<div class="campo-opts" id="cr1Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'📡',title:'Coordinador de comunicaciones — que la información fluya',hint:'En una crisis, la desinformación mata.',scores:{hR:12,hI:10,hC:8,C:6}},
+      {icon:'🏥',title:'Enlace con salud — priorizar a los heridos y enfermos',hint:'Las personas primero.',scores:{S:14,hS:12,pdcP:8,I:6}},
+      {icon:'📋',title:'Logística — organizar refugios, transporte, suministros',hint:'Sin organización, la ayuda no llega.',scores:{hC:14,hE:10,D:8,mTra:6}},
+      {icon:'🎤',title:'Vocero — comunicar a la prensa y calmar a la gente',hint:'Alguien tiene que dar la cara.',scores:{I:12,D:10,S:8,hA:6}},
+    ];
+    var od=document.getElementById('cr1Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(step2,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step2(){
+    var DELEGADOS=[
+      {id:'sofia',icon:'🩺',name:'Sofía',skill:'Estudiante de medicina'},
+      {id:'mateo',icon:'📐',name:'Mateo',skill:'Bueno con datos y mapas'},
+      {id:'dani',icon:'🎨',name:'Dani',skill:'Comunicación visual'},
+      {id:'renzo',icon:'💪',name:'Renzo',skill:'Liderazgo bajo presión'},
+      {id:'lucia',icon:'🤝',name:'Lucía',skill:'Trabajo comunitario'},
+      {id:'tomas',icon:'💻',name:'Tomás',skill:'Sistemas y tecnología'},
+    ];
+    var TAREAS=[
+      {id:'triage',icon:'🏥',title:'Organizar el triage médico',hint:'Clasificar heridos por urgencia.',
+        best:['sofia'],scores:{sofia:{S:14,hS:12,pdcP:8},mateo:{hI:6,C:4},dani:{hA:4,S:4},renzo:{D:8,hR:6},lucia:{S:8,mSoc:6},tomas:{hR:6,hI:4}}},
+      {id:'mapa',icon:'🗺️',title:'Mapear las zonas afectadas en tiempo real',hint:'Saber dónde está el daño para actuar.',
+        best:['mateo','tomas'],scores:{sofia:{hI:4,C:4},mateo:{hI:14,C:10,hR:8},dani:{hA:6,hR:4},renzo:{D:6,hR:4},lucia:{S:4,I:4},tomas:{hR:14,hI:10,pdcC:8}}},
+      {id:'refugio',icon:'🏠',title:'Coordinar los refugios de evacuados',hint:'Necesidades básicas: comida, abrigo, contención.',
+        best:['lucia','renzo'],scores:{sofia:{S:8,hS:6},mateo:{hC:6,C:4},dani:{S:4,hA:4},renzo:{D:14,hC:10,hR:8},lucia:{S:14,I:10,mSoc:8},tomas:{hC:6,hR:4}}},
+      {id:'comms',icon:'📢',title:'Comunicar a la prensa y redes sociales',hint:'Informar sin generar pánico.',
+        best:['dani'],scores:{sofia:{S:6,hS:4},mateo:{hI:6,C:4},dani:{hA:14,mEst:10,mAut:8},renzo:{D:8,I:6},lucia:{S:8,I:6,mSoc:4},tomas:{hR:8,hI:6}}},
+    ];
+    var assignments={};var selectedDelegado=null;var timeLeft=50;
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+    d.innerHTML='<div class="apagon-sub">PASO 2 — ASIGNAR EQUIPO DE CRISIS</div>'+
+      '<div class="apagon-prompt">Asigná a cada delegado una tarea. Tenés 50 segundos.</div>'+
+      '<div class="apagon-hint">Tocá un delegado ↓ y después tocá la tarea ↓</div>'+
+      '<div class="apagon-timer"><div class="apagon-timer-icon">⏱️</div>'+
+        '<div class="apagon-timer-bar"><div class="apagon-timer-fill" id="crTimerFill" style="width:100%"></div></div>'+
+        '<div class="apagon-timer-val" id="crTimerVal">50</div></div>'+
+      '<div class="apagon-vecinos" id="crDelegados"></div>'+
+      '<div class="apagon-problems" id="crTareas"></div>';
+    container.appendChild(d);
+    var mEl=document.getElementById('crDelegados');
+    DELEGADOS.forEach(function(m){
+      var card=document.createElement('div');card.className='apagon-vecino';card.id='cd_'+m.id;
+      card.innerHTML='<div class="apagon-vecino-icon">'+m.icon+'</div><div class="apagon-vecino-name">'+m.name+'</div><div class="apagon-vecino-skill">'+m.skill+'</div>';
+      card.addEventListener('click',function(){
+        if(card.classList.contains('assigned'))return;
+        document.querySelectorAll('.apagon-vecino').forEach(function(c){c.classList.remove('selected');});
+        card.classList.add('selected');selectedDelegado=m.id;
+      });
+      mEl.appendChild(card);
+    });
+    var tEl=document.getElementById('crTareas');
+    TAREAS.forEach(function(t){
+      var row=document.createElement('div');row.className='apagon-problem';row.id='ct_'+t.id;
+      row.innerHTML='<div class="apagon-problem-icon">'+t.icon+'</div><div class="apagon-problem-info"><div class="apagon-problem-title">'+t.title+'</div><div class="apagon-problem-hint">'+t.hint+'</div></div>';
+      row.addEventListener('click',function(){
+        if(!selectedDelegado||row.classList.contains('filled'))return;
+        assignments[t.id]=selectedDelegado;
+        row.classList.add('filled');
+        var mName=DELEGADOS.find(function(m){return m.id===selectedDelegado;}).name;
+        row.querySelector('.apagon-problem-hint').innerHTML='<span class="apagon-problem-assigned">→ '+mName+'</span>';
+        document.getElementById('cd_'+selectedDelegado).classList.add('assigned');
+        document.getElementById('cd_'+selectedDelegado).classList.remove('selected');
+        var sc=t.scores[selectedDelegado];if(sc)addLocal(sc);
+        selectedDelegado=null;
+        if(Object.keys(assignments).length>=4){clearInterval(timerRef);setTimeout(step3,800);}
+      });
+      tEl.appendChild(row);
+    });
+    timerRef=setInterval(function(){
+      timeLeft--;
+      document.getElementById('crTimerVal').textContent=timeLeft;
+      document.getElementById('crTimerFill').style.width=(timeLeft/50*100)+'%';
+      if(timeLeft<=0){
+        clearInterval(timerRef);
+        TAREAS.forEach(function(t){
+          if(!assignments[t.id]){
+            var available=DELEGADOS.filter(function(m){return Object.values(assignments).indexOf(m.id)===-1;});
+            if(available.length){
+              var pick=available[0];assignments[t.id]=pick.id;
+              addLocal({D:4,hR:4});
+            }
+          }
+        });
+        setTimeout(step3,400);
+      }
+    },1000);
+  }
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='autoeval-wrap fade-in';
+    d.innerHTML='<div class="autoeval-badge">AUTOEVALUACIÓN</div>'+
+      '<div style="font-size:48px;">🚨</div>'+
+      '<div class="autoeval-prompt">En una situación de emergencia real, ¿cuál es tu reacción instintiva?</div>'+
+      '<div class="autoeval-hint">Pensá en cómo reaccionaste de verdad alguna vez, no en lo ideal.</div>'+
+      '<div class="autoeval-scale" id="aeScale3"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🧠',label:'Analizo',scores:{hI:8,C:6,mTeo:6}},
+      {icon:'🫂',label:'Contengo',scores:{S:8,hS:6,mSoc:6}},
+      {icon:'⚡',label:'Actúo',scores:{D:8,hR:6,pdcC:6}},
+      {icon:'📋',label:'Organizo',scores:{hC:8,hE:6,mTra:6}},
+    ];
+    var sc=document.getElementById('aeScale3');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='autoeval-btn';
+      btn.innerHTML='<div class="autoeval-btn-icon">'+opt.icon+'</div><div class="autoeval-btn-label">'+opt.label+'</div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.autoeval-btn').forEach(function(b){if(b!==btn)b.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(finishCrisis,550);
+      });
+      sc.appendChild(btn);
+    });
+  }
+  function finishCrisis(){
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var soc=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var eje=(accum.D||0)+(accum.hR||0)+(accum.pdcC||0);
+    var org=(accum.hC||0)+(accum.hE||0)+(accum.mTra||0);
+    var mx=Math.max(ana,soc,eje,org,1);
+    zoneComplete('crisis',accum,{
+      emoji:'🚨',title:'¡Crisis resuelta!',
+      sub:'Tu reacción bajo presión revela tu instinto más profundo.',
+      bars:[
+        {icon:'🧠',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'🫂',color:'#d96a8a',pct:Math.round(soc/mx*100)},
+        {icon:'⚡',color:'#c98540',pct:Math.round(eje/mx*100)},
+        {icon:'📋',color:'#9a6cc7',pct:Math.round(org/mx*100)},
+      ]
+    });
+  }
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 5: EL MANIFIESTO
+//  Composición creativa — declaración
+// ═══════════════════════════════════════
+function buildManifiesto(container){
+  var accum={};var answered=false;var wallItems=[];
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 1 DE 3 — COMPONÉ EL MANIFIESTO</div>'+
+      '<div class="aula-prompt">El Congreso necesita una declaración final. Elegí 3 valores que representen tu visión del futuro.</div>'+
+      '<div class="aula-hint">Tocá 3 valores para tu manifiesto</div>'+
+      '<div class="aula-wall" id="mWall"><div class="aula-wall-label">MANIFIESTO</div></div>'+
+      '<div class="aula-palette" id="mPalette"></div>'+
+      '<button class="btn btn-warm aula-confirm" id="mConfirm" disabled>Confirmar manifiesto →</button>';
+    container.appendChild(d);
+    var ELEMS=[
+      {icon:'🌍',name:'Justicia ambiental',scores:{pdcC:8,S:6,mTra:4}},
+      {icon:'🔬',name:'Innovación científica',scores:{hI:8,hR:6,mTeo:4}},
+      {icon:'✊',name:'Igualdad de oportunidades',scores:{I:8,mSoc:6,S:4}},
+      {icon:'🎨',name:'Libertad creativa',scores:{hA:10,mEst:8,mAut:6}},
+      {icon:'📊',name:'Desarrollo económico',scores:{hE:8,mEco:6,hC:4}},
+      {icon:'📚',name:'Educación universal',scores:{mTra:8,pdcP:6,S:4}},
+      {icon:'🏥',name:'Salud como derecho',scores:{hS:8,S:6,pdcP:4}},
+      {icon:'💻',name:'Soberanía tecnológica',scores:{hR:8,hI:6,pdcC:6}},
+    ];
+    var picked=[];var pal=document.getElementById('mPalette');
+    ELEMS.forEach(function(el){
+      var btn=document.createElement('div');btn.className='aula-elem';
+      btn.innerHTML='<div class="aula-elem-icon">'+el.icon+'</div><div class="aula-elem-name">'+el.name+'</div><div class="aula-elem-check">✓</div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;
+        var idx=picked.indexOf(el);
+        if(idx>-1){picked.splice(idx,1);btn.classList.remove('selected');}
+        else if(picked.length<3){picked.push(el);btn.classList.add('selected');}
+        document.querySelectorAll('.aula-elem').forEach(function(b){
+          if(picked.length>=3&&!b.classList.contains('selected'))b.classList.add('disabled');
+          else b.classList.remove('disabled');
+        });
+        var wall=document.getElementById('mWall');
+        wall.querySelectorAll('.aula-wall-item').forEach(function(w){w.remove();});
+        picked.forEach(function(p){var sp=document.createElement('span');sp.className='aula-wall-item';sp.textContent=p.icon;wall.appendChild(sp);});
+        document.getElementById('mConfirm').disabled=picked.length!==3;
+      });
+      pal.appendChild(btn);
+    });
+    document.getElementById('mConfirm').addEventListener('click',function(){
+      if(answered||picked.length!==3)return;answered=true;
+      wallItems=picked.slice();
+      picked.forEach(function(el){addLocal(el.scores);});
+      setTimeout(step2,400);
+    });
+  }
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">PASO 2 DE 3</div>'+
+      '<div style="text-align:center;font-size:40px;padding:4px 0;">'+wallItems.map(function(w){return w.icon;}).join(' ')+'</div>'+
+      '<div class="campo-prompt">Un grupo de delegados quiere que el manifiesto sea más "realista" y menos "idealista". Dicen: "Si suena a utopía, nadie lo va a tomar en serio." ¿Qué hacés?</div>'+
+      '<div class="campo-opts" id="m2Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🔥',title:'Defendés tu versión — un manifiesto sin ambición es un comunicado de prensa',hint:'Si no apuntás alto, ¿para qué?',scores:{hA:14,mAut:10,D:8,mEst:6}},
+      {icon:'🤝',title:'Incorporás sus sugerencias — un manifiesto tiene que representar a todos',hint:'No es solo tuyo.',scores:{I:12,S:10,hC:8,mSoc:6}},
+      {icon:'📊',title:'Les proponés agregar un plan de acción concreto al lado del manifiesto',hint:'Visión + plan. Los dos tienen razón.',scores:{hI:12,hE:10,C:8,hC:6}},
+      {icon:'🎭',title:'Escribís 2 versiones y dejás que el plenario vote cuál prefiere',hint:'Que la democracia decida.',scores:{I:10,D:8,S:8,mSoc:6}},
+    ];
+    var od=document.getElementById('m2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">AUTOEVALUACIÓN</div><div class="campo-visual">✍️</div>'+
+      '<div class="campo-prompt">Cuando tenés que expresar lo que pensás o sentís, ¿cuál es tu canal natural?</div>'+
+      '<div class="campo-opts" id="m3Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🗣️',title:'Hablando — las palabras me salen mejor en vivo',hint:'Tu voz es tu instrumento.',scores:{D:10,I:8,S:6,mAut:6}},
+      {icon:'✍️',title:'Escribiendo — necesito tiempo para ordenar ideas',hint:'El papel te da claridad.',scores:{hI:10,C:8,mTeo:6,hA:6}},
+      {icon:'🎨',title:'Creando algo visual — un dibujo, un diseño, un video',hint:'Las imágenes dicen más.',scores:{hA:10,mEst:8,hR:6,mAut:6}},
+      {icon:'🤝',title:'En conversación — necesito rebotarlo con alguien',hint:'Pensás mejor acompañado.',scores:{S:10,I:8,mSoc:6,hS:6}},
+    ];
+    var od=document.getElementById('m3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(finishManifiesto,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function finishManifiesto(){
+    var cre=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+    var soc=(accum.S||0)+(accum.I||0)+(accum.mSoc||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var act=(accum.D||0)+(accum.hR||0)+(accum.hE||0);
+    var mx=Math.max(cre,soc,ana,act,1);
+    zoneComplete('manifiesto',accum,{
+      emoji:'✍️',title:'¡Manifiesto escrito!',
+      sub:'Lo que elegís decir (y cómo lo decís) revela tu relación con las ideas y las personas.',
+      bars:[
+        {icon:'🎨',color:'#d96060',pct:Math.round(cre/mx*100)},
+        {icon:'🤝',color:'#d96a8a',pct:Math.round(soc/mx*100)},
+        {icon:'🧠',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'⚡',color:'#c98540',pct:Math.round(act/mx*100)},
+      ]
+    });
+  }
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 6: EL LOBBY
+//  Chat — negociación entre bambalinas
+// ═══════════════════════════════════════
+function buildLobby(container){
+  var accum={};var answered=false;var step=0;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+  var SCRIPT=[
+    {type:'scene',text:'Receso entre sesiones. El pasillo del congreso está lleno de delegados negociando. Tres personas se te acercan por separado.'},
+    {type:'them',name:'Valentina (delegada estudiantil)',text:'Necesitamos hablar. Mi bloque quiere votar a favor del programa educativo, pero si no incluyen salud mental, nos bajamos.'},
+    {type:'narrator',text:'Valentina representa a 40 delegados. Sin ella, la propuesta no pasa.'},
+    {type:'choice',options:[
+      {text:'"Tenés razón. Agrego salud mental al proyecto. ¿Puedo contar con tus 40 votos?"',hint:'Aceptar la demanda para ganar votos.',scores:{S:14,hS:12,I:10,hC:6}},
+      {text:'"Me parece importante, pero necesito ver cómo encaja en el presupuesto antes de prometer."',hint:'Prudencia antes de compromiso.',scores:{hI:12,hE:10,C:8,hC:6}},
+      {text:'"¿Y si en vez de incluirlo en este proyecto, armamos uno dedicado solo a salud mental?"',hint:'No mezclar todo en una misma ley.',scores:{hI:10,hC:10,D:8,mTeo:6}},
+    ]},
+    {type:'them',name:'Ricardo (sector empresario)',text:'Mirá, te voy a ser directo. Mi grupo apoya tu propuesta, pero queremos que se incluya una zona franca para empresas jóvenes. ¿Podemos hablar?'},
+    {type:'them',name:'Ricardo',text:'Si nos das eso, te garantizo 60 votos. Eso es mayoría. Tu propuesta sale sí o sí.'},
+    {type:'narrator',text:'60 votos te darían la mayoría. Pero la zona franca beneficia más a empresas que a la comunidad.'},
+    {type:'choice',options:[
+      {text:'"Acepto. La zona franca con condiciones: al menos 50% de empleados locales."',hint:'Negociar, no regalar.',scores:{hE:14,I:10,hC:8,mEco:6}},
+      {text:'"No. Si mi propuesta solo pasa con condiciones que la desvirtúan, prefiero que no pase."',hint:'Coherencia tiene un precio.',scores:{mAut:14,D:10,C:8,S:6}},
+      {text:'"Dejame consultarlo con mi bloque antes de responderte."',hint:'No decidir solo. Respetar al grupo.',scores:{I:12,S:10,hC:8,mSoc:6}},
+    ]},
+    {type:'them',name:'Camila (periodista)',text:'Hola, soy del medio digital del congreso. ¿Puedo hacerte una pregunta para publicar?'},
+    {type:'them',name:'Camila',text:'Tu propuesta generó debate. Algunos dicen que es idealista. Otros que es lo más concreto que se presentó. ¿Cómo la definirías en una frase?'},
+    {type:'narrator',text:'Lo que digas va a circular. Elegí bien.'},
+    {type:'choice',options:[
+      {text:'"Es una propuesta que pone a las personas antes que a los números."',hint:'Mensaje emocional, memorable.',scores:{S:12,hA:10,mEst:8,I:6}},
+      {text:'"Es la propuesta con mejor relación entre costo e impacto. Los datos la respaldan."',hint:'Mensaje racional, creíble.',scores:{hI:12,hE:10,mTeo:8,C:6}},
+      {text:'"No me interesa cómo la definan. Me interesa que se vote y se ejecute."',hint:'Sin marketing. Solo acción.',scores:{D:14,hR:10,mAut:8,hE:6}},
+    ]},
+  ];
+  var chatEl,choicesEl;
+  function buildChat(){
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='recreo-wrap';
+    d.innerHTML='<div class="recreo-chat" id="lChat"><div class="recreo-sub">EL LOBBY</div></div>'+
+      '<div class="recreo-choices" id="lChoices"></div>';
+    container.appendChild(d);
+    chatEl=document.getElementById('lChat');
+    choicesEl=document.getElementById('lChoices');
+    step=0;nextBeat();
+  }
+  function nextBeat(){
+    if(step>=SCRIPT.length){finishLobby();return;}
+    var beat=SCRIPT[step];
+    if(beat.type==='scene'){
+      var m=document.createElement('div');m.className='recreo-scene';m.textContent=beat.text;
+      chatEl.appendChild(m);step++;setTimeout(nextBeat,600);
+    }else if(beat.type==='narrator'){
+      var m=document.createElement('div');m.className='recreo-msg narrator';m.textContent=beat.text;
+      chatEl.appendChild(m);step++;setTimeout(nextBeat,600);
+    }else if(beat.type==='them'){
+      var typing=document.createElement('div');typing.className='recreo-typing';typing.textContent=beat.name+' escribe...';
+      chatEl.appendChild(typing);chatEl.scrollTop=chatEl.scrollHeight;
+      setTimeout(function(){
+        typing.remove();
+        var m=document.createElement('div');m.className='recreo-msg them';
+        m.innerHTML='<div class="recreo-msg-name">'+beat.name+'</div>'+beat.text;
+        chatEl.appendChild(m);chatEl.scrollTop=chatEl.scrollHeight;
+        step++;setTimeout(nextBeat,400);
+      },800);
+    }else if(beat.type==='choice'){
+      answered=false;choicesEl.innerHTML='';
+      beat.options.forEach(function(opt){
+        var btn=document.createElement('div');btn.className='recreo-choice';
+        btn.innerHTML=opt.text+'<div style="font-size:11px;color:var(--muted);margin-top:4px;">'+opt.hint+'</div>';
+        btn.addEventListener('click',function(){
+          if(answered)return;answered=true;btn.classList.add('picked');
+          document.querySelectorAll('.recreo-choice').forEach(function(c){if(c!==btn)c.style.opacity='.3';});
+          var m=document.createElement('div');m.className='recreo-msg me';m.textContent=opt.text.replace(/"/g,'');
+          chatEl.appendChild(m);chatEl.scrollTop=chatEl.scrollHeight;
+          addLocal(opt.scores);
+          step++;setTimeout(function(){choicesEl.innerHTML='';nextBeat();},600);
+        });
+        choicesEl.appendChild(btn);
+      });
+    }
+  }
+  function finishLobby(){
+    choicesEl.innerHTML='';
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var est=(accum.hE||0)+(accum.mEco||0)+(accum.hC||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var aut=(accum.D||0)+(accum.mAut||0)+(accum.hR||0);
+    var mx=Math.max(emp,est,ana,aut,1);
+    zoneComplete('lobby',accum,{
+      emoji:'🤝',title:'¡Lobby cerrado!',
+      sub:'Cómo negociás revela qué estás dispuesto a ceder y qué no.',
+      bars:[
+        {icon:'💗',color:'#d96a8a',pct:Math.round(emp/mx*100)},
+        {icon:'📊',color:'#c98540',pct:Math.round(est/mx*100)},
+        {icon:'🔍',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'🔥',color:'#d96060',pct:Math.round(aut/mx*100)},
+      ]
+    });
+  }
+  buildChat();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 7: EL EXPEDIENTE
+//  Clasificación — carreras y futuro
+// ═══════════════════════════════════════
+function buildExpediente(container){
+  var accum={};var answered=false;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  var CARRERAS=[
+    {id:'medicina',icon:'🩺',name:'Medicina',desc:'6+ años de estudio, alta demanda, contacto humano constante.',
+      scores:{'❤️':{S:14,hS:12,pdcP:8},'📈':{hE:8,mEco:6,hC:4},'🌍':{S:8,mSoc:6,I:4},'🧠':{hI:10,C:8,mTeo:6}}},
+    {id:'ingsis',icon:'💻',name:'Ingeniería en Sistemas',desc:'Programación, IA, datos. Mercado global, trabajo remoto.',
+      scores:{'❤️':{hR:12,hI:10,pdcC:8},'📈':{hE:14,mEco:10,hR:6},'🌍':{hR:8,pdcC:6,D:4},'🧠':{hI:14,C:10,mTeo:8}}},
+    {id:'derecho',icon:'⚖️',name:'Derecho',desc:'Leyes, justicia, argumentación. Mucha lectura, mucho debate.',
+      scores:{'❤️':{I:10,mSoc:8,S:6},'📈':{hE:10,hC:8,mEco:6},'🌍':{I:12,mSoc:10,S:6},'🧠':{hI:8,C:8,mTeo:6}}},
+    {id:'diseno',icon:'🎨',name:'Diseño / Artes',desc:'Creatividad, estética, comunicación visual. Mercado competitivo.',
+      scores:{'❤️':{hA:14,mEst:10,mAut:8},'📈':{hE:6,hA:6,D:4},'🌍':{hA:8,mEst:6,mSoc:4},'🧠':{hA:8,mEst:6,C:4}}},
+    {id:'agronomia',icon:'🌾',name:'Agronomía / Cs. Ambientales',desc:'Naturaleza, sustentabilidad, campo. Trabajo al aire libre.',
+      scores:{'❤️':{mTra:10,pdcC:8,S:6},'📈':{hE:10,mEco:8,hR:4},'🌍':{pdcC:12,mTra:8,S:6},'🧠':{hI:8,pdcD:6,C:4}}},
+    {id:'educacion',icon:'📚',name:'Educación / Docencia',desc:'Formar personas, transmitir conocimiento. Impacto a largo plazo.',
+      scores:{'❤️':{mTra:12,pdcP:10,S:8},'📈':{hE:4,mTra:6,hC:4},'🌍':{S:10,mSoc:8,I:6},'🧠':{mTeo:8,pdcP:6,C:4}}},
+  ];
+
+  var SHELVES=[
+    {id:'❤️',icon:'❤️',name:'Lo que más me atrae',count:0},
+    {id:'📈',icon:'📈',name:'Lo que tiene mejor salida laboral',count:0},
+    {id:'🌍',icon:'🌍',name:'Lo que más impacto social tiene',count:0},
+    {id:'🧠',icon:'🧠',name:'Lo que más desafío intelectual ofrece',count:0},
+  ];
+
+  var currentItem=0;
+
+  function showItem(){
+    if(currentItem>=CARRERAS.length){step2();return;}
+    container.innerHTML='';
+    var item=CARRERAS[currentItem];
+    var d=document.createElement('div');d.className='biblio-wrap fade-in';
+    d.innerHTML='<div class="biblio-sub">CLASIFICACIÓN DE CARRERAS</div>'+
+      '<div class="biblio-progress"><span>'+(currentItem+1)+'</span> / '+CARRERAS.length+'</div>'+
+      '<div class="biblio-item"><div class="biblio-item-icon">'+item.icon+'</div>'+
+        '<div><div class="biblio-item-name">'+item.name+'</div>'+
+        '<div class="biblio-item-desc">'+item.desc+'</div></div></div>'+
+      '<div class="biblio-prompt">¿Bajo qué criterio evaluás esta carrera?</div>'+
+      '<div class="biblio-shelves" id="expShelves"></div>';
+    container.appendChild(d);
+    var sEl=document.getElementById('expShelves');
+    SHELVES.forEach(function(s){
+      var shelf=document.createElement('div');shelf.className='biblio-shelf';
+      shelf.innerHTML='<div class="biblio-shelf-icon">'+s.icon+'</div>'+
+        '<div class="biblio-shelf-info"><div class="biblio-shelf-name">'+s.name+'</div>'+
+        '<div class="biblio-shelf-count">'+s.count+(s.count===1?' carrera':' carreras')+'</div></div>';
+      shelf.addEventListener('click',function(){
+        shelf.classList.add('picked');
+        document.querySelectorAll('.biblio-shelf').forEach(function(sh){if(sh!==shelf){sh.style.opacity='.3';sh.style.pointerEvents='none';}});
+        var sc=item.scores[s.id];if(sc)addLocal(sc);
+        s.count++;currentItem++;setTimeout(showItem,450);
+      });
+      sEl.appendChild(shelf);
+    });
+  }
+
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">DILEMA CENTRAL</div><div class="campo-visual">⚖️</div>'+
+      '<div class="campo-prompt">Si en 10 años pudieras tener solo una de estas cosas, ¿cuál elegirías?</div>'+
+      '<div class="campo-opts" id="exp2Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🌍',title:'Impacto — que lo que hago cambie algo en el mundo',hint:'No importa cuánto ganes si no dejás huella.',scores:{I:12,S:10,mSoc:8,pdcP:6}},
+      {icon:'💰',title:'Estabilidad — poder vivir tranquilo y darle a mi familia',hint:'La seguridad también es un valor.',scores:{hE:14,mEco:10,hC:8,C:6}},
+      {icon:'🎯',title:'Maestría — ser realmente bueno en algo',hint:'La excelencia como camino.',scores:{hI:12,C:10,mTeo:8,hR:6}},
+      {icon:'🎨',title:'Libertad — decidir cuándo, cómo y en qué trabajo',hint:'Tu tiempo es tuyo.',scores:{mAut:12,hA:10,D:8,mEst:6}},
+    ];
+    var od=document.getElementById('exp2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(finishExpediente,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function finishExpediente(){
+    var pas=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+    var pra=(accum.hE||0)+(accum.mEco||0)+(accum.hC||0);
+    var soc=(accum.S||0)+(accum.mSoc||0)+(accum.pdcP||0);
+    var inv=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var mx=Math.max(pas,pra,soc,inv,1);
+    zoneComplete('expediente',accum,{
+      emoji:'📑',title:'¡Expediente cerrado!',
+      sub:'Cómo evaluás las opciones de futuro dice mucho de lo que buscás en la vida.',
+      bars:[
+        {icon:'❤️',color:'#d96060',pct:Math.round(pas/mx*100)},
+        {icon:'💼',color:'#c98540',pct:Math.round(pra/mx*100)},
+        {icon:'🌍',color:'#d96a8a',pct:Math.round(soc/mx*100)},
+        {icon:'🧠',color:'#3db87a',pct:Math.round(inv/mx*100)},
+      ]
+    });
+  }
+  showItem();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 8: LA VOTACIÓN
+//  Decisiones binarias — proyección personal
+// ═══════════════════════════════════════
+function buildVotacion(container){
+  var PAIRS=[
+    {prompt:'En 10 años te ves...',
+      a:{icon:'🏙️',name:'En una gran ciudad, en el centro de la acción',scores:{D:8,hE:6,hR:4}},
+      b:{icon:'🌄',name:'En un lugar tranquilo, con ritmo propio',scores:{C:8,mTra:6,pdcC:4}}},
+    {prompt:'Tu carrera ideal es...',
+      a:{icon:'📚',name:'Una sola, profunda — ser experto en algo',scores:{hI:8,C:6,mTeo:4}},
+      b:{icon:'🔀',name:'Varias cosas a la vez — no me banco una sola',scores:{D:8,hA:6,mAut:4}}},
+    {prompt:'Lo que más valorás en un trabajo...',
+      a:{icon:'👥',name:'El equipo — con quién trabajo importa más que qué hago',scores:{S:8,mSoc:6,I:4}},
+      b:{icon:'🎯',name:'El desafío — lo que hago importa más que con quién',scores:{hI:8,hR:6,D:4}}},
+    {prompt:'Si algo te apasiona pero no paga bien...',
+      a:{icon:'❤️',name:'Lo hago igual — la plata no es todo',scores:{hA:8,mAut:6,mEst:4}},
+      b:{icon:'💰',name:'Busco cómo hacerlo rentable — pasión sin plan es hobby',scores:{hE:8,mEco:6,hC:4}}},
+    {prompt:'Ante una injusticia...',
+      a:{icon:'📢',name:'Hablo, denuncio, me involucro',scores:{I:10,D:6,mSoc:4}},
+      b:{icon:'🛠️',name:'Construyo una alternativa mejor',scores:{hR:8,hI:6,pdcC:4}}},
+    {prompt:'Tu forma de aprender es...',
+      a:{icon:'📖',name:'Estudiando — libros, cursos, teoría',scores:{hI:8,mTeo:6,C:4}},
+      b:{icon:'🔥',name:'Haciendo — prueba, error, experiencia',scores:{D:8,hR:6,mAut:4}}},
+    {prompt:'Lo que te da más miedo del futuro...',
+      a:{icon:'😐',name:'Hacer algo que no me importa',scores:{hA:8,mAut:6,S:4}},
+      b:{icon:'📉',name:'No poder vivir de lo que elija',scores:{hE:8,mEco:6,C:4}}},
+    {prompt:'Tu última decisión en este Congreso...',
+      a:{icon:'🌍',name:'Quiero que lo que haga le sirva a otros',scores:{S:10,I:6,mSoc:6}},
+      b:{icon:'🚀',name:'Quiero ser la mejor versión de mí mismo',scores:{D:8,hI:6,mAut:6}}},
+  ];
+
+  var idx=0;var accum={};var answered=false;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  function renderPair(){
+    if(idx>=PAIRS.length){finishVotacion();return;}
+    answered=false;container.innerHTML='';
+    var p=PAIRS[idx];
+    var d=document.createElement('div');d.className='esquina-wrap fade-in';
+    d.innerHTML='<div class="esquina-sub">LA VOTACIÓN</div>'+
+      '<div class="esquina-counter">Moción <span>'+(idx+1)+'/'+PAIRS.length+'</span></div>'+
+      '<div class="esquina-bar"><div class="esquina-bar-fill" style="width:'+(idx/PAIRS.length*100)+'%"></div></div>'+
+      '<div class="esquina-prompt">'+p.prompt+'</div>'+
+      '<div class="esquina-vs" id="vCards"></div>';
+    container.appendChild(d);
+    var cd=document.getElementById('vCards');
+    [p.a,p.b].forEach(function(opt,oi){
+      if(oi===1){var sep=document.createElement('div');sep.className='esquina-or';sep.textContent='o';cd.appendChild(sep);}
+      var card=document.createElement('div');card.className='esquina-card';
+      card.innerHTML='<div class="esquina-card-icon">'+opt.icon+'</div><div class="esquina-card-name">'+opt.name+'</div>';
+      card.addEventListener('click',function(){
+        if(answered)return;answered=true;card.classList.add('picked');
+        document.querySelectorAll('.esquina-card').forEach(function(c){if(c!==card)c.classList.add('not-picked');});
+        addLocal(opt.scores);
+        setTimeout(function(){idx++;renderPair();},500);
+      });
+      cd.appendChild(card);
+    });
+  }
+
+  function finishVotacion(){
+    var arr=(accum.S||0)+(accum.mSoc||0)+(accum.I||0);
+    var amb=(accum.D||0)+(accum.hR||0)+(accum.hE||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var aut=(accum.hA||0)+(accum.mAut||0)+(accum.mEst||0);
+    var mx=Math.max(arr,amb,ana,aut,1);
+    zoneComplete('votacion',accum,{
+      emoji:'⚡',title:'¡Votación cerrada!',
+      sub:'Tus elecciones rápidas revelan lo que realmente te importa cuando no hay tiempo para pensar.',
+      bars:[
+        {icon:'🌍',color:'#d96a8a',pct:Math.round(arr/mx*100)},
+        {icon:'🚀',color:'#c98540',pct:Math.round(amb/mx*100)},
+        {icon:'🧠',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'🎨',color:'#d96060',pct:Math.round(aut/mx*100)},
+      ]
+    });
+  }
+  renderPair();
+}
+
+
+// ═══ PATHFINDER SYNC MODULE ═══
+var PF_SUPABASE_URL = 'https://mnmdqqlppwuzejxibqso.supabase.co';  // ← Reemplazar con tu URL de Supabase
+var PF_SUPABASE_KEY = 'sb_publishable_iWdGYjRwe18ortlRznDj9w_HpM0M1Hf';  // ← Reemplazar con tu anon key
+var PF_PATH_NUMBER = 5;
+
+var PF_MAPPING = {
+  salud:['S','hS','mSoc','pdcP'], exactas:['hI','mTeo','pdcD','C'],
+  ing:['hR','hC','D','pdcC'], sociales:['I','hS','S','mSoc'],
+  eco:['hE','mEco','D','hC'], arte:['hA','mEst','mAut'],
+  agro:['hR','pdcC','mTra'], edu:['mTra','pdcP','mSoc','S']
+};
+var PF_CAPS = {salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+
+function pfComputeAreas(rawScores) {
+  var result = {};
+  for (var area in PF_MAPPING) {
+    var sum = 0;
+    PF_MAPPING[area].forEach(function(d){ sum += (rawScores[d]||0); });
+    var cap = PF_CAPS[area] || 160;
+    result[area] = Math.min(100, Math.round(sum / cap * 100));
+  }
+  return result;
+}
+
+function pfSyncResults() {
+  var areaPercentages = pfComputeAreas(GS.scores);
+  var payload = {
+    p_email: GS.email,
+    p_name: GS.name,
+    p_school_code: GS.schoolCode,
+    p_path_number: PF_PATH_NUMBER,
+    p_raw_scores: GS.scores,
+    p_area_percentages: areaPercentages
+  };
+
+  // Show sync status
+  var syncEl = document.getElementById('pf-sync-status');
+  if (syncEl) syncEl.textContent = 'Guardando resultados...';
+
+  fetch(PF_SUPABASE_URL + '/rest/v1/rpc/upsert_path_result', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': PF_SUPABASE_KEY,
+      'Authorization': 'Bearer ' + PF_SUPABASE_KEY
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (syncEl) {
+      if (data && data.success) {
+        syncEl.innerHTML = '✓ Resultados guardados · <a href="dashboard-alumno.html?email=' + encodeURIComponent(GS.email) + '" style="color:var(--warm,#f5a623);text-decoration:underline;">Ver mi evolución →</a>';
+      } else {
+        syncEl.textContent = '✓ Resultados guardados';
+      }
+    }
+  })
+  .catch(function(err){
+    console.error('PathFinder sync error:', err);
+    if (syncEl) syncEl.textContent = 'No se pudieron guardar (sin conexión). Tus resultados están en pantalla.';
+  });
+}
+// ═══ END SYNC MODULE ═══
+
+</script>
+</body>
+</html>

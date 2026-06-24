@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Path 4 — La Fundación</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Gabarito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#0d0e16;color:#e4dfd6;}
+body{font-family:'Nunito',sans-serif;display:flex;flex-direction:column;position:relative;}
+
+.screen{display:none;flex-direction:column;height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
+.screen.active{display:flex;}
+.fade-in{animation:fadeIn .45s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 6px rgba(201,133,64,.3))}50%{filter:drop-shadow(0 0 14px rgba(201,133,64,.5))}}
+
+:root{
+  --sky:#0d0e16;--sky2:#131520;
+  --warm:#c98540;--warm-soft:rgba(201,133,64,.1);--warm-border:rgba(201,133,64,.2);
+  --green:#3db87a;--green-soft:rgba(61,184,122,.08);
+  --blue:#4a7ad9;--red:#d96060;--purple:#9a6cc7;--pink:#d96a8a;
+  --text:#e4dfd6;--muted:rgba(228,223,214,.45);--muted2:rgba(228,223,214,.25);
+  --card:rgba(255,255,255,.04);--border:rgba(255,255,255,.07);
+}
+
+/* ══ INTRO ══ */
+#intro{align-items:center;justify-content:center;gap:1.2rem;padding:2rem;text-align:center;background:radial-gradient(ellipse at 50% 80%,#1a1510,#0d0e16);}
+.intro-badge{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.18em;color:var(--warm);background:var(--warm-soft);padding:5px 16px;border-radius:20px;border:1px solid var(--warm-border);}
+.intro-icon{font-size:64px;animation:glow 3s ease-in-out infinite;}
+.intro-title{font-family:Gabarito,sans-serif;font-size:30px;font-weight:700;color:#fff;line-height:1.2;}
+.intro-sub{font-size:15px;color:var(--muted);line-height:1.6;max-width:300px;}
+.intro-input{display:flex;flex-direction:column;gap:6px;width:100%;max-width:260px;}
+.intro-input label{font-size:12px;color:var(--muted);text-align:left;}
+.intro-input input{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-family:Nunito,sans-serif;font-size:16px;color:#fff;outline:none;width:100%;}
+
+.intro-input-group{display:flex;flex-direction:column;gap:10px;width:100%;max-width:260px;}
+.intro-input-group .intro-input{margin:0;}
+#pf-sync-status{font-size:11px;color:var(--muted,#888);text-align:center;margin-top:8px;min-height:16px;}
+.intro-input input:focus{border-color:var(--warm);}
+.btn{font-family:Gabarito,sans-serif;font-size:14px;font-weight:600;padding:11px 28px;border-radius:12px;border:none;cursor:pointer;touch-action:manipulation;transition:all .15s;}
+.btn:active{transform:scale(.96);}
+.btn-warm{background:var(--warm);color:#1a0800;}
+.btn-warm:disabled{opacity:.25;}
+.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border);}
+
+/* ══ MAP ══ */
+#map-screen{background:radial-gradient(ellipse at 50% 30%,#151210,#0d0e16);}
+.map-header{padding:14px 16px 6px;flex-shrink:0;}
+.map-header-row{display:flex;justify-content:space-between;align-items:center;}
+.map-header h2{font-family:Gabarito,sans-serif;font-size:18px;font-weight:600;color:#fff;}
+.map-header-meta{display:flex;gap:8px;align-items:center;}
+.map-header-tag{font-family:Gabarito,sans-serif;font-size:10px;letter-spacing:.08em;color:var(--warm);background:var(--warm-soft);border:1px solid var(--warm-border);padding:3px 8px;border-radius:8px;}
+.map-header-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.map-header-sub span{color:var(--warm);font-weight:700;}
+.map-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 14px 20px;}
+.map-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.zone-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px 12px;border-radius:16px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .25s;text-align:center;position:relative;opacity:0;animation:fadeIn .4s ease forwards;}
+.zone-card:active{transform:scale(.95);}
+.zone-card.completed{opacity:.35;pointer-events:none;}
+.zone-card-ring{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;transition:transform .2s;}
+.zone-card-ring::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid;opacity:.3;animation:pulse 3s ease infinite;}
+.zone-card-name{font-family:Gabarito,sans-serif;font-size:12px;font-weight:700;color:#fff;line-height:1.2;}
+.zone-card-desc{font-size:10px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.zone-card-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;}
+.zone-card.completed .zone-card-check{display:flex;}
+.map-compass{grid-column:2;display:flex;align-items:center;justify-content:center;padding:10px;}
+.compass-svg{width:80px;height:80px;animation:glow 4s ease-in-out infinite;}
+
+/* ══ GAME ══ */
+#game-screen{background:#0d0e16;}
+.game-top{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(0,0,0,.4);border-bottom:1px solid var(--border);}
+.game-back{font-size:13px;color:var(--muted);cursor:pointer;touch-action:manipulation;}
+.game-label{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.12em;color:var(--warm);opacity:.7;}
+.game-body{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Narrative */
+.campo-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.campo-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.campo-visual{text-align:center;font-size:52px;padding:4px 0;flex-shrink:0;}
+.campo-bubble{padding:8px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;}
+.campo-bubble-label{font-size:11px;color:var(--muted2);}
+.campo-bubble-text{font-size:14px;color:var(--warm);font-style:italic;margin-top:2px;}
+.campo-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.campo-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.campo-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.campo-opt:active{transform:scale(.98);}
+.campo-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+.campo-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.campo-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.campo-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* Zone result */
+.zone-result{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;text-align:center;}
+.zr-icon{font-size:56px;animation:pulse 1.5s ease infinite;}
+.zr-title{font-family:Gabarito,sans-serif;font-size:20px;font-weight:700;color:#fff;}
+.zr-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:300px;}
+.zr-bars{width:100%;max-width:280px;display:flex;flex-direction:column;gap:8px;}
+.zr-bar{display:flex;align-items:center;gap:10px;}
+.zr-bar-icon{font-size:16px;width:24px;text-align:center;}
+.zr-bar-track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.zr-bar-fill{height:100%;border-radius:3px;transition:width 1s ease .3s;}
+.zr-bar-pct{font-size:11px;color:var(--muted);min-width:32px;text-align:right;}
+
+/* Budget */
+.kiosco-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.kiosco-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.kiosco-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.kiosco-hint{font-size:12px;color:var(--muted);text-align:center;}
+.kiosco-budget{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(201,133,64,.06);border:1px solid rgba(201,133,64,.15);}
+.kiosco-budget-icon{font-size:20px;}
+.kiosco-budget-info{flex:1;}
+.kiosco-budget-label{font-family:Gabarito,sans-serif;font-size:10px;letter-spacing:.08em;color:var(--muted2);}
+.kiosco-budget-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:3px;overflow:hidden;}
+.kiosco-budget-fill{height:100%;background:var(--warm);border-radius:2px;transition:width .4s;}
+.kiosco-budget-val{font-family:Gabarito,sans-serif;font-size:16px;font-weight:700;color:var(--warm);}
+.kiosco-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.kiosco-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.kiosco-opt:active{transform:scale(.98);}
+.kiosco-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+.kiosco-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.kiosco-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.kiosco-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.kiosco-products{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.kiosco-product{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;text-align:center;position:relative;}
+.kiosco-product:active{transform:scale(.96);}
+.kiosco-product.selected{border-color:var(--warm);background:var(--warm-soft);}
+.kiosco-product.disabled{opacity:.3;pointer-events:none;}
+.kiosco-product-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--warm);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;}
+.kiosco-product.selected .kiosco-product-check{display:flex;}
+.kiosco-product-icon{font-size:28px;}
+.kiosco-product-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3;}
+.kiosco-product-price{font-size:11px;color:var(--warm);font-weight:700;}
+.kiosco-product-hint{font-size:10px;color:var(--muted);line-height:1.3;}
+.kiosco-confirm{align-self:center;margin-top:4px;}
+
+/* Classification */
+.biblio-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.biblio-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.biblio-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.biblio-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.biblio-progress{font-size:12px;color:var(--muted);text-align:center;}
+.biblio-progress span{font-family:Gabarito,sans-serif;color:var(--warm);font-weight:700;}
+.biblio-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(201,133,64,.06);border:2px solid rgba(201,133,64,.15);text-align:left;animation:slideUp .35s ease;}
+.biblio-item-icon{font-size:28px;flex-shrink:0;}
+.biblio-item-name{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.biblio-item-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.3;}
+.biblio-shelves{display:flex;flex-direction:column;gap:8px;}
+.biblio-shelf{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.biblio-shelf:active{transform:scale(.98);}
+.biblio-shelf.picked{border-color:var(--warm);background:var(--warm-soft);}
+.biblio-shelf-icon{font-size:22px;flex-shrink:0;}
+.biblio-shelf-info{flex:1;}
+.biblio-shelf-name{font-size:13px;font-weight:600;color:#fff;}
+.biblio-shelf-count{font-size:11px;color:var(--muted);margin-top:2px;}
+.biblio-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.biblio-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.biblio-opt:active{transform:scale(.98);}
+.biblio-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+.biblio-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.biblio-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.biblio-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* Binary choices */
+.esquina-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 16px;gap:14px;overflow:hidden;}
+.esquina-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.esquina-counter{font-family:Gabarito,sans-serif;font-size:13px;color:var(--muted);}
+.esquina-counter span{color:var(--green);font-weight:700;}
+.esquina-prompt{font-family:Gabarito,sans-serif;font-size:15px;font-weight:600;color:#fff;text-align:center;line-height:1.4;}
+.esquina-vs{display:flex;align-items:stretch;gap:12px;width:100%;max-width:340px;animation:fadeIn .3s ease;}
+.esquina-card{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 10px;border-radius:16px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;text-align:center;}
+.esquina-card:active{transform:scale(.95);}
+.esquina-card.picked{border-color:var(--green);background:rgba(61,184,122,.08);transform:scale(1.03);}
+.esquina-card.not-picked{opacity:.25;transform:scale(.95);}
+.esquina-card-icon{font-size:40px;}
+.esquina-card-name{font-family:Gabarito,sans-serif;font-size:14px;font-weight:600;color:#fff;}
+.esquina-or{font-family:Gabarito,sans-serif;font-size:12px;color:var(--muted2);align-self:center;}
+.esquina-bar{width:100%;max-width:340px;height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+.esquina-bar-fill{height:100%;background:var(--green);border-radius:2px;transition:width .3s ease;}
+
+/* Chat */
+.recreo-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.recreo-chat{flex:1;display:flex;flex-direction:column;gap:8px;padding:14px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.recreo-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;padding:4px 0;}
+.recreo-scene{font-size:12px;color:var(--muted);text-align:center;font-style:italic;padding:4px 12px;line-height:1.5;}
+.recreo-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;animation:slideUp .35s ease;}
+.recreo-msg.them{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;}
+.recreo-msg.them .recreo-msg-name{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:3px;}
+.recreo-msg.me{align-self:flex-end;background:rgba(74,122,217,.12);border:1px solid rgba(74,122,217,.2);color:#fff;border-bottom-right-radius:4px;}
+.recreo-msg.narrator{align-self:center;max-width:90%;background:none;border:none;font-size:12px;color:var(--muted);text-align:center;font-style:italic;padding:6px 0;}
+.recreo-choices{padding:10px 16px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;border-top:1px solid var(--border);background:rgba(0,0,0,.3);}
+.recreo-choice{padding:11px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;font-size:13px;color:var(--text);line-height:1.4;}
+.recreo-choice:active{transform:scale(.98);}
+.recreo-choice.picked{border-color:var(--blue);background:rgba(74,122,217,.1);color:#fff;}
+.recreo-typing{align-self:flex-start;padding:8px 14px;font-size:12px;color:var(--muted);animation:pulse 1s ease infinite;}
+
+/* Team/Timer */
+.apagon-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.apagon-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.apagon-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.apagon-hint{font-size:12px;color:var(--muted);text-align:center;}
+.apagon-timer{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:rgba(154,108,199,.06);border:1px solid rgba(154,108,199,.15);}
+.apagon-timer-icon{font-size:16px;}
+.apagon-timer-bar{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.apagon-timer-fill{height:100%;background:var(--purple);border-radius:2px;transition:width 1s linear;}
+.apagon-timer-val{font-family:Gabarito,sans-serif;font-size:13px;color:var(--purple);min-width:24px;text-align:right;}
+.apagon-vecinos{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.apagon-vecino{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;width:90px;}
+.apagon-vecino:active{transform:scale(.96);}
+.apagon-vecino.selected{border-color:var(--purple);background:rgba(154,108,199,.08);}
+.apagon-vecino.assigned{opacity:.3;pointer-events:none;}
+.apagon-vecino-icon{font-size:24px;}
+.apagon-vecino-name{font-size:11px;font-weight:600;color:#fff;}
+.apagon-vecino-skill{font-size:10px;color:var(--muted);}
+.apagon-problems{display:flex;flex-direction:column;gap:8px;}
+.apagon-problem{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.apagon-problem:active{transform:scale(.96);}
+.apagon-problem.filled{border-color:var(--purple);background:rgba(154,108,199,.06);}
+.apagon-problem-icon{font-size:22px;}
+.apagon-problem-info{flex:1;}
+.apagon-problem-title{font-size:13px;font-weight:600;color:#fff;}
+.apagon-problem-hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.apagon-problem-assigned{font-size:11px;color:var(--purple);font-weight:600;margin-top:2px;}
+
+/* Art wall */
+.aula-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.aula-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.aula-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.aula-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.aula-wall{position:relative;width:100%;aspect-ratio:5/3;border-radius:14px;background:linear-gradient(180deg,#1a1410 0%,#1e1814 100%);border:2px solid rgba(201,133,64,.15);overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:12px;}
+.aula-wall-label{position:absolute;top:6px;left:10px;font-size:10px;color:rgba(201,133,64,.35);font-family:Gabarito,sans-serif;letter-spacing:.1em;}
+.aula-wall-item{font-size:28px;animation:slideUp .4s ease;opacity:0;animation-fill-mode:forwards;}
+.aula-wall-item:nth-child(2){animation-delay:.1s;}
+.aula-wall-item:nth-child(3){animation-delay:.2s;}
+.aula-wall-item:nth-child(4){animation-delay:.3s;}
+.aula-palette{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.aula-elem{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.aula-elem:active{transform:scale(.96);}
+.aula-elem.selected{border-color:var(--red);background:rgba(217,96,96,.08);}
+.aula-elem.disabled{opacity:.3;pointer-events:none;}
+.aula-elem-icon{font-size:24px;flex-shrink:0;}
+.aula-elem-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3;}
+.aula-elem-check{width:18px;height:18px;border-radius:50%;background:var(--red);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;margin-left:auto;flex-shrink:0;}
+.aula-elem.selected .aula-elem-check{display:flex;}
+.aula-confirm{align-self:center;margin-top:4px;}
+
+/* Autoevaluación (new Y4 mechanic) */
+.autoeval-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;gap:14px;text-align:center;}
+.autoeval-badge{font-family:Gabarito,sans-serif;font-size:10px;letter-spacing:.14em;color:var(--warm);background:var(--warm-soft);padding:4px 12px;border-radius:16px;border:1px solid var(--warm-border);}
+.autoeval-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;max-width:300px;}
+.autoeval-hint{font-size:12px;color:var(--muted);line-height:1.5;max-width:280px;}
+.autoeval-scale{display:flex;gap:8px;width:100%;max-width:320px;}
+.autoeval-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 6px;border-radius:14px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;text-align:center;}
+.autoeval-btn:active{transform:scale(.95);}
+.autoeval-btn.picked{border-color:var(--warm);background:var(--warm-soft);}
+.autoeval-btn-icon{font-size:28px;}
+.autoeval-btn-label{font-size:11px;font-weight:600;color:#fff;line-height:1.2;}
+
+/* ══ RESULTS ══ */
+#results-screen{align-items:center;justify-content:flex-start;padding:20px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;background:radial-gradient(ellipse at 50% 20%,#1a1510,#0d0e16);}
+.res-badge{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.15em;color:var(--warm);background:var(--warm-soft);padding:5px 14px;border-radius:20px;border:1px solid var(--warm-border);margin-bottom:4px;}
+.res-icon{font-size:56px;margin:8px 0;}
+.res-title{font-family:Gabarito,sans-serif;font-size:22px;font-weight:700;color:#fff;text-align:center;}
+.res-sub{font-size:13px;color:var(--muted);text-align:center;max-width:300px;margin-bottom:8px;}
+.res-areas{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;}
+.res-row{display:flex;align-items:center;gap:10px;}
+.res-row-icon{font-size:20px;width:28px;text-align:center;}
+.res-row-info{flex:1;}
+.res-row-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:3px;}
+.res-row-track{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.res-row-fill{height:100%;border-radius:3px;transition:width 1.2s ease .5s;}
+.res-row-pct{font-size:12px;min-width:36px;text-align:right;font-weight:700;}
+.res-note{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.6;text-align:center;max-width:340px;}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div class="intro-badge">AÑO 4 · 16 AÑOS</div>
+  <div class="intro-icon">🏗️</div>
+  <div class="intro-title">La Fundación</div>
+  <div class="intro-sub">Una nave abandonada. Un equipo. Recursos limitados. Miles de decisiones. Lo que construyas acá habla de quién sos.</div>
+  <div class="intro-input-group">
+  <div class="intro-input">
+    <label>Tu nombre para el proyecto</label>
+    <input type="text" id="nameInput" placeholder="Escribí tu nombre..." maxlength="20">
+  </div>
+  <div class="intro-input">
+    <label>Tu email (para guardar tu evolución)</label>
+    <input type="email" id="pfEmail" placeholder="nombre@email.com" maxlength="60" autocomplete="email">
+  </div>
+  <div class="intro-input">
+    <label>Código del colegio</label>
+    <input type="text" id="pfSchoolCode" placeholder="Ej: SJB-2025" maxlength="20" autocomplete="off">
+  </div>
+
+  </div>
+  <button class="btn btn-warm" id="startBtn" disabled>Arrancar el proyecto →</button>
+</div>
+
+<!-- MAP -->
+<div id="map-screen" class="screen">
+  <div class="map-header">
+    <div class="map-header-row">
+      <h2 id="mapHi">Hola</h2>
+      <div class="map-header-meta">
+        <div class="map-header-tag">v4.0</div>
+        <div class="map-header-tag" id="mapDate"></div>
+      </div>
+    </div>
+    <div class="map-header-sub">Elegí una zona del proyecto.<br>Zonas completadas: <span id="zDone">0</span>/8</div>
+  </div>
+  <div class="map-scroll" id="mapScroll"></div>
+</div>
+
+<!-- GAME -->
+<div id="game-screen" class="screen">
+  <div class="game-top">
+    <div class="game-back" onclick="backToMap()">← Mapa</div>
+    <div class="game-label" id="gLabel"></div>
+  </div>
+  <div class="game-body" id="gBody"></div>
+</div>
+
+<!-- RESULTS -->
+<div id="results-screen" class="screen">
+  <div class="res-badge">PERFIL AÑO 4</div>
+  <div class="res-icon">🏗️</div>
+  <div class="res-title">Proyecto fundado</div>
+  <div class="res-sub" id="resName"></div>
+  <div class="res-areas" id="resAreas"></div>
+  <div id="pf-sync-status"></div>
+  <div class="res-note" id="resNote"></div>
+</div>
+
+<script>
+// ═══ STATE ═══
+var GS={name:'',email:'',schoolCode:'',done:{},scores:{},order:[]};
+function addScores(sc){for(var k in sc)GS.scores[k]=(GS.scores[k]||0)+sc[k];}
+
+var AREAS=[
+  {id:'salud',name:'Ciencias de la Salud',icon:'🩺',color:'#4a7ad9'},
+  {id:'exactas',name:'Ciencias Exactas y Naturales',icon:'🔬',color:'#3db87a'},
+  {id:'ing',name:'Ingeniería y Tecnología',icon:'⚙️',color:'#9a6cc7'},
+  {id:'sociales',name:'Ciencias Sociales y Humanas',icon:'🌍',color:'#d96a8a'},
+  {id:'eco',name:'Ciencias Económicas',icon:'📊',color:'#c98540'},
+  {id:'arte',name:'Arte, Diseño y Arquitectura',icon:'🎨',color:'#d96060'},
+  {id:'agro',name:'Ciencias Agropecuarias',icon:'🌱',color:'#5a9a6a'},
+  {id:'edu',name:'Educación y Pedagogía',icon:'📚',color:'#a67c52'},
+];
+
+var ZONES=[
+  {id:'nave',      icon:'🏚️',name:'La Nave',        color:'#d96a8a',glow:'rgba(217,106,138,.15)',desc:'Un espacio abandonado con una historia por descubrir.'},
+  {id:'deposito',  icon:'📦',name:'El Depósito',     color:'#c98540',glow:'rgba(201,133,64,.15)',desc:'Recursos limitados, decisiones éticas.'},
+  {id:'terreno',   icon:'🌿',name:'El Terreno',      color:'#3db87a',glow:'rgba(61,184,122,.15)',desc:'Un terreno con potencial para investigar.'},
+  {id:'equipo',    icon:'👥',name:'El Equipo',       color:'#9a6cc7',glow:'rgba(154,108,199,.15)',desc:'Armá el equipo ideal contra reloj.'},
+  {id:'fachada',   icon:'🎨',name:'La Fachada',      color:'#d96060',glow:'rgba(217,96,96,.15)',desc:'La identidad del proyecto: ¿tu visión o el mercado?'},
+  {id:'asamblea',  icon:'🗣️',name:'La Asamblea',    color:'#4a7ad9',glow:'rgba(74,122,217,.15)',desc:'La comunidad opina. Vos mediás.'},
+  {id:'archivo',   icon:'📋',name:'El Archivo',      color:'#a67c52',glow:'rgba(166,124,82,.15)',desc:'Propuestas para ordenar: pasión o pragmatismo.'},
+  {id:'encrucijada',icon:'⚡',name:'La Encrucijada', color:'#5a9a6a',glow:'rgba(90,154,106,.15)',desc:'Decisiones rápidas sobre valores y futuro.'},
+];
+
+// ═══ SCREENS ═══
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById(id);el.classList.add('active');el.classList.add('fade-in');
+}
+
+// ═══ INTRO ═══
+var ni=document.getElementById('nameInput'),sb=document.getElementById('startBtn');
+var pfEmailEl=document.getElementById('pfEmail'),pfSchoolEl=document.getElementById('pfSchoolCode');
+function pfCheckStart(){sb.disabled=!(ni.value.trim()&&pfEmailEl.value.includes('@')&&pfSchoolEl.value.trim().length>=2);}
+ni.addEventListener('input',pfCheckStart);
+pfEmailEl.addEventListener('input',pfCheckStart);
+pfSchoolEl.addEventListener('input',pfCheckStart);
+sb.addEventListener('click',function(){
+  GS.name=ni.value.trim();
+  GS.email=pfEmailEl.value.trim().toLowerCase();
+  GS.schoolCode=pfSchoolEl.value.trim().toUpperCase();
+  document.getElementById('mapHi').textContent='Hola, '+GS.name;
+  buildMap();showScreen('map-screen');
+});
+
+// ═══ MAP ═══
+function buildMap(){
+  var scroll=document.getElementById('mapScroll');
+  scroll.innerHTML='';
+  var now=new Date();document.getElementById('mapDate').textContent=now.getDate()+'/'+(now.getMonth()+1);
+  var grid=document.createElement('div');grid.className='map-grid';
+  var layout=['nave','deposito','terreno','equipo','__compass__','fachada','asamblea','archivo','encrucijada'];
+  layout.forEach(function(id,i){
+    if(id==='__compass__'){
+      var comp=document.createElement('div');comp.className='map-compass';
+      comp.innerHTML='<svg class="compass-svg" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">'+
+        '<defs><radialGradient id="cg"><stop offset="0%" stop-color="rgba(201,133,64,.2)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>'+
+        '<circle cx="40" cy="40" r="38" fill="url(#cg)" stroke="rgba(201,133,64,.15)" stroke-width=".5"/>'+
+        '<circle cx="40" cy="40" r="24" fill="none" stroke="rgba(201,133,64,.12)" stroke-width=".5"/>'+
+        '<circle cx="40" cy="40" r="12" fill="none" stroke="rgba(201,133,64,.2)" stroke-width=".5"/>'+
+        '<text x="40" y="36" text-anchor="middle" font-size="16" fill="rgba(201,133,64,.5)">🏗️</text>'+
+        '<text x="40" y="48" text-anchor="middle" font-size="5" fill="rgba(201,133,64,.4)" font-family="Gabarito,sans-serif">FUNDACIÓN</text></svg>';
+      grid.appendChild(comp);return;
+    }
+    var z=ZONES.find(function(zone){return zone.id===id;});if(!z)return;
+    var card=document.createElement('div');
+    card.className='zone-card'+(GS.done[z.id]?' completed':'');
+    card.style.animationDelay=(i*60)+'ms';
+    card.innerHTML='<div class="zone-card-ring" style="background:'+z.glow+';border:1.5px solid '+z.color+';box-shadow:0 0 16px '+z.glow+'">'+
+      '<span style="filter:drop-shadow(0 2px 4px '+z.glow+')">'+z.icon+'</span></div>'+
+      '<div class="zone-card-name">'+z.name+'</div><div class="zone-card-desc">'+z.desc+'</div>'+
+      '<div class="zone-card-check">✓</div>';
+    card.addEventListener('click',function(){if(!GS.done[z.id])enterZone(z.id);});
+    grid.appendChild(card);
+  });
+  scroll.appendChild(grid);updateMapUI();
+}
+
+function updateMapUI(){
+  var n=Object.keys(GS.done).length;
+  document.getElementById('zDone').textContent=n;
+}
+
+function enterZone(zoneId){
+  GS.currentZone=zoneId;
+  var z=ZONES.find(function(z){return z.id===zoneId;});
+  document.getElementById('gLabel').textContent=z.name.toUpperCase();
+  showScreen('game-screen');
+  var body=document.getElementById('gBody');body.innerHTML='';
+  switch(zoneId){
+    case 'nave':buildNave(body);break;
+    case 'deposito':buildDeposito(body);break;
+    case 'terreno':buildTerreno(body);break;
+    case 'equipo':buildEquipo(body);break;
+    case 'fachada':buildFachada(body);break;
+    case 'asamblea':buildAsamblea(body);break;
+    case 'archivo':buildArchivo(body);break;
+    case 'encrucijada':buildEncrucijada(body);break;
+    default:buildPlaceholder(body,z);break;
+  }
+}
+function buildPlaceholder(c,z){c.innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;"><div style="font-size:48px;">'+z.icon+'</div><div style="font-family:Gabarito;font-size:18px;font-weight:600;color:#fff;">'+z.name+'</div><div style="font-size:13px;color:var(--muted);">Próximamente</div><button class="btn btn-ghost" onclick="backToMap()">← Volver</button></div>';}
+function backToMap(){buildMap();showScreen('map-screen');}
+
+function zoneComplete(zoneId,scores,display){
+  addScores(scores);GS.done[zoneId]=true;GS.order.push(zoneId);
+  var body=document.getElementById('gBody');
+  var barsHtml='';
+  if(display.bars)display.bars.forEach(function(b){
+    barsHtml+='<div class="zr-bar"><div class="zr-bar-icon">'+b.icon+'</div>'+
+      '<div class="zr-bar-track"><div class="zr-bar-fill" style="width:0%;background:'+b.color+'" data-pct="'+b.pct+'"></div></div>'+
+      '<div class="zr-bar-pct">'+b.pct+'%</div></div>';
+  });
+  body.innerHTML='<div class="zone-result fade-in"><div class="zr-icon">'+display.emoji+'</div>'+
+    '<div class="zr-title">'+display.title+'</div><div class="zr-sub">'+display.sub+'</div>'+
+    '<div class="zr-bars">'+barsHtml+'</div>'+
+    '<button class="btn btn-warm" onclick="afterZone()">'+(Object.keys(GS.done).length>=8?'Ver mi perfil →':'Siguiente zona →')+'</button></div>';
+  setTimeout(function(){document.querySelectorAll('.zr-bar-fill').forEach(function(el){el.style.width=el.dataset.pct+'%';});},200);
+}
+function afterZone(){Object.keys(GS.done).length>=8?showResults():backToMap();}
+
+// ═══ RESULTS ═══
+function showResults(){
+  var areaScores={};AREAS.forEach(function(a){areaScores[a.id]=0;});
+  var mapping={
+    salud:['S','hS','mSoc','pdcP'],exactas:['hI','mTeo','pdcD','C'],
+    ing:['hR','hC','D','pdcC'],sociales:['I','hS','S','mSoc'],
+    eco:['hE','mEco','D','hC'],arte:['hA','mEst','mAut'],
+    agro:['hR','pdcC','mTra'],edu:['mTra','pdcP','mSoc','S'],
+  };
+  for(var a in mapping)mapping[a].forEach(function(d){areaScores[a]+=(GS.scores[d]||0);});
+  // Each area scored independently against its own ceiling (not sum-to-100%)
+  var areaCap={salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+  var sorted=AREAS.slice().sort(function(a,b){return areaScores[b.id]-areaScores[a.id];});
+  var c=document.getElementById('resAreas');c.innerHTML='';
+  document.getElementById('resName').textContent=GS.name+', así se ve tu forma de construir';
+  sorted.forEach(function(a){
+    var cap=areaCap[a.id]||160;
+    var pct=Math.min(100,Math.round(areaScores[a.id]/cap*100));
+    var r=document.createElement('div');r.className='res-row';
+    r.innerHTML='<div class="res-row-icon">'+a.icon+'</div><div class="res-row-info"><div class="res-row-name">'+a.name+'</div>'+
+      '<div class="res-row-track"><div class="res-row-fill" style="width:0%;background:'+a.color+'" data-pct="'+pct+'"></div></div></div>'+
+      '<div class="res-row-pct" style="color:'+a.color+'">'+pct+'%</div>';
+    c.appendChild(r);
+  });
+  var notes={salud:'cuidado de personas y empatía',exactas:'pensamiento analítico y curiosidad',ing:'resolución técnica de problemas',
+    sociales:'interés por las personas y la sociedad',eco:'pensamiento estratégico y resultados',arte:'expresión creativa',
+    agro:'conexión con la naturaleza',edu:'vocación de enseñanza'};
+  document.getElementById('resNote').textContent=GS.name+' muestra tendencia hacia '+notes[sorted[0].id]+
+    ' y '+notes[sorted[1].id]+'. Este perfil se compara con los años anteriores para ver tu evolución.';
+  showScreen('results-screen');
+  pfSyncResults();
+  setTimeout(function(){document.querySelectorAll('.res-row-fill').forEach(function(el){el.style.width=el.dataset.pct+'%';});},300);
+}
+
+// ═══════════════════════════════════════
+//  ZONA 1: LA NAVE
+//  Narrativa ramificada — descubrir el espacio
+// ═══════════════════════════════════════
+function buildNave(container){
+  var TREE={
+    s1:{visual:'🏚️',status:'Polvo, silencio, historia...',thought:'¿Qué fue este lugar?',sub:'DECISIÓN 1 DE 4',
+      prompt:'Entrás por primera vez a la nave abandonada. Es enorme: techos altos, máquinas oxidadas, paredes con grafitis. El municipio la va a demoler si nadie propone un proyecto. ¿Qué te llama la atención primero?',
+      options:[
+        {id:'a',icon:'🔍',title:'Las máquinas viejas — cómo funcionaban, qué producían',hint:'La historia técnica del lugar te atrapa.',next:'s2a',scores:{hI:12,C:10,mTeo:8,pdcD:6}},
+        {id:'b',icon:'👥',title:'Los nombres grabados en las paredes — la gente que trabajó acá',hint:'Detrás de cada marca hay una historia humana.',next:'s2b',scores:{S:12,I:10,mSoc:8,hS:6}},
+        {id:'c',icon:'🏗️',title:'La estructura — qué se puede rescatar y qué hay que tirar',hint:'Evaluás viabilidad antes que emoción.',next:'s2c',scores:{hR:12,D:10,hC:8,pdcC:6}},
+        {id:'d',icon:'🎨',title:'La luz entrando por los ventanales rotos — esto podría ser hermoso',hint:'Donde otros ven ruina, vos ves potencial estético.',next:'s2d',scores:{hA:12,mEst:10,mAut:8,S:4}},
+      ]},
+    s2a:{visual:'⚙️',status:'Descubriste algo...',thought:'Esto era una fábrica textil...',sub:'DECISIÓN 2 DE 4',
+      prompt:'Investigando las máquinas descubrís que era una fábrica textil que cerró en los 90. Encontrás planos originales y un cuaderno de producción. El municipio te da una semana para presentar un proyecto. ¿Cómo arrancás?',
+      options:[
+        {id:'a1',icon:'📊',title:'Hacés un estudio de factibilidad: costos, plazos, necesidades del barrio',hint:'Los datos primero, la visión después.',next:'s3a',scores:{hI:14,hC:12,mTeo:8,C:6}},
+        {id:'a2',icon:'🤝',title:'Salís a hablar con los vecinos para entender qué necesitan',hint:'Un proyecto sin la gente no tiene sentido.',next:'s3b',scores:{I:14,S:10,mSoc:8,hS:6}},
+        {id:'a3',icon:'🛠️',title:'Arrancás a limpiar y a armar un prototipo del espacio',hint:'Mejor mostrar que explicar.',next:'s3a',scores:{D:14,hR:10,pdcC:8,hE:6}},
+      ]},
+    s2b:{visual:'👤',status:'Una foto vieja en el piso...',thought:'¿Quiénes eran?',sub:'DECISIÓN 2 DE 4',
+      prompt:'Encontrás fotos de los trabajadores, cartas, recuerdos. Una vecina te cuenta que su padre trabajó ahí toda su vida. Te emociona. ¿Cómo canalizás eso?',
+      options:[
+        {id:'b1',icon:'📖',title:'Proponés un centro cultural que preserve la memoria del lugar',hint:'La historia merece ser contada.',next:'s3b',scores:{mSoc:14,I:10,hA:8,S:6}},
+        {id:'b2',icon:'🏥',title:'Proponés un espacio de salud comunitaria — lo que más necesita el barrio',hint:'El presente importa más que el pasado.',next:'s3a',scores:{S:14,hS:12,pdcP:8,I:6}},
+        {id:'b3',icon:'🎓',title:'Proponés un centro de formación laboral — que enseñe oficios como antes',hint:'Honrar el pasado construyendo futuro.',next:'s3b',scores:{mTra:14,pdcP:10,hE:8,I:6}},
+      ]},
+    s2c:{visual:'🧱',status:'Evaluando estructura...',thought:'Se puede salvar un 70%...',sub:'DECISIÓN 2 DE 4',
+      prompt:'Tu evaluación técnica indica que el 70% de la estructura se puede rescatar. Pero el municipio solo financia si el proyecto genera ingresos propios. ¿Qué proponés?',
+      options:[
+        {id:'c1',icon:'🏪',title:'Un centro comercial de emprendedores locales — genera ingresos y comunidad',hint:'Economía + impacto social.',next:'s3a',scores:{hE:14,hC:10,mEco:8,I:6}},
+        {id:'c2',icon:'🔬',title:'Un laboratorio maker — impresoras 3D, electrónica, carpintería',hint:'Tecnología accesible para todos.',next:'s3b',scores:{hR:14,hI:10,pdcC:8,D:6}},
+        {id:'c3',icon:'🌱',title:'Un espacio verde techado con huerta vertical y talleres ambientales',hint:'Sustentabilidad como modelo.',next:'s3a',scores:{pdcC:12,hI:8,mTra:8,S:6}},
+      ]},
+    s2d:{visual:'🌅',status:'La luz te inspira...',thought:'Esto puede ser increíble...',sub:'DECISIÓN 2 DE 4',
+      prompt:'Le sacás fotos al espacio y las subís a redes. Se viralizan. Un colectivo de artistas te contacta queriendo intervenir la nave. Pero el municipio quiere algo más "productivo". ¿Qué hacés?',
+      options:[
+        {id:'d1',icon:'🎭',title:'Defendés el proyecto artístico — el arte ES productivo',hint:'No todo se mide en pesos.',next:'s3b',scores:{hA:14,mEst:10,mAut:8,D:6}},
+        {id:'d2',icon:'🤝',title:'Proponés un híbrido: galería + talleres que generen ingresos',hint:'Arte y sustentabilidad no son opuestos.',next:'s3a',scores:{hE:12,hA:8,I:8,hC:6}},
+        {id:'d3',icon:'📋',title:'Preparás un informe con datos de impacto cultural en otras ciudades',hint:'Si querés convencer, hablá su idioma.',next:'s3b',scores:{hI:12,C:10,mTeo:8,hA:6}},
+      ]},
+    s3a:{visual:'📄',status:'La propuesta toma forma...',thought:'Falta convencer...',sub:'DECISIÓN 3 DE 4',
+      prompt:'Tu propuesta está armada. Tenés que presentarla ante el consejo municipal. Son 5 minutos. ¿Cómo la presentás?',
+      options:[
+        {id:'e1',icon:'📊',title:'Con datos duros: costos, proyecciones, comparaciones con otros proyectos',hint:'Los números hablan.',next:'s4',scores:{hI:12,mTeo:10,C:8,hC:6}},
+        {id:'e2',icon:'🎥',title:'Con un video emotivo mostrando la nave y los vecinos',hint:'Las historias mueven más que las planillas.',next:'s4',scores:{hA:12,mEst:10,S:8,mSoc:6}},
+        {id:'e3',icon:'🗣️',title:'Hablás de corazón, sin slides, mirándolos a los ojos',hint:'La convicción se transmite en persona.',next:'s4',scores:{S:12,D:10,I:8,hS:6}},
+      ]},
+    s3b:{visual:'🤔',status:'Un obstáculo...',thought:'No va a ser fácil...',sub:'DECISIÓN 3 DE 4',
+      prompt:'Un concejal se opone al proyecto. Dice que es "demasiado idealista" y que el terreno vale más como estacionamiento. Los vecinos están divididos. ¿Cómo reaccionás?',
+      options:[
+        {id:'f1',icon:'📝',title:'Juntás firmas de vecinos y armás un petitorio formal',hint:'La democracia funciona con participación.',next:'s4',scores:{I:14,S:10,mSoc:8,hC:6}},
+        {id:'f2',icon:'💡',title:'Modificás el proyecto para incluir estacionamiento + espacio comunitario',hint:'A veces ceder en algo es ganar en lo importante.',next:'s4',scores:{hE:12,hC:10,mEco:8,C:6}},
+        {id:'f3',icon:'🔥',title:'Organizás un evento abierto en la nave para mostrar su potencial',hint:'Que la gente lo viva, no que lo imagine.',next:'s4',scores:{D:14,hA:10,I:8,mAut:6}},
+      ]},
+    s4:{visual:'🏗️',status:'¡Se aprobó!',thought:'Ahora empieza lo real...',sub:'AUTOEVALUACIÓN',
+      prompt:'El proyecto se aprobó. Antes de seguir: ¿qué te resultó más natural en todo este proceso?',
+      options:[
+        {id:'g1',icon:'🔍',title:'Investigar y analizar — me gusta entender antes de actuar',hint:'El conocimiento es tu herramienta principal.',next:'fin',scores:{hI:10,C:8,mTeo:8,pdcD:6}},
+        {id:'g2',icon:'💬',title:'Hablar con la gente — me importa lo que sienten y necesitan',hint:'Las personas son tu brújula.',next:'fin',scores:{S:10,I:8,mSoc:8,hS:6}},
+        {id:'g3',icon:'⚡',title:'Hacer cosas — me aburre planificar sin ejecutar',hint:'La acción te define.',next:'fin',scores:{D:10,hR:8,pdcC:8,hE:6}},
+        {id:'g4',icon:'🎨',title:'Imaginar posibilidades — veo lo que otros no ven todavía',hint:'La visión es tu superpoder.',next:'fin',scores:{hA:10,mEst:8,mAut:8,hI:6}},
+      ]}
+  };
+  var accum={};var answered=false;
+  function render(sid){
+    var sc=TREE[sid];answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">'+sc.sub+'</div><div class="campo-visual">'+sc.visual+'</div>'+
+      '<div class="campo-bubble"><div class="campo-bubble-label">'+sc.thought+'</div><div class="campo-bubble-text">'+sc.status+'</div></div>'+
+      '<div class="campo-prompt">'+sc.prompt+'</div><div class="campo-opts" id="cOpts"></div>';
+    container.appendChild(d);
+    var od=document.getElementById('cOpts');
+    sc.options.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(function(){opt.next==='fin'?finish():render(opt.next);},550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function finish(){
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var act=(accum.D||0)+(accum.hR||0)+(accum.hE||0);
+    var vis=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+    var mx=Math.max(emp,ana,act,vis,1);
+    zoneComplete('nave',accum,{
+      emoji:'🏚️',title:'¡Nave recuperada!',
+      sub:'Cómo descubrís un espacio revela cómo te parás frente a los problemas.',
+      bars:[
+        {icon:'💗',color:'#d96a8a',pct:Math.round(emp/mx*100)},
+        {icon:'🔍',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'⚡',color:'#c98540',pct:Math.round(act/mx*100)},
+        {icon:'🎨',color:'#d96060',pct:Math.round(vis/mx*100)},
+      ]
+    });
+  }
+  render('s1');
+}
+
+// ═══════════════════════════════════════
+//  ZONA 2: EL DEPÓSITO
+//  Gestión de presupuesto + dilema ético
+// ═══════════════════════════════════════
+function buildDeposito(container){
+  var budget=500;var accum={};var answered=false;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+  function budgetHTML(){
+    return '<div class="kiosco-budget"><div class="kiosco-budget-icon">💰</div>'+
+      '<div class="kiosco-budget-info"><div class="kiosco-budget-label">PRESUPUESTO (EN MILES)</div>'+
+      '<div class="kiosco-budget-bar"><div class="kiosco-budget-fill" style="width:'+(budget/500*100)+'%"></div></div></div>'+
+      '<div class="kiosco-budget-val">$'+budget+'k</div></div>';
+  }
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 1 DE 4</div>'+budgetHTML()+
+      '<div class="kiosco-prompt">Tenés $500k para renovar la nave. Elegí 2 prioridades de inversión.</div>'+
+      '<div class="kiosco-hint">Cada una cuesta $150k — Tocá para elegir</div>'+
+      '<div class="kiosco-products" id="kProds"></div>'+
+      '<button class="btn btn-warm kiosco-confirm" id="kConfirm" disabled>Invertir →</button>';
+    container.appendChild(d);
+    var ITEMS=[
+      {id:'tech',icon:'💻',name:'Equipamiento tecnológico',price:150,hint:'Computadoras, internet, proyector.',scores:{hR:10,hI:8,pdcC:6}},
+      {id:'verde',icon:'🌱',name:'Espacio verde y sustentable',price:150,hint:'Paneles solares, huerta, reciclado.',scores:{pdcC:8,mTra:8,S:6}},
+      {id:'arte',icon:'🎨',name:'Sala de arte y expresión',price:150,hint:'Instrumentos, materiales, escenario.',scores:{hA:10,mEst:8,mAut:6}},
+      {id:'salud',icon:'🩺',name:'Consultorio comunitario',price:150,hint:'Espacio de salud y bienestar.',scores:{S:10,hS:8,pdcP:6}},
+    ];
+    var picks=[];var grid=document.getElementById('kProds');
+    ITEMS.forEach(function(p){
+      var card=document.createElement('div');card.className='kiosco-product';
+      card.innerHTML='<div class="kiosco-product-check">✓</div><div class="kiosco-product-icon">'+p.icon+'</div>'+
+        '<div class="kiosco-product-name">'+p.name+'</div><div class="kiosco-product-price">$'+p.price+'k</div>'+
+        '<div class="kiosco-product-hint">'+p.hint+'</div>';
+      card.addEventListener('click',function(){
+        if(answered)return;
+        var idx=picks.indexOf(p.id);
+        if(idx>-1){picks.splice(idx,1);card.classList.remove('selected');}
+        else if(picks.length<2){picks.push(p.id);card.classList.add('selected');}
+        document.getElementById('kConfirm').disabled=picks.length!==2;
+        document.querySelectorAll('.kiosco-product').forEach(function(c){
+          if(picks.length>=2&&!c.classList.contains('selected'))c.classList.add('disabled');
+          else c.classList.remove('disabled');
+        });
+      });
+      grid.appendChild(card);
+    });
+    document.getElementById('kConfirm').addEventListener('click',function(){
+      if(answered||picks.length!==2)return;answered=true;
+      picks.forEach(function(pid){var it=ITEMS.find(function(i){return i.id===pid;});addLocal(it.scores);});
+      budget-=300;setTimeout(step2,400);
+    });
+  }
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 2 DE 4</div>'+budgetHTML()+
+      '<div style="text-align:center;font-size:48px;padding:4px 0;">📦</div>'+
+      '<div class="kiosco-prompt">Un proveedor te ofrece materiales de construcción a mitad de precio. Pero un vecino te dice que esa empresa tiene denuncias por trabajo informal. ¿Qué hacés?</div>'+
+      '<div class="kiosco-opts" id="k2Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'✅',title:'Aceptás la oferta — el presupuesto no alcanza para ser exigente',hint:'La prioridad es que el proyecto exista.',scores:{hE:12,mEco:10,D:8,hC:6},cost:0},
+      {icon:'🔍',title:'Investigás por tu cuenta antes de decidir',hint:'No querés acusar sin pruebas, pero tampoco ignorar.',scores:{hI:12,C:10,mTeo:8,pdcD:6},cost:0},
+      {icon:'❌',title:'Rechazás y buscás otro proveedor aunque cueste más',hint:'Los valores no se negocian.',scores:{S:12,I:10,mSoc:8,hS:6},cost:50},
+      {icon:'📢',title:'Lo denunciás públicamente y usás otro proveedor',hint:'Que no le pase a otro proyecto.',scores:{I:14,S:10,D:8,mSoc:6},cost:50},
+    ];
+    var od=document.getElementById('k2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="kiosco-opt-icon">'+opt.icon+'</div><div><div class="kiosco-opt-title">'+opt.title+'</div><div class="kiosco-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);budget-=opt.cost;setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 3 DE 4</div>'+budgetHTML()+
+      '<div class="kiosco-prompt">Una empresa grande se ofrece a sponsorear el proyecto entero, pero quiere poner su logo en la fachada y elegir el nombre del espacio. ¿Aceptás?</div>'+
+      '<div class="kiosco-opts" id="k3Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🤝',title:'Aceptás — sin plata no hay proyecto',hint:'El pragmatismo a veces gana.',scores:{hE:14,mEco:10,hC:8,D:6}},
+      {icon:'⚖️',title:'Negociás: aceptás el logo pero no que elijan el nombre',hint:'Hay cosas que se ceden y otras no.',scores:{hC:12,hE:10,I:8,C:6}},
+      {icon:'✋',title:'Rechazás — la identidad del proyecto no se vende',hint:'Independencia a cualquier precio.',scores:{mAut:12,hA:10,D:8,S:6}},
+      {icon:'💡',title:'Proponés un modelo de sponsors múltiples para no depender de uno',hint:'Diversificar es más seguro.',scores:{hI:12,hC:10,mEco:8,hE:6}},
+    ];
+    var od=document.getElementById('k3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="kiosco-opt-icon">'+opt.icon+'</div><div><div class="kiosco-opt-title">'+opt.title+'</div><div class="kiosco-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(step4,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step4(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='autoeval-wrap fade-in';
+    d.innerHTML='<div class="autoeval-badge">AUTOEVALUACIÓN</div>'+
+      '<div style="font-size:48px;">💰</div>'+
+      '<div class="autoeval-prompt">Cuando manejás plata y recursos, ¿cómo te sentís?</div>'+
+      '<div class="autoeval-hint">No hay respuestas correctas — esto es para vos.</div>'+
+      '<div class="autoeval-scale" id="aeScale"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'😰',label:'Me estresa',scores:{S:8,hS:6,mSoc:4}},
+      {icon:'🤔',label:'Me hace pensar mucho',scores:{hI:8,C:6,mTeo:4}},
+      {icon:'😎',label:'Me sale natural',scores:{hE:8,mEco:6,hC:4}},
+      {icon:'🔥',label:'Me entusiasma',scores:{D:8,hR:6,hE:4}},
+    ];
+    var sc=document.getElementById('aeScale');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='autoeval-btn';
+      btn.innerHTML='<div class="autoeval-btn-icon">'+opt.icon+'</div><div class="autoeval-btn-label">'+opt.label+'</div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.autoeval-btn').forEach(function(b){if(b!==btn)b.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(finishDeposito,550);
+      });
+      sc.appendChild(btn);
+    });
+  }
+  function finishDeposito(){
+    var est=(accum.hE||0)+(accum.mEco||0)+(accum.hC||0);
+    var soc=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var vis=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+    var mx=Math.max(est,soc,ana,vis,1);
+    zoneComplete('deposito',accum,{
+      emoji:'📦',title:'¡Depósito organizado!',
+      sub:'Cómo manejás recursos dice mucho sobre tus valores y prioridades.',
+      bars:[
+        {icon:'💰',color:'#c98540',pct:Math.round(est/mx*100)},
+        {icon:'🤝',color:'#d96a8a',pct:Math.round(soc/mx*100)},
+        {icon:'🔍',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'🎨',color:'#d96060',pct:Math.round(vis/mx*100)},
+      ]
+    });
+  }
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 3: EL TERRENO
+//  Investigación + dilema innovación/tradición
+// ═══════════════════════════════════════
+function buildTerreno(container){
+  var accum={};var answered=false;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">PASO 1 DE 3</div><div class="campo-visual">🌿</div>'+
+      '<div class="campo-prompt">Detrás de la nave hay un terreno grande. Antes era el jardín de los trabajadores. Hoy está abandonado pero el suelo es fértil. ¿Cómo lo investigás?</div>'+
+      '<div class="campo-opts" id="t1Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🔬',title:'Tomás muestras de suelo y las analizás',hint:'Datos antes de decisiones.',scores:{hI:12,mTeo:10,C:8,pdcD:6}},
+      {icon:'🧓',title:'Hablás con los vecinos más viejos que recuerdan el jardín',hint:'La memoria del barrio vale más que un laboratorio.',scores:{I:10,S:8,mSoc:8,hS:6}},
+      {icon:'🌱',title:'Plantás algunas cosas a ver qué crece bien',hint:'El mejor estudio es experimentar.',scores:{hR:12,D:10,mAut:6,pdcC:6}},
+      {icon:'📐',title:'Medís el terreno y diseñás un plano con zonas',hint:'Organizar el espacio antes de usarlo.',scores:{hC:10,hI:8,C:8,mTeo:6}},
+    ];
+    var od=document.getElementById('t1Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(step2,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">PASO 2 DE 3</div><div class="campo-visual">🌾</div>'+
+      '<div class="campo-prompt">El terreno tiene potencial. Te ofrecen 4 caminos posibles para desarrollarlo. ¿Cuál elegís?</div>'+
+      '<div class="campo-opts" id="t2Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🤖',title:'Tecnificarlo con sensores, riego automático y drones',hint:'La tecnología multiplica el impacto.',scores:{hR:14,hI:10,pdcC:8,D:6}},
+      {icon:'🏡',title:'Convertirlo en un espacio de agroturismo educativo',hint:'Que la gente venga, aprenda y se lleve algo.',scores:{hE:12,I:10,mTra:8,S:6}},
+      {icon:'🌿',title:'Mantenerlo como huerta orgánica tradicional',hint:'Lo simple funciona. Lo natural perdura.',scores:{mTra:12,pdcC:10,S:8,C:6}},
+      {icon:'💼',title:'Arrendarlo a un emprendimiento gastronómico local',hint:'Que genere ingresos para sostener el resto del proyecto.',scores:{hE:14,mEco:10,hC:8,D:6}},
+    ];
+    var od=document.getElementById('t2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">AUTOEVALUACIÓN</div><div class="campo-visual">🤔</div>'+
+      '<div class="campo-prompt">Cuando pensás en innovación vs tradición, ¿con cuál te identificás más?</div>'+
+      '<div class="campo-opts" id="t3Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🚀',title:'Innovar siempre — el futuro se construye probando cosas nuevas',hint:'El riesgo te motiva.',scores:{D:10,hR:8,hI:6,mAut:6}},
+      {icon:'🌳',title:'Preservar lo que funciona — no todo lo nuevo es mejor',hint:'Valorás la experiencia acumulada.',scores:{C:10,mTra:8,S:6,pdcP:6}},
+      {icon:'⚖️',title:'Depende del contexto — a veces una, a veces otra',hint:'La flexibilidad es tu fuerte.',scores:{hI:8,hC:8,I:6,mTeo:6}},
+      {icon:'🔄',title:'Combinar — innovar respetando lo que ya existe',hint:'Lo mejor de los dos mundos.',scores:{hE:8,I:8,hR:6,mSoc:6}},
+    ];
+    var od=document.getElementById('t3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(finishTerreno,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function finishTerreno(){
+    var tec=(accum.hR||0)+(accum.hI||0)+(accum.pdcC||0);
+    var soc=(accum.S||0)+(accum.I||0)+(accum.mSoc||0);
+    var eco=(accum.hE||0)+(accum.mEco||0)+(accum.hC||0);
+    var nat=(accum.mTra||0)+(accum.C||0)+(accum.pdcP||0);
+    var mx=Math.max(tec,soc,eco,nat,1);
+    zoneComplete('terreno',accum,{
+      emoji:'🌿',title:'¡Terreno definido!',
+      sub:'Cómo pensás el uso de un espacio revela tu relación entre progreso y raíces.',
+      bars:[
+        {icon:'🔬',color:'#3db87a',pct:Math.round(tec/mx*100)},
+        {icon:'🤝',color:'#d96a8a',pct:Math.round(soc/mx*100)},
+        {icon:'💰',color:'#c98540',pct:Math.round(eco/mx*100)},
+        {icon:'🌱',color:'#5a9a6a',pct:Math.round(nat/mx*100)},
+      ]
+    });
+  }
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 4: EL EQUIPO
+//  Gestión de equipo con timer
+// ═══════════════════════════════════════
+function buildEquipo(container){
+  var accum={};var answered=false;var timerRef=null;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">PASO 1 DE 3</div><div class="campo-visual">👥</div>'+
+      '<div class="campo-prompt">El proyecto necesita presentarse en un evento público. Tu curso representa al equipo. ¿Qué rol asumís vos?</div>'+
+      '<div class="campo-opts" id="e1Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🎤',title:'Orador — te ofrecés a hablar frente a todos',hint:'La voz del proyecto sos vos.',scores:{D:12,I:10,S:8,hA:6}},
+      {icon:'🎓',title:'Preparador — entrenás a otros para que hablen bien',hint:'Tu fuerza es hacer brillar a los demás.',scores:{mTra:12,pdcP:10,S:8,I:6}},
+      {icon:'📋',title:'Coordinador — organizás la logística del evento',hint:'Sin organización no hay show.',scores:{hC:14,hE:10,mTra:8,C:6}},
+      {icon:'📊',title:'Analista — armás los argumentos y los datos del discurso',hint:'Las ideas necesitan fundamento.',scores:{hI:14,mTeo:10,C:8,pdcD:6}},
+    ];
+    var od=document.getElementById('e1Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(step2,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step2(){
+    var MIEMBROS=[
+      {id:'vale',icon:'🗣️',name:'Vale',skill:'Buena comunicadora'},
+      {id:'tomi',icon:'📐',name:'Tomi',skill:'Muy analítico'},
+      {id:'lu',icon:'🎨',name:'Lu',skill:'Creativa y visual'},
+      {id:'fran',icon:'💪',name:'Fran',skill:'Resuelve bajo presión'},
+      {id:'cami',icon:'🤝',name:'Cami',skill:'Conecta con la gente'},
+      {id:'nico',icon:'💻',name:'Nico',skill:'Tecnología y datos'},
+    ];
+    var TAREAS=[
+      {id:'discurso',icon:'🎤',title:'Armar el discurso central',hint:'Las palabras que van a escuchar todos.',
+        best:['vale','tomi'],scores:{vale:{I:12,S:10,hA:6},tomi:{hI:12,C:10,mTeo:6},lu:{hA:8,mEst:6},fran:{D:8,hR:6},cami:{S:8,mSoc:6},nico:{hI:6,C:4}}},
+      {id:'visual',icon:'🖼️',title:'Diseñar la presentación visual',hint:'Slides, póster, video.',
+        best:['lu','nico'],scores:{vale:{hA:4,I:4},tomi:{C:6,hI:4},lu:{hA:14,mEst:10,mAut:8},fran:{hR:6,D:4},cami:{S:4,mSoc:4},nico:{hR:12,hI:10,pdcC:8}}},
+      {id:'ensayo',icon:'🎭',title:'Coordinar el ensayo general',hint:'Que todo salga prolijo.',
+        best:['cami','vale'],scores:{vale:{I:10,S:8,mSoc:6},tomi:{C:6,hC:4},lu:{hA:4,mEst:4},fran:{D:10,hC:8,hR:6},cami:{I:14,S:10,mTra:8},nico:{hC:6,C:4}}},
+      {id:'imprevisto',icon:'🔥',title:'Resolver los imprevistos del día',hint:'Siempre pasa algo.',
+        best:['fran'],scores:{vale:{S:6,I:4},tomi:{hI:6,C:4},lu:{hA:4,mAut:4},fran:{D:14,hR:12,pdcC:8},cami:{S:8,I:6},nico:{hR:8,hI:6,D:4}}},
+    ];
+    var assignments={};var selectedMiembro=null;var timeLeft=50;
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+    d.innerHTML='<div class="apagon-sub">PASO 2 — ARMAR EQUIPO</div>'+
+      '<div class="apagon-prompt">Asigná a cada persona a una tarea. Tenés 50 segundos.</div>'+
+      '<div class="apagon-hint">Tocá una persona ↓ y después tocá la tarea ↓</div>'+
+      '<div class="apagon-timer"><div class="apagon-timer-icon">⏱️</div>'+
+        '<div class="apagon-timer-bar"><div class="apagon-timer-fill" id="eTimerFill" style="width:100%"></div></div>'+
+        '<div class="apagon-timer-val" id="eTimerVal">50</div></div>'+
+      '<div class="apagon-vecinos" id="eMiembros"></div>'+
+      '<div class="apagon-problems" id="eTareas"></div>';
+    container.appendChild(d);
+    var mEl=document.getElementById('eMiembros');
+    MIEMBROS.forEach(function(m){
+      var card=document.createElement('div');card.className='apagon-vecino';card.id='em_'+m.id;
+      card.innerHTML='<div class="apagon-vecino-icon">'+m.icon+'</div><div class="apagon-vecino-name">'+m.name+'</div><div class="apagon-vecino-skill">'+m.skill+'</div>';
+      card.addEventListener('click',function(){
+        if(card.classList.contains('assigned'))return;
+        document.querySelectorAll('.apagon-vecino').forEach(function(c){c.classList.remove('selected');});
+        card.classList.add('selected');selectedMiembro=m.id;
+      });
+      mEl.appendChild(card);
+    });
+    var tEl=document.getElementById('eTareas');
+    TAREAS.forEach(function(t){
+      var row=document.createElement('div');row.className='apagon-problem';row.id='et_'+t.id;
+      row.innerHTML='<div class="apagon-problem-icon">'+t.icon+'</div><div class="apagon-problem-info"><div class="apagon-problem-title">'+t.title+'</div><div class="apagon-problem-hint">'+t.hint+'</div></div>';
+      row.addEventListener('click',function(){
+        if(!selectedMiembro||row.classList.contains('filled'))return;
+        assignments[t.id]=selectedMiembro;
+        row.classList.add('filled');
+        var mName=MIEMBROS.find(function(m){return m.id===selectedMiembro;}).name;
+        row.querySelector('.apagon-problem-hint').innerHTML='<span class="apagon-problem-assigned">→ '+mName+'</span>';
+        document.getElementById('em_'+selectedMiembro).classList.add('assigned');
+        document.getElementById('em_'+selectedMiembro).classList.remove('selected');
+        var sc=t.scores[selectedMiembro];if(sc)addLocal(sc);
+        selectedMiembro=null;
+        if(Object.keys(assignments).length>=4){clearInterval(timerRef);setTimeout(step3,800);}
+      });
+      tEl.appendChild(row);
+    });
+    timerRef=setInterval(function(){
+      timeLeft--;
+      document.getElementById('eTimerVal').textContent=timeLeft;
+      document.getElementById('eTimerFill').style.width=(timeLeft/50*100)+'%';
+      if(timeLeft<=0){
+        clearInterval(timerRef);
+        TAREAS.forEach(function(t){
+          if(!assignments[t.id]){
+            var available=MIEMBROS.filter(function(m){return Object.values(assignments).indexOf(m.id)===-1;});
+            if(available.length){
+              var pick=available[0];assignments[t.id]=pick.id;
+              addLocal({D:4,hR:4});
+            }
+          }
+        });
+        setTimeout(step3,400);
+      }
+    },1000);
+  }
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='autoeval-wrap fade-in';
+    d.innerHTML='<div class="autoeval-badge">AUTOEVALUACIÓN</div>'+
+      '<div style="font-size:48px;">👥</div>'+
+      '<div class="autoeval-prompt">¿Qué rol te sale más natural en un equipo?</div>'+
+      '<div class="autoeval-hint">Pensá en tus experiencias reales, no en lo que "deberías" ser.</div>'+
+      '<div class="autoeval-scale" id="aeScale2"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🎯',label:'Liderar',scores:{I:8,D:6,hE:6}},
+      {icon:'🧠',label:'Pensar',scores:{hI:8,C:6,mTeo:6}},
+      {icon:'🤝',label:'Conectar',scores:{S:8,mSoc:6,I:6}},
+      {icon:'🛠️',label:'Ejecutar',scores:{hR:8,D:6,pdcC:6}},
+    ];
+    var sc=document.getElementById('aeScale2');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='autoeval-btn';
+      btn.innerHTML='<div class="autoeval-btn-icon">'+opt.icon+'</div><div class="autoeval-btn-label">'+opt.label+'</div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.autoeval-btn').forEach(function(b){if(b!==btn)b.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(finishEquipo,550);
+      });
+      sc.appendChild(btn);
+    });
+  }
+  function finishEquipo(){
+    var lid=(accum.I||0)+(accum.D||0)+(accum.hE||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var soc=(accum.S||0)+(accum.mSoc||0)+(accum.hS||0);
+    var eje=(accum.hR||0)+(accum.pdcC||0)+(accum.hC||0);
+    var mx=Math.max(lid,ana,soc,eje,1);
+    zoneComplete('equipo',accum,{
+      emoji:'👥',title:'¡Equipo armado!',
+      sub:'Cómo asignás roles y dónde te ubicás revela tu estilo de liderazgo.',
+      bars:[
+        {icon:'🎯',color:'#9a6cc7',pct:Math.round(lid/mx*100)},
+        {icon:'🧠',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'🤝',color:'#d96a8a',pct:Math.round(soc/mx*100)},
+        {icon:'🛠️',color:'#c98540',pct:Math.round(eje/mx*100)},
+      ]
+    });
+  }
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 5: LA FACHADA
+//  Arte, identidad y presión comercial
+// ═══════════════════════════════════════
+function buildFachada(container){
+  var accum={};var answered=false;var wallItems=[];
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 1 DE 3 — DISEÑÁ LA FACHADA</div>'+
+      '<div class="aula-prompt">La nave necesita una cara. Elegí 3 elementos para la fachada del proyecto.</div>'+
+      '<div class="aula-hint">Tocá 3 elementos que representen tu visión</div>'+
+      '<div class="aula-wall" id="fWall"><div class="aula-wall-label">FACHADA</div></div>'+
+      '<div class="aula-palette" id="fPalette"></div>'+
+      '<button class="btn btn-warm aula-confirm" id="fConfirm" disabled>Confirmar diseño →</button>';
+    container.appendChild(d);
+    var ELEMS=[
+      {icon:'🌿',name:'Plantas vivas',scores:{pdcC:8,S:6,mTra:4}},
+      {icon:'💡',name:'Luces de neón',scores:{hA:8,mEst:6,D:4}},
+      {icon:'🧱',name:'Ladrillo a la vista',scores:{hR:8,C:6,mTra:4}},
+      {icon:'🎨',name:'Mural colorido',scores:{hA:10,mEst:8,mAut:6}},
+      {icon:'📡',name:'Pantalla digital',scores:{hR:8,hI:6,pdcC:6}},
+      {icon:'🪵',name:'Madera reciclada',scores:{pdcC:8,mTra:6,hR:4}},
+      {icon:'✊',name:'Frase de protesta',scores:{I:8,mSoc:6,D:4}},
+      {icon:'🔔',name:'Campana comunitaria',scores:{S:8,I:6,mSoc:4}},
+    ];
+    var picked=[];var pal=document.getElementById('fPalette');
+    ELEMS.forEach(function(el){
+      var btn=document.createElement('div');btn.className='aula-elem';
+      btn.innerHTML='<div class="aula-elem-icon">'+el.icon+'</div><div class="aula-elem-name">'+el.name+'</div><div class="aula-elem-check">✓</div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;
+        var idx=picked.indexOf(el);
+        if(idx>-1){picked.splice(idx,1);btn.classList.remove('selected');}
+        else if(picked.length<3){picked.push(el);btn.classList.add('selected');}
+        document.querySelectorAll('.aula-elem').forEach(function(b){
+          if(picked.length>=3&&!b.classList.contains('selected'))b.classList.add('disabled');
+          else b.classList.remove('disabled');
+        });
+        var wall=document.getElementById('fWall');
+        wall.querySelectorAll('.aula-wall-item').forEach(function(w){w.remove();});
+        picked.forEach(function(p){var sp=document.createElement('span');sp.className='aula-wall-item';sp.textContent=p.icon;wall.appendChild(sp);});
+        document.getElementById('fConfirm').disabled=picked.length!==3;
+      });
+      pal.appendChild(btn);
+    });
+    document.getElementById('fConfirm').addEventListener('click',function(){
+      if(answered||picked.length!==3)return;answered=true;
+      wallItems=picked.slice();
+      picked.forEach(function(el){addLocal(el.scores);});
+      setTimeout(step2,400);
+    });
+  }
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">PASO 2 DE 3</div>'+
+      '<div style="text-align:center;font-size:40px;padding:4px 0;">'+wallItems.map(function(w){return w.icon;}).join(' ')+'</div>'+
+      '<div class="campo-prompt">Un inversor importante visita la nave. Le gusta el proyecto pero dice: "La fachada es muy artística. Si la hacen más sobria y profesional, les duplico la inversión." ¿Qué hacés?</div>'+
+      '<div class="campo-opts" id="f2Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🤝',title:'Aceptás — con esa plata el proyecto crece el doble',hint:'El pragmatismo a veces es la mejor creatividad.',scores:{hE:14,mEco:10,hC:8,D:6}},
+      {icon:'🎨',title:'Rechazás — la identidad no se negocia',hint:'Si cedés en esto, ¿dónde parás?',scores:{hA:14,mAut:10,mEst:8,D:6}},
+      {icon:'💡',title:'Proponés un compromiso: fachada profesional afuera, artística adentro',hint:'Dos caras del mismo proyecto.',scores:{hC:12,hE:8,hA:8,I:6}},
+      {icon:'📊',title:'Le mostrás datos de proyectos culturales exitosos con estética arriesgada',hint:'Convencer con evidencia, no con sumisión.',scores:{hI:12,mTeo:10,C:8,hA:6}},
+    ];
+    var od=document.getElementById('f2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">AUTOEVALUACIÓN</div><div class="campo-visual">🎨</div>'+
+      '<div class="campo-prompt">Cuando tu visión creativa choca con lo que otros esperan, ¿cómo reaccionás normalmente?</div>'+
+      '<div class="campo-opts" id="f3Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'🛡️',title:'Defiendo mi idea con todo — si no es mía, no la siento',hint:'La autenticidad es innegociable para vos.',scores:{hA:10,mAut:8,D:6,mEst:6}},
+      {icon:'🔄',title:'Escucho y adapto — las buenas ideas se mejoran con otros',hint:'La colaboración te enriquece.',scores:{I:10,S:8,hC:6,mSoc:6}},
+      {icon:'🤷',title:'Me cuesta mucho decidir — las dos posturas tienen razón',hint:'La tensión te paraliza un poco.',scores:{C:8,hI:6,S:6,mTeo:6}},
+      {icon:'🧪',title:'Pruebo las dos versiones y veo cuál funciona mejor',hint:'El experimento resuelve debates.',scores:{hI:10,hR:8,D:6,C:6}},
+    ];
+    var od=document.getElementById('f3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(finishFachada,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+  function finishFachada(){
+    var cre=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+    var est=(accum.hE||0)+(accum.mEco||0)+(accum.hC||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var soc=(accum.S||0)+(accum.I||0)+(accum.mSoc||0);
+    var mx=Math.max(cre,est,ana,soc,1);
+    zoneComplete('fachada',accum,{
+      emoji:'🎨',title:'¡Fachada diseñada!',
+      sub:'La tensión entre tu visión y el mercado revela cómo negociás tu identidad.',
+      bars:[
+        {icon:'🎨',color:'#d96060',pct:Math.round(cre/mx*100)},
+        {icon:'💰',color:'#c98540',pct:Math.round(est/mx*100)},
+        {icon:'🔍',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'🤝',color:'#d96a8a',pct:Math.round(soc/mx*100)},
+      ]
+    });
+  }
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 6: LA ASAMBLEA
+//  Chat — mediación comunitaria
+// ═══════════════════════════════════════
+function buildAsamblea(container){
+  var accum={};var answered=false;var step=0;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+  var SCRIPT=[
+    {type:'scene',text:'La asamblea vecinal para decidir el futuro de la nave. Hay 15 personas sentadas en ronda.'},
+    {type:'them',name:'Don Carlos',text:'Yo lo que quiero es que esto no sea otro antro. Ya tenemos suficientes problemas en el barrio.'},
+    {type:'them',name:'Lucía (25)',text:'¿Antro? Estamos hablando de un centro cultural. Lo que falta acá es vida, no más estacionamientos.'},
+    {type:'them',name:'Don Carlos',text:'Cultural... ¿y quién lo paga? ¿Ustedes con sus likes?'},
+    {type:'narrator',text:'La tensión sube. Te miran esperando que intervengas.'},
+    {type:'choice',options:[
+      {text:'\"Don Carlos, entiendo su preocupación. ¿Qué le gustaría que tuviera el espacio para sentirlo suyo?\"',hint:'Incluir al opositor.',scores:{S:14,hS:12,I:10,mSoc:6}},
+      {text:'\"Los números están acá: el proyecto se autofinancia en 18 meses. ¿Quieren verlos?\"',hint:'Datos para calmar ánimos.',scores:{hI:12,hE:10,mTeo:8,C:6}},
+      {text:'\"¿Y si en vez de discutir, hacemos una lista de lo que cada uno necesita?\"',hint:'Cambiar el formato del debate.',scores:{hC:14,I:10,mTra:8,C:6}},
+    ]},
+    {type:'them',name:'Marta (docente)',text:'A mí me preocupa otra cosa. ¿Esto va a tener actividades para los chicos del barrio? Porque después de las 5 no tienen a dónde ir.'},
+    {type:'them',name:'Esteban (emprendedor)',text:'Y yo necesito un lugar para dar talleres de oficios. Hay pibes que quieren aprender carpintería, herrería...'},
+    {type:'narrator',text:'Dos propuestas válidas, pero el espacio no alcanza para todo.'},
+    {type:'choice',options:[
+      {text:'\"¿Y si hacemos turnos? Chicos a la tarde, talleres a la noche, fines de semana abierto.\"',hint:'Optimizar el recurso.',scores:{hC:12,hE:10,mTra:8,hI:6}},
+      {text:'\"Prioricemos: ¿qué es más urgente para el barrio hoy?\"',hint:'Jerarquizar necesidades.',scores:{hI:12,I:10,C:8,pdcD:6}},
+      {text:'\"Podemos arrancar con lo de los chicos y ir sumando talleres cuando crezca. Paso a paso.\"',hint:'Empezar chico, crecer orgánico.',scores:{D:12,mTra:8,hR:8,S:6}},
+    ]},
+    {type:'them',name:'Lucía (25)',text:'Una cosa más: ¿quién va a dirigir esto? Porque si es el municipio, en 6 meses se olvidan.'},
+    {type:'narrator',text:'Todos te miran.'},
+    {type:'choice',options:[
+      {text:'\"Propongo un consejo vecinal rotativo. Que sea de todos, no de uno.\"',hint:'Gobernanza colectiva.',scores:{I:14,mSoc:10,S:8,hC:6}},
+      {text:'\"Yo me comprometo a coordinarlo el primer año. Después armamos elecciones.\"',hint:'Liderazgo con fecha de vencimiento.',scores:{D:12,hE:10,I:8,hC:6}},
+      {text:'\"Busquemos a alguien con experiencia en gestión comunitaria.\"',hint:'Profesionalizar desde el arranque.',scores:{hI:10,hC:10,mTeo:8,C:6}},
+    ]},
+  ];
+  var chatEl,choicesEl;
+  function buildChat(){
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='recreo-wrap';
+    d.innerHTML='<div class="recreo-chat" id="aChat"><div class="recreo-sub">LA ASAMBLEA</div></div>'+
+      '<div class="recreo-choices" id="aChoices"></div>';
+    container.appendChild(d);
+    chatEl=document.getElementById('aChat');
+    choicesEl=document.getElementById('aChoices');
+    step=0;nextBeat();
+  }
+  function nextBeat(){
+    if(step>=SCRIPT.length){finishAsamblea();return;}
+    var beat=SCRIPT[step];
+    if(beat.type==='scene'){
+      var m=document.createElement('div');m.className='recreo-scene';m.textContent=beat.text;
+      chatEl.appendChild(m);step++;setTimeout(nextBeat,600);
+    }else if(beat.type==='narrator'){
+      var m=document.createElement('div');m.className='recreo-msg narrator';m.textContent=beat.text;
+      chatEl.appendChild(m);step++;setTimeout(nextBeat,600);
+    }else if(beat.type==='them'){
+      var typing=document.createElement('div');typing.className='recreo-typing';typing.textContent=beat.name+' escribe...';
+      chatEl.appendChild(typing);chatEl.scrollTop=chatEl.scrollHeight;
+      setTimeout(function(){
+        typing.remove();
+        var m=document.createElement('div');m.className='recreo-msg them';
+        m.innerHTML='<div class="recreo-msg-name">'+beat.name+'</div>'+beat.text;
+        chatEl.appendChild(m);chatEl.scrollTop=chatEl.scrollHeight;
+        step++;setTimeout(nextBeat,400);
+      },800);
+    }else if(beat.type==='choice'){
+      answered=false;choicesEl.innerHTML='';
+      beat.options.forEach(function(opt){
+        var btn=document.createElement('div');btn.className='recreo-choice';
+        btn.innerHTML=opt.text+'<div class="recreo-choice-hint">'+opt.hint+'</div>';
+        btn.addEventListener('click',function(){
+          if(answered)return;answered=true;btn.classList.add('picked');
+          document.querySelectorAll('.recreo-choice').forEach(function(c){if(c!==btn)c.style.opacity='.3';});
+          var m=document.createElement('div');m.className='recreo-msg me';m.textContent=opt.text.replace(/"/g,'');
+          chatEl.appendChild(m);chatEl.scrollTop=chatEl.scrollHeight;
+          addLocal(opt.scores);
+          step++;setTimeout(function(){choicesEl.innerHTML='';nextBeat();},600);
+        });
+        choicesEl.appendChild(btn);
+      });
+    }
+  }
+  function finishAsamblea(){
+    choicesEl.innerHTML='';
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var org=(accum.hC||0)+(accum.mTra||0)+(accum.hE||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var act=(accum.D||0)+(accum.I||0)+(accum.hR||0);
+    var mx=Math.max(emp,org,ana,act,1);
+    zoneComplete('asamblea',accum,{
+      emoji:'🗣️',title:'¡Asamblea resuelta!',
+      sub:'Cómo mediás conflictos dice mucho sobre tu forma de construir con otros.',
+      bars:[
+        {icon:'💗',color:'#d96a8a',pct:Math.round(emp/mx*100)},
+        {icon:'📋',color:'#a67c52',pct:Math.round(org/mx*100)},
+        {icon:'🔍',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'⚡',color:'#c98540',pct:Math.round(act/mx*100)},
+      ]
+    });
+  }
+  buildChat();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 7: EL ARCHIVO
+//  Clasificación — pasión vs pragmatismo
+// ═══════════════════════════════════════
+function buildArchivo(container){
+  var accum={};var answered=false;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  var PROPOSALS=[
+    {id:'musica',icon:'🎵',name:'Escuela de música popular',desc:'Guitarra, percusión, canto. Mucha demanda, poca plata.',
+      scores:{'🔥':{hA:12,mEst:10,S:6},'💼':{hE:8,mEco:6,D:4},'📚':{mTra:10,pdcP:8,I:4},'🔬':{hI:6,C:6,mTeo:4}}},
+    {id:'code',icon:'💻',name:'Bootcamp de programación',desc:'Python, diseño web, datos. Alta salida laboral.',
+      scores:{'🔥':{hR:12,hI:10,pdcC:6},'💼':{hE:12,mEco:10,hC:6},'📚':{mTra:8,pdcP:6,hI:4},'🔬':{hI:12,C:10,mTeo:8}}},
+    {id:'huerta',icon:'🥬',name:'Huerta comunitaria con venta directa',desc:'Producir alimentos sanos, vender sin intermediarios.',
+      scores:{'🔥':{pdcC:10,mTra:8,S:6},'💼':{hE:10,mEco:8,D:6},'📚':{mTra:10,S:8,I:6},'🔬':{hI:8,pdcD:6,C:4}}},
+    {id:'psico',icon:'🧠',name:'Centro de orientación y salud mental',desc:'Psicólogos, trabajadores sociales, talleres.',
+      scores:{'🔥':{S:14,hS:12,pdcP:8},'💼':{hE:6,hC:6,mTra:4},'📚':{mTra:8,pdcP:10,S:6},'🔬':{hI:8,C:6,mTeo:6}}},
+    {id:'media',icon:'📹',name:'Productora audiovisual barrial',desc:'Contenido local, documentales, podcast.',
+      scores:{'🔥':{hA:12,mEst:10,mAut:8},'💼':{hE:10,mEco:8,hA:4},'📚':{mTra:6,I:6,mSoc:6},'🔬':{hI:6,hA:6,mEst:4}}},
+    {id:'oficio',icon:'🔧',name:'Taller de oficios: herrería, electricidad, plomería',desc:'Formación práctica con salida laboral inmediata.',
+      scores:{'🔥':{hR:12,D:10,pdcC:8},'💼':{hE:12,hC:8,mTra:6},'📚':{mTra:12,pdcP:10,hR:6},'🔬':{hI:6,hR:6,C:4}}},
+  ];
+
+  var SHELVES=[
+    {id:'🔥',icon:'🔥',name:'Lo que más me entusiasma',count:0},
+    {id:'💼',icon:'💼',name:'Lo más viable económicamente',count:0},
+    {id:'📚',icon:'📚',name:'Lo que más impacto educativo tiene',count:0},
+    {id:'🔬',icon:'🔬',name:'Lo más innovador',count:0},
+  ];
+
+  var currentItem=0;
+
+  function showItem(){
+    if(currentItem>=PROPOSALS.length){step2();return;}
+    container.innerHTML='';
+    var item=PROPOSALS[currentItem];
+    var d=document.createElement('div');d.className='biblio-wrap fade-in';
+    d.innerHTML='<div class="biblio-sub">CLASIFICACIÓN DE PROPUESTAS</div>'+
+      '<div class="biblio-progress"><span>'+(currentItem+1)+'</span> / '+PROPOSALS.length+'</div>'+
+      '<div class="biblio-item"><div class="biblio-item-icon">'+item.icon+'</div>'+
+        '<div><div class="biblio-item-name">'+item.name+'</div>'+
+        '<div class="biblio-item-desc">'+item.desc+'</div></div></div>'+
+      '<div class="biblio-prompt">¿Bajo qué criterio priorizás esta propuesta?</div>'+
+      '<div class="biblio-shelves" id="aShelves"></div>';
+    container.appendChild(d);
+    var sEl=document.getElementById('aShelves');
+    SHELVES.forEach(function(s){
+      var shelf=document.createElement('div');shelf.className='biblio-shelf';
+      shelf.innerHTML='<div class="biblio-shelf-icon">'+s.icon+'</div>'+
+        '<div class="biblio-shelf-info"><div class="biblio-shelf-name">'+s.name+'</div>'+
+        '<div class="biblio-shelf-count">'+s.count+(s.count===1?' propuesta':' propuestas')+'</div></div>';
+      shelf.addEventListener('click',function(){
+        shelf.classList.add('picked');
+        document.querySelectorAll('.biblio-shelf').forEach(function(sh){if(sh!==shelf){sh.style.opacity='.3';sh.style.pointerEvents='none';}});
+        var sc=item.scores[s.id];if(sc)addLocal(sc);
+        s.count++;currentItem++;setTimeout(showItem,450);
+      });
+      sEl.appendChild(shelf);
+    });
+  }
+
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">DILEMA CENTRAL</div><div class="campo-visual">⚖️</div>'+
+      '<div class="campo-prompt">Si tuvieras que elegir entre dedicarte a algo que te apasiona pero tiene poco mercado, o a algo que no te entusiasma pero tiene mucha demanda, ¿qué elegirías?</div>'+
+      '<div class="campo-opts" id="a2Opts"></div>';
+    container.appendChild(d);
+    var opts=[
+      {icon:'❤️',title:'Siempre la pasión — si no te gusta, no lo vas a hacer bien',hint:'La motivación interna es el motor más potente.',scores:{hA:12,mAut:10,mEst:8,S:6}},
+      {icon:'📈',title:'La demanda — primero estabilidad, después buscás lo que te gusta',hint:'El realismo económico tiene valor.',scores:{hE:14,mEco:10,hC:8,C:6}},
+      {icon:'🔀',title:'Buscaría la intersección — algo que me guste Y que sirva',hint:'No son necesariamente opuestos.',scores:{hI:10,hE:8,hA:6,I:6}},
+      {icon:'🧪',title:'Probaría ambos caminos antes de decidir',hint:'La experiencia enseña más que la teoría.',scores:{D:10,hR:8,hI:6,mAut:6}},
+    ];
+    var od=document.getElementById('a2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);setTimeout(finishArchivo,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function finishArchivo(){
+    var pas=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+    var pra=(accum.hE||0)+(accum.mEco||0)+(accum.hC||0);
+    var soc=(accum.S||0)+(accum.mTra||0)+(accum.pdcP||0);
+    var inv=(accum.hI||0)+(accum.C||0)+(accum.hR||0);
+    var mx=Math.max(pas,pra,soc,inv,1);
+    zoneComplete('archivo',accum,{
+      emoji:'📋',title:'¡Archivo organizado!',
+      sub:'Cómo priorizás propuestas revela qué valorás más: pasión, impacto o sustentabilidad.',
+      bars:[
+        {icon:'❤️',color:'#d96060',pct:Math.round(pas/mx*100)},
+        {icon:'💼',color:'#c98540',pct:Math.round(pra/mx*100)},
+        {icon:'🤝',color:'#d96a8a',pct:Math.round(soc/mx*100)},
+        {icon:'🔬',color:'#3db87a',pct:Math.round(inv/mx*100)},
+      ]
+    });
+  }
+  showItem();
+}
+
+// ═══════════════════════════════════════
+//  ZONA 8: LA ENCRUCIJADA
+//  Decisiones binarias — valores y futuro
+// ═══════════════════════════════════════
+function buildEncrucijada(container){
+  var PAIRS=[
+    {prompt:'Tu proyecto ideal...',
+      a:{icon:'🏠',name:'Cerca de tu familia',scores:{S:8,mSoc:6,pdcP:4}},
+      b:{icon:'🌍',name:'Donde haya más oportunidades',scores:{D:8,hE:6,hR:4}}},
+    {prompt:'Si tuvieras que elegir...',
+      a:{icon:'💰',name:'Buen sueldo, trabajo rutinario',scores:{hE:8,mEco:6,hC:4}},
+      b:{icon:'🎯',name:'Sueldo justo, trabajo que te apasiona',scores:{hA:8,mAut:6,mEst:4}}},
+    {prompt:'En un equipo preferís...',
+      a:{icon:'👑',name:'Liderar y tomar decisiones',scores:{I:8,hE:6,D:6}},
+      b:{icon:'🧩',name:'Aportar tu expertise sin coordinar',scores:{hI:8,C:6,mTeo:4}}},
+    {prompt:'Un conflicto con un colega. ¿Qué hacés?',
+      a:{icon:'🗣️',name:'Lo hablás de frente',scores:{D:10,S:6,I:4}},
+      b:{icon:'📝',name:'Le escribís para pensar bien qué decir',scores:{C:8,hI:6,hA:4}}},
+    {prompt:'Para cambiar el mundo preferís...',
+      a:{icon:'🏛️',name:'Trabajar desde las instituciones',scores:{hC:8,I:6,mTra:6}},
+      b:{icon:'🔥',name:'Crear algo nuevo desde cero',scores:{D:8,hR:6,mAut:6}}},
+    {prompt:'¿Qué te da más satisfacción?',
+      a:{icon:'📊',name:'Resolver un problema complejo',scores:{hI:10,C:8,pdcD:4}},
+      b:{icon:'❤️',name:'Ayudar a alguien que lo necesita',scores:{S:10,hS:8,pdcP:4}}},
+    {prompt:'Tu carrera ideal tiene...',
+      a:{icon:'🔒',name:'Estabilidad y previsibilidad',scores:{C:8,hC:6,mTra:4}},
+      b:{icon:'🎲',name:'Desafíos nuevos todo el tiempo',scores:{D:8,hR:6,mAut:4}}},
+    {prompt:'Último día del proyecto. ¿Qué sentís?',
+      a:{icon:'📓',name:'Orgullo por lo que construimos juntos',scores:{S:8,I:6,mSoc:6}},
+      b:{icon:'🚀',name:'Ganas de arrancar el próximo',scores:{D:8,hR:6,hE:6}}},
+  ];
+
+  var idx=0;var accum={};var answered=false;
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  function renderPair(){
+    if(idx>=PAIRS.length){finishEncrucijada();return;}
+    answered=false;container.innerHTML='';
+    var p=PAIRS[idx];
+    var d=document.createElement('div');d.className='esquina-wrap fade-in';
+    d.innerHTML='<div class="esquina-sub">LA ENCRUCIJADA</div>'+
+      '<div class="esquina-counter">Decisión <span>'+(idx+1)+'/'+PAIRS.length+'</span></div>'+
+      '<div class="esquina-bar"><div class="esquina-bar-fill" style="width:'+(idx/PAIRS.length*100)+'%"></div></div>'+
+      '<div class="esquina-prompt">'+p.prompt+'</div>'+
+      '<div class="esquina-vs" id="eCards"></div>';
+    container.appendChild(d);
+    var cd=document.getElementById('eCards');
+    [p.a,p.b].forEach(function(opt,oi){
+      if(oi===1){var sep=document.createElement('div');sep.className='esquina-or';sep.textContent='o';cd.appendChild(sep);}
+      var card=document.createElement('div');card.className='esquina-card';
+      card.innerHTML='<div class="esquina-card-icon">'+opt.icon+'</div><div class="esquina-card-name">'+opt.name+'</div>';
+      card.addEventListener('click',function(){
+        if(answered)return;answered=true;card.classList.add('picked');
+        document.querySelectorAll('.esquina-card').forEach(function(c){if(c!==card)c.classList.add('not-picked');});
+        addLocal(opt.scores);
+        setTimeout(function(){idx++;renderPair();},500);
+      });
+      cd.appendChild(card);
+    });
+  }
+
+  function finishEncrucijada(){
+    var arr=(accum.S||0)+(accum.mSoc||0)+(accum.pdcP||0);
+    var amb=(accum.D||0)+(accum.hR||0)+(accum.hE||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var aut=(accum.hA||0)+(accum.mAut||0)+(accum.mEst||0);
+    var mx=Math.max(arr,amb,ana,aut,1);
+    zoneComplete('encrucijada',accum,{
+      emoji:'⚡',title:'¡Encrucijada resuelta!',
+      sub:'Tus decisiones rápidas revelan valores profundos sobre tu futuro.',
+      bars:[
+        {icon:'🏠',color:'#d96a8a',pct:Math.round(arr/mx*100)},
+        {icon:'🚀',color:'#c98540',pct:Math.round(amb/mx*100)},
+        {icon:'🧠',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'🎨',color:'#d96060',pct:Math.round(aut/mx*100)},
+      ]
+    });
+  }
+  renderPair();
+}
+
+
+// ═══ PATHFINDER SYNC MODULE ═══
+var PF_SUPABASE_URL = 'https://mnmdqqlppwuzejxibqso.supabase.co';  // ← Reemplazar con tu URL de Supabase
+var PF_SUPABASE_KEY = 'sb_publishable_iWdGYjRwe18ortlRznDj9w_HpM0M1Hf';  // ← Reemplazar con tu anon key
+var PF_PATH_NUMBER = 4;
+
+var PF_MAPPING = {
+  salud:['S','hS','mSoc','pdcP'], exactas:['hI','mTeo','pdcD','C'],
+  ing:['hR','hC','D','pdcC'], sociales:['I','hS','S','mSoc'],
+  eco:['hE','mEco','D','hC'], arte:['hA','mEst','mAut'],
+  agro:['hR','pdcC','mTra'], edu:['mTra','pdcP','mSoc','S']
+};
+var PF_CAPS = {salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+
+function pfComputeAreas(rawScores) {
+  var result = {};
+  for (var area in PF_MAPPING) {
+    var sum = 0;
+    PF_MAPPING[area].forEach(function(d){ sum += (rawScores[d]||0); });
+    var cap = PF_CAPS[area] || 160;
+    result[area] = Math.min(100, Math.round(sum / cap * 100));
+  }
+  return result;
+}
+
+function pfSyncResults() {
+  var areaPercentages = pfComputeAreas(GS.scores);
+  var payload = {
+    p_email: GS.email,
+    p_name: GS.name,
+    p_school_code: GS.schoolCode,
+    p_path_number: PF_PATH_NUMBER,
+    p_raw_scores: GS.scores,
+    p_area_percentages: areaPercentages
+  };
+
+  // Show sync status
+  var syncEl = document.getElementById('pf-sync-status');
+  if (syncEl) syncEl.textContent = 'Guardando resultados...';
+
+  fetch(PF_SUPABASE_URL + '/rest/v1/rpc/upsert_path_result', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': PF_SUPABASE_KEY,
+      'Authorization': 'Bearer ' + PF_SUPABASE_KEY
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (syncEl) {
+      if (data && data.success) {
+        syncEl.innerHTML = '✓ Resultados guardados · <a href="dashboard-alumno.html?email=' + encodeURIComponent(GS.email) + '" style="color:var(--warm,#f5a623);text-decoration:underline;">Ver mi evolución →</a>';
+      } else {
+        syncEl.textContent = '✓ Resultados guardados';
+      }
+    }
+  })
+  .catch(function(err){
+    console.error('PathFinder sync error:', err);
+    if (syncEl) syncEl.textContent = 'No se pudieron guardar (sin conexión). Tus resultados están en pantalla.';
+  });
+}
+// ═══ END SYNC MODULE ═══
+
+</script>
+</body>
+</html>

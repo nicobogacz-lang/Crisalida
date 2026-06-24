@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Path 2 — La Expedición</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Gabarito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#0a120e;color:#e0ddd4;}
+body{font-family:'Nunito',sans-serif;display:flex;flex-direction:column;position:relative;}
+
+.screen{display:none;flex-direction:column;height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
+.screen.active{display:flex;}
+.fade-in{animation:fadeIn .45s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.7}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+:root{
+  --sky:#0a120e;--sky2:#121e16;
+  --warm:#e8a838;--warm-soft:rgba(232,168,56,.1);--warm-border:rgba(232,168,56,.2);
+  --green:#3dba5e;--green-soft:rgba(61,186,94,.08);
+  --blue:#4a90d9;--red:#d95040;--purple:#9a6ad9;--pink:#d96a8a;
+  --text:#e0ddd4;--muted:rgba(224,221,212,.45);--muted2:rgba(224,221,212,.25);
+  --card:rgba(255,255,255,.04);--border:rgba(255,255,255,.07);
+  --earth:#a67c52;--earth-soft:rgba(166,124,82,.1);--earth-border:rgba(166,124,82,.2);
+  --moss:#5a9a5a;--moss-soft:rgba(90,154,90,.1);
+}
+
+/* ══ INTRO ══ */
+#intro{align-items:center;justify-content:center;gap:1.2rem;padding:2rem;text-align:center;background:radial-gradient(ellipse at 50% 80%,#142418,#0a120e);}
+.intro-badge{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.18em;color:var(--earth);background:var(--earth-soft);padding:5px 16px;border-radius:20px;border:1px solid var(--earth-border);}
+.intro-icon{font-size:64px;animation:float 3s ease-in-out infinite;}
+.intro-title{font-family:Gabarito,sans-serif;font-size:30px;font-weight:700;color:#fff;line-height:1.2;}
+.intro-sub{font-size:15px;color:var(--muted);line-height:1.6;max-width:300px;}
+.intro-input{display:flex;flex-direction:column;gap:6px;width:100%;max-width:260px;}
+.intro-input label{font-size:12px;color:var(--muted);text-align:left;}
+.intro-input input{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-family:Nunito,sans-serif;font-size:16px;color:#fff;outline:none;width:100%;}
+
+.intro-input-group{display:flex;flex-direction:column;gap:10px;width:100%;max-width:260px;}
+.intro-input-group .intro-input{margin:0;}
+#pf-sync-status{font-size:11px;color:var(--muted,#888);text-align:center;margin-top:8px;min-height:16px;}
+.intro-input input:focus{border-color:var(--earth);}
+.btn{font-family:Gabarito,sans-serif;font-size:14px;font-weight:600;padding:11px 28px;border-radius:12px;border:none;cursor:pointer;touch-action:manipulation;transition:all .15s;}
+.btn:active{transform:scale(.96);}
+.btn-warm{background:var(--earth);color:#1a0800;}
+.btn-warm:disabled{opacity:.25;}
+.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border);}
+
+/* ══ MAP ══ */
+#map-screen{background:radial-gradient(ellipse at 50% 30%,#121e16,#0a120e);}
+.map-header{padding:14px 16px 6px;flex-shrink:0;}
+.map-header-row{display:flex;justify-content:space-between;align-items:center;}
+.map-header h2{font-family:Gabarito,sans-serif;font-size:18px;font-weight:600;color:#fff;}
+.map-header-meta{display:flex;gap:8px;align-items:center;}
+.map-header-tag{font-family:Gabarito,sans-serif;font-size:10px;letter-spacing:.08em;color:var(--earth);background:var(--earth-soft);border:1px solid var(--earth-border);padding:3px 8px;border-radius:8px;}
+.map-header-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.map-header-sub span{color:var(--earth);font-weight:700;}
+
+.map-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 14px 20px;}
+
+/* Zone cards grid */
+.map-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.zone-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px 12px;border-radius:16px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .25s;text-align:center;position:relative;opacity:0;animation:fadeIn .4s ease forwards;}
+.zone-card:active{transform:scale(.95);}
+.zone-card.completed{opacity:.35;pointer-events:none;}
+.zone-card-ring{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;transition:transform .2s;}
+.zone-card-ring::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid;opacity:.3;animation:pulse 3s ease infinite;}
+.zone-card-name{font-family:Gabarito,sans-serif;font-size:12px;font-weight:700;color:#fff;line-height:1.2;}
+.zone-card-desc{font-size:10px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.zone-card-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;}
+.zone-card.completed .zone-card-check{display:flex;}
+
+/* Central compass */
+.map-compass{grid-column:2;display:flex;align-items:center;justify-content:center;padding:10px;}
+.compass-svg{width:80px;height:80px;animation:pulse 4s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(232,168,56,.15));}
+
+/* ══ GAME ══ */
+#game-screen{background:#0a120e;}
+.game-top{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(0,0,0,.4);border-bottom:1px solid var(--border);}
+.game-back{font-size:13px;color:var(--muted);cursor:pointer;touch-action:manipulation;}
+.game-label{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.12em;color:var(--earth);opacity:.7;}
+.game-body{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Campo/Sendero: narrative */
+.campo-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.campo-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.campo-visual{text-align:center;font-size:52px;padding:4px 0;flex-shrink:0;}
+.campo-bubble{padding:8px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;}
+.campo-bubble-label{font-size:11px;color:var(--muted2);}
+.campo-bubble-text{font-size:14px;color:var(--earth);font-style:italic;margin-top:2px;}
+.campo-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.campo-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.campo-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.campo-opt:active{transform:scale(.98);}
+.campo-opt.picked{border-color:var(--earth);background:var(--earth-soft);}
+.campo-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.campo-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.campo-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* Zone result */
+.zone-result{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;text-align:center;}
+.zr-icon{font-size:56px;animation:pulse 1.5s ease infinite;}
+.zr-title{font-family:Gabarito,sans-serif;font-size:20px;font-weight:700;color:#fff;}
+.zr-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:300px;}
+.zr-bars{width:100%;max-width:280px;display:flex;flex-direction:column;gap:8px;}
+.zr-bar{display:flex;align-items:center;gap:10px;}
+.zr-bar-icon{font-size:16px;width:24px;text-align:center;}
+.zr-bar-track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.zr-bar-fill{height:100%;border-radius:3px;transition:width 1s ease .3s;}
+.zr-bar-pct{font-size:11px;color:var(--muted);min-width:32px;text-align:right;}
+
+/* ══ MOCHILA (sorting/classification) ══ */
+.biblio-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.biblio-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.biblio-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.biblio-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.biblio-progress{font-size:12px;color:var(--muted);text-align:center;}
+.biblio-progress span{font-family:Gabarito,sans-serif;color:var(--earth);font-weight:700;}
+.biblio-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(166,124,82,.06);border:2px solid rgba(166,124,82,.15);text-align:left;animation:slideUp .35s ease;}
+.biblio-item-icon{font-size:28px;flex-shrink:0;}
+.biblio-item-name{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.biblio-item-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.3;}
+.biblio-shelves{display:flex;flex-direction:column;gap:8px;}
+.biblio-shelf{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.biblio-shelf:active{transform:scale(.98);}
+.biblio-shelf.picked{border-color:var(--earth);background:var(--earth-soft);}
+.biblio-shelf-icon{font-size:22px;flex-shrink:0;}
+.biblio-shelf-info{flex:1;}
+.biblio-shelf-name{font-size:13px;font-weight:600;color:#fff;}
+.biblio-shelf-count{font-size:11px;color:var(--muted);margin-top:2px;}
+.biblio-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.biblio-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.biblio-opt:active{transform:scale(.98);}
+.biblio-opt.picked{border-color:var(--earth);background:var(--earth-soft);}
+.biblio-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.biblio-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.biblio-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ BIFURCACIÓN (binary choices) ══ */
+.esquina-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 16px;gap:14px;overflow:hidden;}
+.esquina-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.esquina-counter{font-family:Gabarito,sans-serif;font-size:13px;color:var(--muted);}
+.esquina-counter span{color:var(--moss);font-weight:700;}
+.esquina-prompt{font-family:Gabarito,sans-serif;font-size:15px;font-weight:600;color:#fff;text-align:center;line-height:1.4;}
+.esquina-vs{display:flex;align-items:stretch;gap:12px;width:100%;max-width:340px;animation:fadeIn .3s ease;}
+.esquina-card{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 10px;border-radius:16px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;text-align:center;}
+.esquina-card:active{transform:scale(.95);}
+.esquina-card.picked{border-color:var(--moss);background:var(--moss-soft);transform:scale(1.03);}
+.esquina-card.not-picked{opacity:.25;transform:scale(.95);}
+.esquina-card-icon{font-size:40px;}
+.esquina-card-name{font-family:Gabarito,sans-serif;font-size:14px;font-weight:600;color:#fff;}
+.esquina-or{font-family:Gabarito,sans-serif;font-size:12px;color:var(--muted2);align-self:center;}
+.esquina-bar{width:100%;max-width:340px;height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+.esquina-bar-fill{height:100%;background:var(--moss);border-radius:2px;transition:width .3s ease;}
+.esquina-opts{display:flex;flex-direction:column;gap:8px;width:100%;max-width:340px;}
+.esquina-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.esquina-opt:active{transform:scale(.98);}
+.esquina-opt.picked{border-color:var(--moss);background:var(--moss-soft);}
+.esquina-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.esquina-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.esquina-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ CARPA (chat sim) ══ */
+.recreo-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.recreo-chat{flex:1;display:flex;flex-direction:column;gap:8px;padding:14px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.recreo-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;padding:4px 0;}
+.recreo-scene{font-size:12px;color:var(--muted);text-align:center;font-style:italic;padding:4px 12px;line-height:1.5;}
+.recreo-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;animation:slideUp .35s ease;}
+.recreo-msg.them{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;}
+.recreo-msg.them .recreo-msg-name{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:3px;}
+.recreo-msg.me{align-self:flex-end;background:rgba(74,144,217,.12);border:1px solid rgba(74,144,217,.2);color:#fff;border-bottom-right-radius:4px;}
+.recreo-msg.narrator{align-self:center;max-width:90%;background:none;border:none;font-size:12px;color:var(--muted);text-align:center;font-style:italic;padding:6px 0;}
+.recreo-choices{padding:10px 16px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;border-top:1px solid var(--border);background:rgba(0,0,0,.3);}
+.recreo-choice{padding:11px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;font-size:13px;color:var(--text);line-height:1.4;}
+.recreo-choice:active{transform:scale(.98);}
+.recreo-choice.picked{border-color:var(--blue);background:rgba(74,144,217,.1);color:#fff;}
+.recreo-choice-hint{font-size:11px;color:var(--muted);margin-top:3px;}
+.recreo-typing{align-self:flex-start;padding:8px 14px;font-size:12px;color:var(--muted);animation:pulse 1s ease infinite;}
+
+/* ══ FOGATA (creative) ══ */
+.aula-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.aula-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.aula-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.aula-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.aula-wall{position:relative;width:100%;aspect-ratio:5/3;border-radius:14px;background:linear-gradient(180deg,#10180e 0%,#141e14 100%);border:2px solid rgba(166,124,82,.15);overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:12px;}
+.aula-wall-label{position:absolute;top:6px;left:10px;font-size:10px;color:rgba(166,124,82,.35);font-family:Gabarito,sans-serif;letter-spacing:.1em;}
+.aula-wall-item{font-size:28px;animation:slideUp .4s ease;opacity:0;animation-fill-mode:forwards;}
+.aula-wall-item:nth-child(2){animation-delay:.1s;}
+.aula-wall-item:nth-child(3){animation-delay:.2s;}
+.aula-wall-item:nth-child(4){animation-delay:.3s;}
+.aula-palette{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.aula-elem{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.aula-elem:active{transform:scale(.96);}
+.aula-elem.selected{border-color:var(--earth);background:var(--earth-soft);}
+.aula-elem.disabled{opacity:.3;pointer-events:none;}
+.aula-elem-icon{font-size:24px;flex-shrink:0;}
+.aula-elem-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3;}
+.aula-elem-check{width:18px;height:18px;border-radius:50%;background:var(--earth);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;margin-left:auto;flex-shrink:0;}
+.aula-elem.selected .aula-elem-check{display:flex;}
+.aula-confirm{align-self:center;margin-top:4px;}
+.aula-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+
+/* ══ APAGÓN/CRUCE styles ══ */
+.apagon-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.apagon-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.apagon-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.apagon-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.apagon-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.apagon-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.apagon-opt:active{transform:scale(.98);}
+.apagon-opt.picked{border-color:var(--purple);background:rgba(154,106,217,.08);}
+.apagon-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.apagon-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.apagon-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.apagon-timer{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:rgba(154,106,217,.06);border:1px solid rgba(154,106,217,.15);}
+.apagon-timer-icon{font-size:16px;}
+.apagon-timer-bar{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.apagon-timer-fill{height:100%;background:var(--purple);border-radius:2px;transition:width 1s linear;}
+.apagon-timer-val{font-family:Gabarito,sans-serif;font-size:13px;color:var(--purple);min-width:24px;text-align:right;}
+.apagon-vecinos{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.apagon-vecino{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;width:90px;}
+.apagon-vecino:active{transform:scale(.96);}
+.apagon-vecino.selected{border-color:var(--purple);background:rgba(154,106,217,.08);}
+.apagon-vecino.assigned{opacity:.3;pointer-events:none;}
+.apagon-vecino-icon{font-size:24px;}
+.apagon-vecino-name{font-size:11px;font-weight:600;color:#fff;}
+.apagon-vecino-skill{font-size:10px;color:var(--muted);}
+.apagon-problems{display:flex;flex-direction:column;gap:8px;}
+.apagon-problem{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.apagon-problem:active{transform:scale(.96);}
+.apagon-problem.filled{border-color:var(--purple);background:rgba(154,106,217,.06);}
+.apagon-problem-icon{font-size:22px;}
+.apagon-problem-info{flex:1;}
+.apagon-problem-title{font-size:13px;font-weight:600;color:#fff;}
+.apagon-problem-hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.apagon-problem-assigned{font-size:11px;color:var(--purple);font-weight:600;margin-top:2px;}
+
+/* Kiosco/Campamento budget */
+.kiosco-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.kiosco-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.kiosco-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.kiosco-hint{font-size:12px;color:var(--muted);text-align:center;}
+.kiosco-budget{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(232,168,56,.06);border:1px solid rgba(232,168,56,.15);}
+.kiosco-budget-icon{font-size:20px;}
+.kiosco-budget-info{flex:1;}
+.kiosco-budget-label{font-size:10px;color:var(--muted);letter-spacing:.08em;font-family:Gabarito,sans-serif;}
+.kiosco-budget-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-top:3px;}
+.kiosco-budget-fill{height:100%;background:var(--warm);border-radius:2px;transition:width .3s;}
+.kiosco-budget-val{font-family:Gabarito,sans-serif;font-size:15px;color:var(--warm);font-weight:700;}
+.kiosco-items{display:flex;flex-direction:column;gap:8px;}
+.kiosco-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.kiosco-item:active{transform:scale(.98);}
+.kiosco-item.selected{border-color:var(--warm);background:var(--warm-soft);}
+.kiosco-item.disabled{opacity:.3;pointer-events:none;}
+.kiosco-item-icon{font-size:24px;flex-shrink:0;}
+.kiosco-item-info{flex:1;}
+.kiosco-item-name{font-size:13px;font-weight:600;color:#fff;}
+.kiosco-item-hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.kiosco-item-price{font-family:Gabarito,sans-serif;font-size:13px;color:var(--warm);font-weight:700;flex-shrink:0;}
+.kiosco-receipt{display:flex;flex-direction:column;gap:4px;padding:8px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);}
+.kiosco-receipt-item{font-size:12px;color:var(--text);display:flex;align-items:center;gap:6px;}
+.kiosco-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.kiosco-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.kiosco-opt:active{transform:scale(.98);}
+.kiosco-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+
+/* Terraza/Huerta */
+.terraza-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.terraza-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.terraza-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.terraza-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.terraza-garden{position:relative;width:100%;aspect-ratio:5/3;border-radius:14px;background:linear-gradient(180deg,#0a1a10 0%,#0e1a0e 100%);border:2px solid rgba(61,186,94,.15);overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:12px;}
+.terraza-garden-label{position:absolute;top:6px;left:10px;font-size:10px;color:rgba(61,186,94,.35);font-family:Gabarito,sans-serif;letter-spacing:.1em;}
+.terraza-garden-item{font-size:28px;animation:slideUp .4s ease;opacity:0;animation-fill-mode:forwards;}
+.terraza-garden-item:nth-child(2){animation-delay:.1s;}
+.terraza-garden-item:nth-child(3){animation-delay:.2s;}
+.terraza-garden-item:nth-child(4){animation-delay:.3s;}
+.terraza-plants{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.terraza-plant{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.terraza-plant:active{transform:scale(.96);}
+.terraza-plant.selected{border-color:var(--green);background:var(--green-soft);}
+.terraza-plant.disabled{opacity:.3;pointer-events:none;}
+.terraza-plant-icon{font-size:24px;flex-shrink:0;}
+.terraza-plant-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3;}
+.terraza-plant-check{width:18px;height:18px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;margin-left:auto;flex-shrink:0;}
+.terraza-plant.selected .terraza-plant-check{display:flex;}
+.terraza-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.terraza-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.terraza-opt:active{transform:scale(.98);}
+.terraza-opt.picked{border-color:var(--green);background:var(--green-soft);}
+.terraza-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.terraza-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.terraza-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ ZONE INTRO ══ */
+.zone-intro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:radial-gradient(ellipse at 50% 40%,rgba(166,124,82,.06),transparent);}
+.zi-icon{font-size:72px;animation:float 3s ease-in-out infinite;}
+.zi-name{font-family:Gabarito,sans-serif;font-size:24px;font-weight:700;color:#fff;}
+.zi-desc{font-size:14px;color:var(--text);line-height:1.7;max-width:300px;opacity:.85;}
+.zi-mechanic{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;background:var(--card);border:1px solid var(--border);max-width:300px;}
+.zi-mechanic-icon{font-size:20px;flex-shrink:0;}
+.zi-mechanic-text{font-size:12px;color:var(--muted);line-height:1.5;text-align:left;}
+.zi-start{margin-top:6px;}
+
+/* ══ RESULTS ══ */
+#results-screen{align-items:center;justify-content:flex-start;padding:20px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;background:radial-gradient(ellipse at 50% 20%,#142418,#0a120e);}
+.res-badge{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.15em;color:var(--earth);background:var(--earth-soft);padding:5px 14px;border-radius:20px;border:1px solid var(--earth-border);margin-bottom:4px;}
+.res-icon{font-size:56px;margin:8px 0;}
+.res-title{font-family:Gabarito,sans-serif;font-size:22px;font-weight:700;color:#fff;text-align:center;}
+.res-sub{font-size:13px;color:var(--muted);text-align:center;max-width:300px;margin-bottom:8px;}
+.res-areas{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;}
+.res-row{display:flex;align-items:center;gap:10px;}
+.res-row-icon{font-size:20px;width:28px;text-align:center;}
+.res-row-info{flex:1;}
+.res-row-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:3px;}
+.res-row-track{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.res-row-fill{height:100%;border-radius:3px;transition:width 1.2s ease .5s;}
+.res-row-pct{font-size:12px;min-width:36px;text-align:right;font-weight:700;}
+.res-note{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.6;text-align:center;max-width:340px;}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div class="intro-badge">AÑO 2 · 14 AÑOS</div>
+  <div class="intro-icon">🏔️</div>
+  <div class="intro-title">La Expedición</div>
+  <div class="intro-sub">Tu grupo sale de campamento a la montaña. Hay que explorar, sobrevivir y descubrir juntos. Cada decisión cuenta.</div>
+  <div class="intro-input-group">
+  <div class="intro-input">
+    <label>Tu nombre para la expedición</label>
+    <input type="text" id="nameInput" placeholder="Escribí tu nombre..." maxlength="20">
+  </div>
+  <div class="intro-input">
+    <label>Tu email (para guardar tu evolución)</label>
+    <input type="email" id="pfEmail" placeholder="nombre@email.com" maxlength="60" autocomplete="email">
+  </div>
+  <div class="intro-input">
+    <label>Código del colegio</label>
+    <input type="text" id="pfSchoolCode" placeholder="Ej: SJB-2025" maxlength="20" autocomplete="off">
+  </div>
+
+  </div>
+  <button class="btn btn-warm" id="startBtn" disabled>Arrancar expedición →</button>
+</div>
+
+<!-- MAP -->
+<div id="map-screen" class="screen">
+  <div class="map-header">
+    <div class="map-header-row">
+      <h2 id="mapHi">Hola</h2>
+      <div class="map-header-meta">
+        <div class="map-header-tag">v2.0</div>
+        <div class="map-header-tag" id="mapDate"></div>
+      </div>
+    </div>
+    <div class="map-header-sub">Elegí una zona para explorar.<br>Zonas exploradas: <span id="zDone">0</span>/8</div>
+  </div>
+  <div class="map-scroll" id="mapScroll"></div>
+</div>
+
+<!-- GAME -->
+<div id="game-screen" class="screen">
+  <div class="game-top">
+    <div class="game-back" onclick="backToMap()">← Mapa</div>
+    <div class="game-label" id="gLabel"></div>
+  </div>
+  <div class="game-body" id="gBody"></div>
+</div>
+
+<!-- RESULTS -->
+<div id="results-screen" class="screen">
+  <div class="res-badge">PERFIL AÑO 2</div>
+  <div class="res-icon">🏔️</div>
+  <div class="res-title">Expedición completada</div>
+  <div class="res-sub" id="resName"></div>
+  <div class="res-areas" id="resAreas"></div>
+  <div id="pf-sync-status"></div>
+  <div class="res-note" id="resNote"></div>
+</div>
+
+<script>
+// ═══ STATE ═══
+var GS={name:'',email:'',schoolCode:'',done:{},scores:{},order:[]};
+function addScores(sc){for(var k in sc)GS.scores[k]=(GS.scores[k]||0)+sc[k];}
+
+var AREAS=[
+  {id:'salud',name:'Ciencias de la Salud',icon:'🩺',color:'#4a90d9'},
+  {id:'exactas',name:'Ciencias Exactas y Naturales',icon:'🔬',color:'#3dba5e'},
+  {id:'ing',name:'Ingeniería y Tecnología',icon:'⚙️',color:'#9a6ad9'},
+  {id:'sociales',name:'Ciencias Sociales y Humanas',icon:'🌍',color:'#d96a8a'},
+  {id:'eco',name:'Ciencias Económicas',icon:'📊',color:'#e8a838'},
+  {id:'arte',name:'Arte, Diseño y Arquitectura',icon:'🎨',color:'#d95040'},
+  {id:'agro',name:'Ciencias Agropecuarias',icon:'🌱',color:'#5a9a5a'},
+  {id:'edu',name:'Educación y Pedagogía',icon:'📚',color:'#a67c52'},
+];
+
+var ZONES=[
+  {id:'sendero',  icon:'🥾',name:'El Sendero',      color:'#d96a8a',glow:'rgba(217,106,138,.15)',desc:'Ayudá a quien lo necesita en la montaña.'},
+  {id:'campamento',icon:'🎒',name:'El Campamento',  color:'#e8a838',glow:'rgba(232,168,56,.15)',desc:'Equipá al grupo con recursos limitados.'},
+  {id:'huerta',   icon:'🌿',name:'La Huerta',       color:'#3dba5e',glow:'rgba(61,186,94,.15)',desc:'Recolectá y descubrí plantas del monte.'},
+  {id:'cruce',    icon:'🌊',name:'El Cruce',        color:'#9a6ad9',glow:'rgba(154,106,217,.15)',desc:'Organizá al equipo para cruzar el río.'},
+  {id:'fogata',   icon:'🔥',name:'La Fogata',       color:'#d95040',glow:'rgba(217,80,64,.15)',desc:'Dale forma a la noche perfecta.'},
+  {id:'carpa',    icon:'⛺',name:'La Carpa',         color:'#4a90d9',glow:'rgba(74,144,217,.15)',desc:'Resolvé los conflictos del grupo.'},
+  {id:'mochila',  icon:'🧭',name:'La Mochila',      color:'#a67c52',glow:'rgba(166,124,82,.15)',desc:'Organizá y clasificá el equipo.'},
+  {id:'bifurcacion',icon:'🔀',name:'La Bifurcación',color:'#5a9a5a',glow:'rgba(90,154,90,.15)',desc:'Decidí tu camino, rápido.'},
+];
+
+// ═══ SCREENS ═══
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById(id);el.classList.add('active');el.classList.add('fade-in');
+}
+
+// ═══ INTRO ═══
+var ni=document.getElementById('nameInput'),sb=document.getElementById('startBtn');
+var pfEmailEl=document.getElementById('pfEmail'),pfSchoolEl=document.getElementById('pfSchoolCode');
+function pfCheckStart(){sb.disabled=!(ni.value.trim()&&pfEmailEl.value.includes('@')&&pfSchoolEl.value.trim().length>=2);}
+ni.addEventListener('input',pfCheckStart);
+pfEmailEl.addEventListener('input',pfCheckStart);
+pfSchoolEl.addEventListener('input',pfCheckStart);
+sb.addEventListener('click',function(){
+  GS.name=ni.value.trim();
+  GS.email=pfEmailEl.value.trim().toLowerCase();
+  GS.schoolCode=pfSchoolEl.value.trim().toUpperCase();
+  document.getElementById('mapHi').textContent='Hola, '+GS.name;
+  buildMap();showScreen('map-screen');
+});
+
+// ═══ MAP ═══
+function buildMap(){
+  var scroll=document.getElementById('mapScroll');
+  scroll.innerHTML='';
+
+  // Set date
+  var now=new Date();var dd=now.getDate();var mm=now.getMonth()+1;
+  document.getElementById('mapDate').textContent=dd+'/'+mm;
+
+  // Grid container
+  var grid=document.createElement('div');
+  grid.className='map-grid';
+
+  // Zone order for the grid: 3 top, 2 sides + compass center, 3 bottom
+  var layout=['sendero','campamento','huerta','cruce','__compass__','fogata','carpa','mochila','bifurcacion'];
+
+  layout.forEach(function(id,i){
+    if(id==='__compass__'){
+      // Central compass element
+      var comp=document.createElement('div');comp.className='map-compass';
+      comp.innerHTML='<svg class="compass-svg" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">'+
+        '<defs><radialGradient id="cg"><stop offset="0%" stop-color="rgba(232,168,56,.2)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>'+
+        '<circle cx="40" cy="40" r="38" fill="url(#cg)" stroke="rgba(232,168,56,.15)" stroke-width=".5"/>'+
+        '<circle cx="40" cy="40" r="24" fill="none" stroke="rgba(232,168,56,.12)" stroke-width=".5"/>'+
+        '<circle cx="40" cy="40" r="12" fill="none" stroke="rgba(232,168,56,.2)" stroke-width=".5"/>'+
+        '<line x1="40" y1="4" x2="40" y2="76" stroke="rgba(232,168,56,.1)" stroke-width=".5"/>'+
+        '<line x1="4" y1="40" x2="76" y2="40" stroke="rgba(232,168,56,.1)" stroke-width=".5"/>'+
+        '<polygon points="40,6 44,18 40,14 36,18" fill="rgba(232,168,56,.5)"/>'+
+        '<polygon points="40,74 44,62 40,66 36,62" fill="rgba(232,168,56,.2)"/>'+
+        '<polygon points="6,40 18,36 14,40 18,44" fill="rgba(232,168,56,.2)"/>'+
+        '<polygon points="74,40 62,36 66,40 62,44" fill="rgba(232,168,56,.2)"/>'+
+        '<circle cx="40" cy="40" r="4" fill="rgba(232,168,56,.35)"/>'+
+        '<circle cx="40" cy="40" r="1.5" fill="rgba(232,168,56,.7)"/>'+
+        '<text x="40" y="11" text-anchor="middle" font-size="5" fill="rgba(232,168,56,.4)" font-family="Gabarito,sans-serif">N</text>'+
+        '</svg>';
+      grid.appendChild(comp);
+      return;
+    }
+
+    var z=ZONES.find(function(zone){return zone.id===id;});
+    if(!z)return;
+
+    var card=document.createElement('div');
+    card.className='zone-card'+(GS.done[z.id]?' completed':'');
+    card.style.animationDelay=(i*60)+'ms';
+    card.innerHTML=
+      '<div class="zone-card-ring" style="background:'+z.glow+';border:1.5px solid '+z.color+';box-shadow:0 0 16px '+z.glow+'">'+
+        '<span style="filter:drop-shadow(0 2px 4px '+z.glow+')">'+z.icon+'</span>'+
+      '</div>'+
+      '<div class="zone-card-name">'+z.name+'</div>'+
+      '<div class="zone-card-desc">'+z.desc+'</div>'+
+      '<div class="zone-card-check">✓</div>';
+
+    // Set ring border-color for pulse animation
+    var style=document.createElement('style');
+    style.textContent='.zone-card:nth-child('+(i+1)+') .zone-card-ring::after{border-color:'+z.color+';}';
+    card.appendChild(style);
+
+    card.addEventListener('click',function(){if(!GS.done[z.id])enterZone(z.id);});
+    grid.appendChild(card);
+  });
+
+  scroll.appendChild(grid);
+  updateMapUI();
+}
+
+function updateMapUI(){
+  var n=Object.keys(GS.done).length;
+  document.getElementById('zDone').textContent=n;
+}
+
+var ZONE_INTROS={
+  sendero:{
+    desc:'Tu grupo está subiendo por un sendero de montaña cuando escuchás gritos de auxilio desde un barranco. Alguien está en problemas y las decisiones que tomes pueden cambiar todo.',
+    mechIcon:'🌿',mechText:'Narrativa con decisiones. Cada elección abre un camino diferente. No hay respuestas correctas, solo las tuyas.'
+  },
+  campamento:{
+    desc:'Antes de salir de expedición, hay que equipar al campamento. Tienen un presupuesto limitado y hay que decidir qué es prioridad. No alcanza para todo.',
+    mechIcon:'💰',mechText:'Gestión de recursos. Elegí en qué gastar, decidí qué hacer con lo que sobra, y resolvé los imprevistos del camino.'
+  },
+  huerta:{
+    desc:'En un claro del monte encontrás plantas silvestres que pueden ser útiles: algunas alimentan, otras curan, otras son peligrosas. ¿Sabés distinguirlas?',
+    mechIcon:'🌱',mechText:'Selección y dilema. Elegí qué recolectar, enfrentá una planta desconocida, y decidí qué hacer con lo que encontraste.'
+  },
+  cruce:{
+    desc:'El río corta el sendero. La corriente es fuerte, no hay puente, y hay que cruzar con todo el equipo. Cada persona del grupo tiene una habilidad distinta.',
+    mechIcon:'⏱️',mechText:'Asignación de roles bajo presión. Tenés 50 segundos para decidir quién hace qué. ¡El reloj corre!'
+  },
+  fogata:{
+    desc:'Cae la noche en la montaña. El grupo se reúne alrededor del fuego. Es el momento de crear algo juntos: la fogata perfecta.',
+    mechIcon:'✨',mechText:'Composición creativa. Elegí los elementos para la noche, proponé una actividad, y cerrá con una reflexión.'
+  },
+  carpa:{
+    desc:'Segunda noche de campamento. Hace frío, todos están cansados, y de repente surge un conflicto en la carpa. ¿Cómo manejás la tensión del grupo?',
+    mechIcon:'💬',mechText:'Chat simulado. Leé lo que dicen tus compañeros y elegí cómo responder. Lo que digas cambia la dinámica del grupo.'
+  },
+  mochila:{
+    desc:'Hay que preparar la mochila para la expedición. Tenés 12 objetos y 6 compartimentos. Cada cosa tiene su lugar... pero ¿sabés cuál es?',
+    mechIcon:'📦',mechText:'Clasificación. Asigná cada ítem a su categoría correcta. Tu forma de organizar revela cómo pensás.'
+  },
+  bifurcacion:{
+    desc:'El sendero se divide una y otra vez. En cada bifurcación hay dos opciones y hay que elegir rápido. No hay tiempo para dudar.',
+    mechIcon:'⚡',mechText:'Decisiones binarias. 7 elecciones rápidas, una tras otra. Instinto puro.'
+  }
+};
+
+function enterZone(zoneId){
+  GS.currentZone=zoneId;
+  var z=ZONES.find(function(z){return z.id===zoneId;});
+  document.getElementById('gLabel').textContent=z.name.toUpperCase();
+  showScreen('game-screen');
+  var body=document.getElementById('gBody');body.innerHTML='';
+  var intro=ZONE_INTROS[zoneId];
+  if(intro){
+    var d=document.createElement('div');d.className='zone-intro fade-in';
+    d.innerHTML='<div class="zi-icon">'+z.icon+'</div>'+
+      '<div class="zi-name">'+z.name+'</div>'+
+      '<div class="zi-desc">'+intro.desc+'</div>'+
+      '<div class="zi-mechanic"><div class="zi-mechanic-icon">'+intro.mechIcon+'</div><div class="zi-mechanic-text">'+intro.mechText+'</div></div>'+
+      '<button class="btn btn-warm zi-start" id="ziStart">Empezar →</button>';
+    body.appendChild(d);
+    document.getElementById('ziStart').addEventListener('click',function(){
+      body.innerHTML='';
+      startZoneGame(zoneId,body);
+    });
+  }else{
+    startZoneGame(zoneId,body);
+  }
+}
+
+function startZoneGame(zoneId,body){
+  switch(zoneId){
+    case 'sendero':buildSendero(body);break;
+    case 'campamento':buildCampamento(body);break;
+    case 'huerta':buildHuerta(body);break;
+    case 'cruce':buildCruce(body);break;
+    case 'fogata':buildFogata(body);break;
+    case 'carpa':buildCarpa(body);break;
+    case 'mochila':buildMochila(body);break;
+    case 'bifurcacion':buildBifurcacion(body);break;
+    default:buildPlaceholder(body,ZONES.find(function(z){return z.id===zoneId;}));break;
+  }
+}
+
+function buildPlaceholder(c,z){
+  c.innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;">'+
+    '<div style="font-size:48px;">'+z.icon+'</div>'+
+    '<div style="font-family:Gabarito,sans-serif;font-size:18px;font-weight:600;color:#fff;">'+z.name+'</div>'+
+    '<div style="font-size:13px;color:var(--muted);">Próximamente</div>'+
+    '<button class="btn btn-ghost" onclick="backToMap()">← Volver</button></div>';
+}
+
+function backToMap(){buildMap();showScreen('map-screen');}
+
+function zoneComplete(zoneId,scores,display){
+  addScores(scores);GS.done[zoneId]=true;GS.order.push(zoneId);
+  var body=document.getElementById('gBody');
+  var barsHtml='';
+  if(display.bars)display.bars.forEach(function(b){
+    barsHtml+='<div class="zr-bar"><div class="zr-bar-icon">'+b.icon+'</div>'+
+      '<div class="zr-bar-track"><div class="zr-bar-fill" style="width:0%;background:'+b.color+'" data-pct="'+b.pct+'"></div></div>'+
+      '<div class="zr-bar-pct">'+b.pct+'%</div></div>';
+  });
+  body.innerHTML='<div class="zone-result fade-in"><div class="zr-icon">'+display.emoji+'</div>'+
+    '<div class="zr-title">'+display.title+'</div><div class="zr-sub">'+display.sub+'</div>'+
+    '<div class="zr-bars">'+barsHtml+'</div>'+
+    '<button class="btn btn-warm" onclick="afterZone()">'+(Object.keys(GS.done).length>=8?'Ver mi perfil →':'Siguiente zona →')+'</button></div>';
+  setTimeout(function(){document.querySelectorAll('.zr-bar-fill').forEach(function(el){el.style.width=el.dataset.pct+'%';});},200);
+}
+
+function afterZone(){Object.keys(GS.done).length>=8?showResults():backToMap();}
+
+// ═══ RESULTS ═══
+function showResults(){
+  var areaScores={};AREAS.forEach(function(a){areaScores[a.id]=0;});
+  var mapping={
+    salud:['S','hS','mSoc','pdcP'],exactas:['hI','mTeo','pdcD','C'],
+    ing:['hR','hC','D','pdcC'],sociales:['I','hS','S','mSoc'],
+    eco:['hE','mEco','D','hC'],arte:['hA','mEst','mAut'],
+    agro:['hR','pdcC','mTra'],edu:['mTra','pdcP','mSoc','S'],
+  };
+  for(var a in mapping)mapping[a].forEach(function(d){areaScores[a]+=(GS.scores[d]||0);});
+  var areaCap={salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+  var sorted=AREAS.slice().sort(function(a,b){return areaScores[b.id]-areaScores[a.id];});
+  var c=document.getElementById('resAreas');c.innerHTML='';
+  document.getElementById('resName').textContent=GS.name+', así se ve tu forma de explorar el mundo';
+  sorted.forEach(function(a){
+    var cap=areaCap[a.id]||160;
+    var pct=Math.min(100,Math.round(areaScores[a.id]/cap*100));
+    var r=document.createElement('div');r.className='res-row';
+    r.innerHTML='<div class="res-row-icon">'+a.icon+'</div><div class="res-row-info"><div class="res-row-name">'+a.name+'</div>'+
+      '<div class="res-row-track"><div class="res-row-fill" style="width:0%;background:'+a.color+'" data-pct="'+pct+'"></div></div></div>'+
+      '<div class="res-row-pct" style="color:'+a.color+'">'+pct+'%</div>';
+    c.appendChild(r);
+  });
+  var notes={salud:'cuidado de personas y empatía',exactas:'pensamiento analítico y curiosidad',ing:'resolución técnica de problemas',
+    sociales:'interés por las personas y la sociedad',eco:'pensamiento estratégico y resultados',arte:'expresión creativa',
+    agro:'conexión con la naturaleza',edu:'vocación de enseñanza'};
+  document.getElementById('resNote').textContent=GS.name+' muestra tendencia hacia '+notes[sorted[0].id]+
+    ', con rasgos de '+notes[sorted[1].id]+'. Perfil Año 2 — comparar con Año 1 y ediciones siguientes.';
+  showScreen('results-screen');
+  pfSyncResults();
+  setTimeout(function(){document.querySelectorAll('.res-row-fill').forEach(function(el){el.style.width=el.dataset.pct+'%';});},400);
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL SENDERO
+//  Narrativa: excursionista perdido
+// ═══════════════════════════════════════
+function buildSendero(container){
+  var TREE={
+    s1:{visual:'🏔️',status:'El viento sopla fuerte...',thought:'¿Qué es ese ruido?',sub:'DECISIÓN 1 DE 4',
+      prompt:'Tu grupo está subiendo por un sendero de montaña. De repente, escuchás gritos de ayuda que vienen de un barranco lateral. Se ve una mochila tirada. ¿Qué hacés?',
+      options:[
+        {id:'a',icon:'📣',title:'Gritás para que responda y ubicar de dónde viene',hint:'Primero hay que entender la situación.',next:'s2a',scores:{S:12,hS:10,pdcP:8,mSoc:6}},
+        {id:'b',icon:'🧗',title:'Bajás con cuidado por el borde del barranco',hint:'Alguien puede estar herido abajo.',next:'s2b',scores:{D:12,hR:10,S:8,pdcC:6}},
+        {id:'c',icon:'📱',title:'Sacás el celular para buscar señal y pedir ayuda',hint:'Guardaparques o emergencias saben qué hacer.',next:'s2c',scores:{hC:12,C:10,hI:8,mTra:6}},
+        {id:'d',icon:'👥',title:'Reunís al grupo y organizás roles antes de actuar',hint:'En equipo se resuelve mejor.',next:'s2d',scores:{I:12,hC:10,mTra:8,hE:6}},
+      ]},
+    s2a:{visual:'👤',status:'Una voz responde...',thought:'¡Estoy acá abajo!',sub:'DECISIÓN 2 DE 4',
+      prompt:'Es un excursionista que se resbaló. Dice que se torció el tobillo y no puede subir. Está a unos 10 metros abajo, en una saliente. ¿Qué hacés?',
+      options:[
+        {id:'a1',icon:'🪢',title:'Atás mochilas y camperas para improvisar una soga',hint:'Con lo que hay, se puede armar algo.',next:'s3a',scores:{hR:14,hI:10,D:8,pdcC:6}},
+        {id:'a2',icon:'🗣️',title:'Le hablás para calmarlo y le pedís que describa cómo está',hint:'Evaluar la lesión antes de actuar.',next:'s3b',scores:{S:14,hS:12,mSoc:8,pdcP:6}},
+        {id:'a3',icon:'🏃',title:'Mandás a dos del grupo a buscar guardaparques',hint:'Mientras, vos te quedás acompañando.',next:'s3a',scores:{hC:12,I:10,mTra:8,D:6}},
+      ]},
+    s2b:{visual:'🧗',status:'Bajás despacio...',thought:'Cuidado con las piedras sueltas...',sub:'DECISIÓN 2 DE 4',
+      prompt:'Llegás hasta la saliente. El excursionista es un hombre joven, tiene el tobillo hinchado y está asustado. Tiene sed y frío. ¿Qué priorizás?',
+      options:[
+        {id:'b1',icon:'💧',title:'Le das agua y tu campera para que entre en calor',hint:'Primero lo básico: hidratación y temperatura.',next:'s3b',scores:{S:14,hS:12,pdcP:10}},
+        {id:'b2',icon:'🩹',title:'Le revisás el tobillo e improvisás una venda con tu remera',hint:'Estabilizar la lesión para que no empeore.',next:'s3a',scores:{S:10,hS:14,hI:8,pdcP:6}},
+        {id:'b3',icon:'📐',title:'Evaluás la ruta para subirlo: piedras, distancia, agarre',hint:'Sin un plan de escape, todo puede empeorar.',next:'s3a',scores:{hI:14,C:12,hR:8,pdcD:6}},
+      ]},
+    s2c:{visual:'📱',status:'Buscando señal...',thought:'Dale, dale, una barrita...',sub:'DECISIÓN 2 DE 4',
+      prompt:'No hay señal. Pero encontrás un mapa del parque en la mochila tirada. Marca un puesto de guardaparques a 2 km. ¿Qué hacés?',
+      options:[
+        {id:'c1',icon:'🗺️',title:'Estudiás el mapa y planificás la ruta más rápida al puesto',hint:'Información precisa ahorra tiempo.',next:'s3a',scores:{hI:14,C:12,pdcD:8,mTeo:6}},
+        {id:'c2',icon:'🏃',title:'Salís corriendo hacia el puesto vos solo',hint:'Cada minuto cuenta.',next:'s3b',scores:{D:14,hR:10,S:6,hE:6}},
+        {id:'c3',icon:'🪞',title:'Usás un espejo o pantalla del celular para hacer señales de luz',hint:'Puede haber alguien más arriba que te vea.',next:'s3a',scores:{hI:12,hR:10,C:8,pdcC:6}},
+      ]},
+    s2d:{visual:'👥',status:'El grupo se organiza...',thought:'¿Quién hace qué?',sub:'DECISIÓN 2 DE 4',
+      prompt:'Dividiste al grupo: dos bajan, dos quedan arriba, y vos coordinás. Los que bajan reportan que el tipo está consciente pero no puede moverse. ¿Cuál es el siguiente paso?',
+      options:[
+        {id:'d1',icon:'🧰',title:'Armás un plan de rescate con los recursos del grupo',hint:'Sogas, mochilas, camperas... todo sirve.',next:'s3a',scores:{I:14,hC:12,hR:8,mTra:6}},
+        {id:'d2',icon:'🗣️',title:'Le pedís a los de abajo que lo calmen mientras mandás a alguien por ayuda',hint:'Dividir tareas: cuidado y búsqueda en paralelo.',next:'s3b',scores:{I:12,S:10,hC:8,mTra:8}},
+        {id:'d3',icon:'📋',title:'Anotás la posición exacta, hora y estado del tipo para el reporte',hint:'Los datos van a ayudar a los guardaparques.',next:'s3a',scores:{C:14,hI:12,pdcD:8,mTeo:6}},
+      ]},
+    s3a:{visual:'🪢',status:'Manos a la obra...',thought:'Ya falta poco...',sub:'DECISIÓN 3 DE 4',
+      prompt:'Entre todos logran subir al excursionista a la saliente más alta. Pero está oscureciendo y el sendero de vuelta es peligroso de noche. ¿Qué hacés?',
+      options:[
+        {id:'e1',icon:'⛺',title:'Armás un campamento improvisado y esperan al amanecer',hint:'De noche en la montaña no se camina.',next:'s4',scores:{C:12,hI:10,hC:8,pdcD:6}},
+        {id:'e2',icon:'🔦',title:'Usás linternas y bajás despacio, guiando al grupo',hint:'Si van con cuidado, llegan antes de que sea muy tarde.',next:'s4',scores:{D:12,hR:10,I:8,hC:6}},
+        {id:'e3',icon:'🔥',title:'Prendés una fogata como señal y para calentarse',hint:'Luz y calor mientras esperan auxilio.',next:'s4',scores:{hR:10,hA:8,S:10,pdcC:8}},
+      ]},
+    s3b:{visual:'💬',status:'Hablando con calma...',thought:'Me siento mejor...',sub:'DECISIÓN 3 DE 4',
+      prompt:'El excursionista te cuenta que salió solo y nadie sabe dónde está. Se emociona. Dice que fue una estupidez. ¿Cómo respondés?',
+      options:[
+        {id:'f1',icon:'❤️',title:'"Le puede pasar a cualquiera. Lo importante es que estás bien."',hint:'No es momento de juzgar.',next:'s4',scores:{S:14,hS:12,mSoc:10,pdcP:6}},
+        {id:'f2',icon:'📝',title:'"¿Tenés a alguien a quien avisar? Cuando lleguemos, llamamos."',hint:'Resolver lo práctico ayuda a calmar.',next:'s4',scores:{C:12,hI:10,hC:8,mTra:6}},
+        {id:'f3',icon:'💡',title:'"Para la próxima podemos armar un sistema de compañeros de ruta."',hint:'Convertir el error en aprendizaje.',next:'s4',scores:{hI:10,hE:12,mTeo:10,I:6}},
+      ]},
+    s4:{visual:'🌅',status:'Llegaron a salvo',thought:'Gracias, posta.',sub:'ÚLTIMA DECISIÓN',
+      prompt:'Al día siguiente, ya en el refugio, el guardaparques te dice que lo que hicieron fue valiente. Te pregunta qué aprendiste de la experiencia. ¿Qué le decís?',
+      options:[
+        {id:'g1',icon:'🤝',title:'"Que en grupo se puede resolver casi cualquier cosa"',hint:'El trabajo en equipo fue clave.',next:'fin',scores:{I:12,mSoc:10,S:8,hS:6}},
+        {id:'g2',icon:'🧠',title:'"Que hay que pensar antes de actuar, especialmente en la montaña"',hint:'La planificación salva vidas.',next:'fin',scores:{C:12,hI:10,pdcD:8,mTeo:6}},
+        {id:'g3',icon:'💪',title:'"Que uno puede hacer más de lo que cree cuando alguien necesita ayuda"',hint:'Los límites se estiran en la emergencia.',next:'fin',scores:{D:12,S:10,hR:8,hS:6}},
+        {id:'g4',icon:'🗺️',title:'"Que hay que prepararse mejor: mapas, botiquín, plan B"',hint:'La prevención es la mejor aventura.',next:'fin',scores:{hI:10,hC:12,hR:8,pdcC:6,C:6}},
+      ]}
+  };
+
+  var accum={};var answered=false;
+
+  function render(sid){
+    var sc=TREE[sid];answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">'+sc.sub+'</div><div class="campo-visual">'+sc.visual+'</div>'+
+      '<div class="campo-bubble"><div class="campo-bubble-label">'+sc.thought+'</div><div class="campo-bubble-text">'+sc.status+'</div></div>'+
+      '<div class="campo-prompt">'+sc.prompt+'</div><div class="campo-opts" id="cOpts"></div>';
+    container.appendChild(d);
+    var od=document.getElementById('cOpts');
+    sc.options.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(function(){opt.next==='fin'?finish():render(opt.next);},550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function finish(){
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.pdcD||0);
+    var act=(accum.D||0)+(accum.hE||0)+(accum.hR||0);
+    var sys=(accum.hC||0)+(accum.mTra||0)+(accum.I||0);
+    var mx=Math.max(emp,ana,act,sys,1);
+    zoneComplete('sendero',accum,{
+      emoji:'🥾',title:'¡Rescate exitoso!',
+      sub:'Cada decisión mostró cómo actuás cuando la montaña pone a prueba.',
+      bars:[
+        {icon:'💗',color:'#d96a8a',pct:Math.round(emp/mx*100)},
+        {icon:'🔍',color:'#4a90d9',pct:Math.round(ana/mx*100)},
+        {icon:'⚡',color:'#e8a838',pct:Math.round(act/mx*100)},
+        {icon:'🔗',color:'#9a6ad9',pct:Math.round(sys/mx*100)},
+      ]
+    });
+  }
+
+  render('s1');
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA MOCHILA
+//  Clasificación: organizar equipo
+// ═══════════════════════════════════════
+function buildMochila(container){
+  var ITEMS=[
+    {icon:'🗺️',name:'Mapa topográfico del parque',desc:'Muestra senderos, ríos y altitudes.',area:'nav'},
+    {icon:'🩹',name:'Botiquín de primeros auxilios',desc:'Vendas, antiséptico, analgésicos.',area:'seg'},
+    {icon:'🔦',name:'Linterna frontal con pilas extra',desc:'Para caminatas de noche o cuevas.',area:'seg'},
+    {icon:'🧪',name:'Pastillas potabilizadoras de agua',desc:'Hacen potable el agua de arroyo.',area:'ciencia'},
+    {icon:'📓',name:'Cuaderno de campo y lápiz',desc:'Para anotar especies, dibujar, registrar.',area:'obs'},
+    {icon:'🌡️',name:'Termómetro ambiental',desc:'Para medir temperatura y anticipar clima.',area:'ciencia'},
+    {icon:'🪓',name:'Navaja multiusos',desc:'Cortar, abrir, destornillar.',area:'herr'},
+    {icon:'🎨',name:'Set de acuarelas portátil',desc:'Para pintar paisajes en el camino.',area:'arte'},
+    {icon:'📖',name:'Guía de flora y fauna local',desc:'Identificar plantas y animales.',area:'ciencia'},
+    {icon:'🧲',name:'Brújula',desc:'Para orientarse sin señal ni GPS.',area:'nav'},
+    {icon:'🍫',name:'Barras energéticas',desc:'Calorías rápidas para la caminata.',area:'seg'},
+    {icon:'📷',name:'Cámara fotográfica',desc:'Para documentar el viaje.',area:'obs'},
+  ];
+
+  var SHELVES=[
+    {id:'seg',icon:'🛡️',name:'Seguridad y supervivencia',desc:'Lo esencial para estar protegidos'},
+    {id:'ciencia',icon:'🔬',name:'Ciencia y exploración',desc:'Para investigar y entender el entorno'},
+    {id:'nav',icon:'🧭',name:'Navegación y orientación',desc:'Para no perderse nunca'},
+    {id:'obs',icon:'👁️',name:'Observación y registro',desc:'Para documentar la expedición'},
+    {id:'herr',icon:'🔧',name:'Herramientas prácticas',desc:'Para resolver problemas en el momento'},
+    {id:'arte',icon:'🎨',name:'Expresión y creatividad',desc:'Porque explorar también es sentir'},
+  ];
+
+  var queue=ITEMS.slice();var shelfCounts={};
+  SHELVES.forEach(function(s){shelfCounts[s.id]=0;});
+  var idx=0;var accum={};var answered=false;
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  var shelfScores={
+    seg:{S:8,hS:6,hC:6,pdcP:4},
+    ciencia:{hI:8,mTeo:6,C:6,pdcD:4},
+    nav:{hI:6,hR:6,pdcC:6,C:4},
+    obs:{hI:6,mEst:6,C:6,hA:4},
+    herr:{hR:8,D:6,hC:6,pdcC:4},
+    arte:{hA:8,mEst:6,mAut:6},
+  };
+
+  function renderItem(){
+    if(idx>=queue.length){finishSort();return;}
+    answered=false;container.innerHTML='';
+    var item=queue[idx];
+    var d=document.createElement('div');d.className='biblio-wrap fade-in';
+    d.innerHTML='<div class="biblio-sub">ORGANIZAR EQUIPO</div>'+
+      '<div class="biblio-progress"><span>'+(idx+1)+'/'+queue.length+'</span> ítems clasificados</div>'+
+      '<div class="biblio-item"><div class="biblio-item-icon">'+item.icon+'</div><div><div class="biblio-item-name">'+item.name+'</div><div class="biblio-item-desc">'+item.desc+'</div></div></div>'+
+      '<div class="biblio-prompt">¿En qué categoría va?</div>'+
+      '<div class="biblio-shelves" id="bShelves"></div>';
+    container.appendChild(d);
+
+    var sd=document.getElementById('bShelves');
+    SHELVES.forEach(function(shelf){
+      var btn=document.createElement('div');btn.className='biblio-shelf';
+      btn.innerHTML='<div class="biblio-shelf-icon">'+shelf.icon+'</div><div class="biblio-shelf-info"><div class="biblio-shelf-name">'+shelf.name+'</div><div class="biblio-shelf-count">'+shelfCounts[shelf.id]+' ítems</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        shelfCounts[shelf.id]++;
+        var correct=shelf.id===item.area;
+        var sc=Object.assign({},shelfScores[shelf.id]);
+        if(correct){for(var k in sc)sc[k]=Math.round(sc[k]*1.4);}
+        addLocal(sc);
+        setTimeout(function(){idx++;renderItem();},400);
+      });
+      sd.appendChild(btn);
+    });
+  }
+
+  function finishSort(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='biblio-wrap fade-in';
+    d.innerHTML='<div class="biblio-sub">REFLEXIÓN FINAL</div>'+
+      '<div class="biblio-prompt">Ya organizaste toda la mochila. ¿Qué aprendiste sobre prepararse para una expedición?</div>'+
+      '<div class="biblio-opts" id="bOpts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🛡️',title:'Que lo más importante es la seguridad: sin eso, nada funciona',hint:'Primeros auxilios, agua, luz.',scores:{S:12,hS:10,hC:8,pdcP:6}},
+      {icon:'🔬',title:'Que entender el entorno te da ventaja: saber qué plantas son comestibles, leer el clima',hint:'El conocimiento es poder.',scores:{hI:14,mTeo:10,C:8,pdcD:6}},
+      {icon:'🧭',title:'Que saber orientarte es fundamental: mapa, brújula, puntos de referencia',hint:'Perderse es el mayor riesgo.',scores:{hR:12,hI:10,D:8,pdcC:6}},
+      {icon:'🎨',title:'Que una expedición también es una experiencia creativa: dibujar, fotografiar, sentir',hint:'No todo es supervivencia.',scores:{hA:14,mEst:10,mAut:8}},
+    ];
+
+    var od=document.getElementById('bOpts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='biblio-opt';
+      btn.innerHTML='<div class="biblio-opt-icon">'+opt.icon+'</div><div><div class="biblio-opt-title">'+opt.title+'</div><div class="biblio-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.biblio-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(function(){
+          var sci=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+          var prac=(accum.hR||0)+(accum.D||0)+(accum.hC||0);
+          var care=(accum.S||0)+(accum.hS||0)+(accum.pdcP||0);
+          var crea=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+          var mx=Math.max(sci,prac,care,crea,1);
+          zoneComplete('mochila',accum,{
+            emoji:'🧭',title:'¡Mochila lista!',
+            sub:'Tu forma de organizar revela cómo pensás y qué priorizás.',
+            bars:[
+              {icon:'🔬',color:'#3dba5e',pct:Math.round(sci/mx*100)},
+              {icon:'🔧',color:'#9a6ad9',pct:Math.round(prac/mx*100)},
+              {icon:'💗',color:'#d96a8a',pct:Math.round(care/mx*100)},
+              {icon:'🎨',color:'#d95040',pct:Math.round(crea/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  renderItem();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA BIFURCACIÓN
+//  Decisiones binarias rápidas en el sendero
+// ═══════════════════════════════════════
+function buildBifurcacion(container){
+  var PAIRS=[
+    {prompt:'Se divide el camino. ¿Por dónde vas?',
+      a:{icon:'🌲',name:'Bosque cerrado',scores:{hI:8,C:6,pdcD:6}},
+      b:{icon:'🏔️',name:'Cima rocosa',scores:{D:8,hR:6,pdcC:6}}},
+    {prompt:'Encontrás un arroyo. ¿Qué hacés primero?',
+      a:{icon:'🧪',name:'Analizás si el agua es potable',scores:{hI:10,C:8,mTeo:4}},
+      b:{icon:'💧',name:'Llenás la botella directo',scores:{D:8,hR:6,S:4}}},
+    {prompt:'Tu compañero quiere descansar, pero falta poco para el mirador. ¿Qué elegís?',
+      a:{icon:'🧎',name:'Parar y descansar',scores:{S:10,hS:8,mSoc:6}},
+      b:{icon:'🚶',name:'Seguir al mirador',scores:{D:8,hR:6,hE:6}}},
+    {prompt:'Hay una cueva interesante pero el sendero marcado sigue derecho. ¿Qué hacés?',
+      a:{icon:'🕳️',name:'Explorar la cueva',scores:{hI:10,hA:6,C:4}},
+      b:{icon:'➡️',name:'Seguir el sendero seguro',scores:{hC:8,mTra:6,D:4}}},
+    {prompt:'Ves un ave rara. ¿Qué hacés?',
+      a:{icon:'📷',name:'Sacar foto rápido',scores:{hA:8,mEst:6,hI:4}},
+      b:{icon:'📝',name:'Anotar especie y comportamiento',scores:{C:10,hI:8,mTeo:4}}},
+    {prompt:'Empieza a llover. ¿Qué priorizás?',
+      a:{icon:'⛺',name:'Armar refugio',scores:{hR:10,D:8,pdcC:4}},
+      b:{icon:'🗺️',name:'Revisar el mapa para ruta corta',scores:{hI:8,C:8,hC:4}}},
+    {prompt:'Encontrás hongos en un tronco. ¿Qué hacés?',
+      a:{icon:'🔬',name:'Los estudiás con la guía',scores:{hI:10,mTeo:8,C:4}},
+      b:{icon:'🎨',name:'Los dibujás en tu cuaderno',scores:{hA:10,mEst:8,mAut:4}}},
+  ];
+
+  var idx=0;var accum={};var answered=false;
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  function renderPair(){
+    if(idx>=PAIRS.length){finishBif();return;}
+    answered=false;container.innerHTML='';
+    var p=PAIRS[idx];
+    var d=document.createElement('div');d.className='esquina-wrap fade-in';
+    d.innerHTML='<div class="esquina-sub">BIFURCACIÓN</div>'+
+      '<div class="esquina-counter">Decisión <span>'+(idx+1)+'/'+PAIRS.length+'</span></div>'+
+      '<div class="esquina-bar"><div class="esquina-bar-fill" style="width:'+(idx/PAIRS.length*100)+'%"></div></div>'+
+      '<div class="esquina-prompt">'+p.prompt+'</div>'+
+      '<div class="esquina-vs" id="eCards"></div>';
+    container.appendChild(d);
+    var cd=document.getElementById('eCards');
+
+    [p.a,p.b].forEach(function(opt,oi){
+      if(oi===1){var sep=document.createElement('div');sep.className='esquina-or';sep.textContent='o';cd.appendChild(sep);}
+      var card=document.createElement('div');card.className='esquina-card';
+      card.innerHTML='<div class="esquina-card-icon">'+opt.icon+'</div><div class="esquina-card-name">'+opt.name+'</div>';
+      card.addEventListener('click',function(){
+        if(answered)return;answered=true;card.classList.add('picked');
+        document.querySelectorAll('.esquina-card').forEach(function(c){if(c!==card)c.classList.add('not-picked');});
+        addLocal(opt.scores);
+        setTimeout(function(){idx++;renderPair();},500);
+      });
+      cd.appendChild(card);
+    });
+  }
+
+  function finishBif(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='esquina-wrap fade-in';
+    d.innerHTML='<div class="esquina-sub">REFLEXIÓN</div>'+
+      '<div class="esquina-prompt">Tus decisiones rápidas en el sendero dicen mucho. ¿Con cuál te identificás más?</div>'+
+      '<div class="esquina-opts" id="eOpts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🔍',title:'Soy de los que investigan antes de elegir',hint:'La información es poder.',scores:{hI:12,C:10,mTeo:8}},
+      {icon:'⚡',title:'Soy de los que actúan y después ven',hint:'La acción resuelve.',scores:{D:12,hR:10,hE:8}},
+      {icon:'🌿',title:'Soy de los que se conectan con el entorno',hint:'La naturaleza habla, hay que escuchar.',scores:{hA:10,mEst:8,hR:8,mAut:6}},
+      {icon:'👥',title:'Soy de los que piensan en el grupo primero',hint:'Nadie se salva solo.',scores:{S:12,I:10,mSoc:8,hS:6}},
+    ];
+
+    var od=document.getElementById('eOpts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='esquina-opt';
+      btn.innerHTML='<div class="esquina-opt-icon">'+opt.icon+'</div><div><div class="esquina-opt-title">'+opt.title+'</div><div class="esquina-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.esquina-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(function(){
+          var explore=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+          var action=(accum.D||0)+(accum.hR||0)+(accum.pdcC||0);
+          var nature=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+          var social=(accum.S||0)+(accum.I||0)+(accum.mSoc||0);
+          var mx=Math.max(explore,action,nature,social,1);
+          zoneComplete('bifurcacion',accum,{
+            emoji:'🔀',title:'¡Camino elegido!',
+            sub:'En cada bifurcación se ve qué te mueve.',
+            bars:[
+              {icon:'🔍',color:'#3dba5e',pct:Math.round(explore/mx*100)},
+              {icon:'⚡',color:'#e8a838',pct:Math.round(action/mx*100)},
+              {icon:'🌿',color:'#5a9a5a',pct:Math.round(nature/mx*100)},
+              {icon:'👥',color:'#d96a8a',pct:Math.round(social/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  renderPair();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA CARPA
+//  Chat: conflicto grupal nocturno
+// ═══════════════════════════════════════
+function buildCarpa(container){
+  var accum={};
+  var STEPS=[
+    {msgs:[
+      {type:'narrator',text:'Es la segunda noche de campamento. Están todos en la carpa grande. Hace frío.'},
+      {type:'them',name:'Sofi',text:'Che, ¿alguien vio mi linterna? La dejé acá y no está.'},
+      {type:'them',name:'Mati',text:'Yo no la toqué. ¿No la habrás dejado afuera?'},
+      {type:'them',name:'Sofi',text:'No, estoy segura de que la dejé en la carpa. Alguien la agarró.'}
+    ],choices:[
+      {text:'"Tranqui Sofi, busquemos entre todos antes de acusar a alguien."',hint:'Calmar primero, resolver después.',scores:{S:12,hS:10,mSoc:8,pdcP:6}},
+      {text:'"¿Quién fue el último en entrar a la carpa? Reconstruyamos qué pasó."',hint:'Pensar como detective.',scores:{hI:12,C:10,pdcD:8,mTeo:6}},
+      {text:'"Usemos mi linterna mientras tanto, mañana con luz la encontramos."',hint:'Solución práctica inmediata.',scores:{D:10,hR:8,hC:8,I:6}},
+    ]},
+    {msgs:[
+      {type:'them',name:'Sofi',text:'No, yo quiero saber quién la agarró. Estaba AHÍ.'},
+      {type:'them',name:'Tomás',text:'Pará... yo la usé un rato para ir al baño pero la dejé de nuevo.'},
+      {type:'them',name:'Sofi',text:'¿Y por qué no dijiste antes? No se usan las cosas de otros sin preguntar.'},
+      {type:'them',name:'Tomás',text:'Era una linterna, no tu celular. No exageres.'},
+      {type:'narrator',text:'El ambiente se pone tenso. Mati mira el piso.'}
+    ],choices:[
+      {text:'"Tomás, entiendo que era urgente, pero Sofi tiene razón: se pide."',hint:'Validar a ambos, marcar el límite.',scores:{I:12,S:10,hS:8,mSoc:8}},
+      {text:'"Propongo una regla: las cosas compartidas se avisan, las personales se piden."',hint:'Crear un sistema para que no pase de nuevo.',scores:{hC:12,I:10,mTra:8,hE:6}},
+      {text:'"Ya fue, la encontró. ¿Podemos dormir?"',hint:'No todo necesita un debate largo.',scores:{D:10,hR:6,C:6}},
+    ]},
+    {msgs:[
+      {type:'narrator',text:'Hay un silencio largo. Sofi se da vuelta en la bolsa de dormir.'},
+      {type:'them',name:'Mati',text:'Che... yo la verdad tengo frío y no traje la bolsa que corresponde. Me muero.'},
+      {type:'them',name:'Tomás',text:'¿Querés una campera mía? Tengo una extra.'},
+      {type:'them',name:'Mati',text:'Dale, gracias. Esto de acampar es más jodido de lo que pensé.'}
+    ],choices:[
+      {text:'"Es parte de la experiencia. Mañana nos reímos de esto."',hint:'El humor afloja la tensión.',scores:{S:10,mSoc:8,hS:6,I:6}},
+      {text:'"Para mañana podemos reorganizar el equipo: ver quién tiene de más y repartir mejor."',hint:'Logística para que nadie la pase mal.',scores:{hC:12,I:10,hE:8,mTra:6}},
+      {text:'"Mati, ¿querés que armemos la bolsa doble? Se puede zipear dos bolsas juntas para más abrigo."',hint:'Solución técnica creativa.',scores:{hR:12,hI:8,D:8,pdcC:6}},
+    ]},
+    {msgs:[
+      {type:'narrator',text:'Pasa un rato. Sofi se vuelve a dar vuelta.'},
+      {type:'them',name:'Sofi',text:'Tomás... perdón por reaccionar así. Estoy cansada y me puse nerviosa.'},
+      {type:'them',name:'Tomás',text:'Está bien. Yo también tendría que haber dicho. Perdón.'},
+      {type:'them',name:'Mati',text:'¿Mañana exploramos la cascada que vimos en el mapa?'},
+      {type:'narrator',text:'El grupo te mira. Sos quien más miró el mapa.'}
+    ],choices:[
+      {text:'"¡Sí! Pero primero desayunamos bien y revisamos el sendero juntos."',hint:'Entusiasmo + planificación.',scores:{I:10,hC:8,D:8,hI:6}},
+      {text:'"Dale, y llevemos el cuaderno para anotar lo que encontremos."',hint:'Convertir la caminata en una aventura científica.',scores:{hI:12,C:10,mTeo:8,hA:6}},
+      {text:'"Vamos, pero paremos si alguien se siente mal. Hoy aprendimos que hay que cuidarse."',hint:'La lección de hoy aplicada a mañana.',scores:{S:14,hS:10,mSoc:8,pdcP:6}},
+    ]}
+  ];
+
+  var stepIdx=0;
+
+  function renderStep(){
+    if(stepIdx>=STEPS.length){finishCarpa();return;}
+    var step=STEPS[stepIdx];
+    container.innerHTML='';
+    var wrap=document.createElement('div');wrap.className='recreo-wrap';
+    var chat=document.createElement('div');chat.className='recreo-chat';
+    if(stepIdx===0){
+      var sub=document.createElement('div');sub.className='recreo-sub';sub.textContent='NOCHE EN LA CARPA';
+      chat.appendChild(sub);
+    }
+    wrap.appendChild(chat);
+
+    var choicesDiv=document.createElement('div');choicesDiv.className='recreo-choices';choicesDiv.style.display='none';
+    wrap.appendChild(choicesDiv);
+    container.appendChild(wrap);
+
+    var msgIdx=0;
+    function showNextMsg(){
+      if(msgIdx>=step.msgs.length){showChoices();return;}
+      var m=step.msgs[msgIdx];
+      var el=document.createElement('div');el.className='recreo-msg '+m.type;
+      if(m.type==='them')el.innerHTML='<div class="recreo-msg-name">'+m.name+'</div>'+m.text;
+      else if(m.type==='narrator')el.textContent=m.text;
+      else el.textContent=m.text;
+      chat.appendChild(el);
+      chat.scrollTop=chat.scrollHeight;
+      msgIdx++;
+      setTimeout(showNextMsg,600);
+    }
+
+    function showChoices(){
+      choicesDiv.style.display='flex';
+      var answered=false;
+      step.choices.forEach(function(ch){
+        var btn=document.createElement('div');btn.className='recreo-choice';
+        btn.innerHTML=ch.text+'<div class="recreo-choice-hint">'+ch.hint+'</div>';
+        btn.addEventListener('click',function(){
+          if(answered)return;answered=true;btn.classList.add('picked');
+          document.querySelectorAll('.recreo-choice').forEach(function(c){if(c!==btn)c.style.opacity='.3';});
+          for(var k in ch.scores)accum[k]=(accum[k]||0)+ch.scores[k];
+          var myMsg=document.createElement('div');myMsg.className='recreo-msg me';myMsg.textContent=ch.text.replace(/"/g,'');
+          chat.appendChild(myMsg);chat.scrollTop=chat.scrollHeight;
+          setTimeout(function(){stepIdx++;renderStep();},700);
+        });
+        choicesDiv.appendChild(btn);
+      });
+    }
+
+    showNextMsg();
+  }
+
+  function finishCarpa(){
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var org=(accum.hC||0)+(accum.I||0)+(accum.mTra||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var act=(accum.D||0)+(accum.hR||0)+(accum.pdcC||0);
+    var mx=Math.max(emp,org,ana,act,1);
+    zoneComplete('carpa',accum,{
+      emoji:'⛺',title:'¡Noche superada!',
+      sub:'Cómo manejás los conflictos y el cansancio dice mucho de vos.',
+      bars:[
+        {icon:'💗',color:'#d96a8a',pct:Math.round(emp/mx*100)},
+        {icon:'📋',color:'#e8a838',pct:Math.round(org/mx*100)},
+        {icon:'🔍',color:'#4a90d9',pct:Math.round(ana/mx*100)},
+        {icon:'⚡',color:'#9a6ad9',pct:Math.round(act/mx*100)},
+      ]
+    });
+  }
+
+  renderStep();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA FOGATA
+//  Creatividad: diseñar campamento
+// ═══════════════════════════════════════
+function buildFogata(container){
+  var accum={};var answered=false;
+  var wall=[];var maxPicks=4;
+
+  var ELEMENTS=[
+    {icon:'🪵',name:'Leña seca',scores:{hR:8,D:6,pdcC:6}},
+    {icon:'🪨',name:'Piedras para fogón',scores:{hR:6,hC:6,hI:4}},
+    {icon:'🎸',name:'Guitarra',scores:{hA:10,mEst:8,mSoc:4}},
+    {icon:'🌿',name:'Ramas de eucalipto',scores:{hI:6,mTeo:4,hA:4}},
+    {icon:'🕯️',name:'Velas aromáticas',scores:{hA:8,mEst:6,S:4}},
+    {icon:'🗒️',name:'Libreta de historias',scores:{hA:6,C:6,mEst:4,mAut:4}},
+    {icon:'⭐',name:'Guía de estrellas',scores:{hI:10,mTeo:8,C:4}},
+    {icon:'🫖',name:'Mate y termo',scores:{S:6,mSoc:6,I:4}},
+    {icon:'🔭',name:'Binoculares',scores:{hI:8,C:6,mTeo:4}},
+    {icon:'🎲',name:'Juegos de mesa portátil',scores:{I:8,mSoc:6,S:4}},
+  ];
+
+  // Step 1: Pick 4 elements for the fogata
+  function step1(){
+    wall=[];answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 1 — ARMAR LA FOGATA</div>'+
+      '<div class="aula-prompt">Tu grupo se reúne alrededor del fuego. Elegí 4 elementos para crear la noche perfecta.</div>'+
+      '<div class="aula-hint">Cada elección define el vibe de la fogata.</div>'+
+      '<div class="aula-wall" id="fWall"><div class="aula-wall-label">🔥 TU FOGATA</div></div>'+
+      '<div class="aula-palette" id="fPalette"></div>'+
+      '<button class="btn btn-warm aula-confirm" id="fConfirm" disabled>Confirmar fogata →</button>';
+    container.appendChild(d);
+
+    var pal=document.getElementById('fPalette');
+    ELEMENTS.forEach(function(el){
+      var btn=document.createElement('div');btn.className='aula-elem';
+      btn.innerHTML='<div class="aula-elem-icon">'+el.icon+'</div><div class="aula-elem-name">'+el.name+'</div><div class="aula-elem-check">✓</div>';
+      btn.addEventListener('click',function(){
+        if(btn.classList.contains('selected')){
+          btn.classList.remove('selected');
+          wall=wall.filter(function(w){return w!==el;});
+        }else{
+          if(wall.length>=maxPicks)return;
+          btn.classList.add('selected');
+          wall.push(el);
+        }
+        updateWall();
+        document.getElementById('fConfirm').disabled=wall.length<maxPicks;
+        document.querySelectorAll('.aula-elem').forEach(function(e){
+          if(!e.classList.contains('selected'))e.classList.toggle('disabled',wall.length>=maxPicks);
+        });
+      });
+      pal.appendChild(btn);
+    });
+
+    document.getElementById('fConfirm').addEventListener('click',function(){
+      wall.forEach(function(el){for(var k in el.scores)accum[k]=(accum[k]||0)+el.scores[k];});
+      step2();
+    });
+  }
+
+  function updateWall(){
+    var w=document.getElementById('fWall');
+    w.innerHTML='<div class="aula-wall-label">🔥 TU FOGATA</div>';
+    wall.forEach(function(el){
+      var s=document.createElement('span');s.className='aula-wall-item';s.textContent=el.icon;
+      w.appendChild(s);
+    });
+  }
+
+  // Step 2: What to do around the fire
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 2 — ACTIVIDAD</div>'+
+      '<div style="text-align:center;font-size:48px;padding:4px 0;">🔥</div>'+
+      '<div class="aula-prompt">La fogata está prendida y el grupo se acomoda. ¿Qué proponés hacer?</div>'+
+      '<div class="aula-opts" id="fOpts2"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🎶',title:'Cantar canciones y tocar música',hint:'La música conecta y relaja.',scores:{hA:12,mEst:10,mSoc:8,S:4}},
+      {icon:'⭐',title:'Identificar constelaciones con la guía',hint:'El cielo nocturno es un mapa increíble.',scores:{hI:14,mTeo:10,C:8}},
+      {icon:'📖',title:'Contar historias de terror o de aventuras',hint:'Las mejores historias nacen en la fogata.',scores:{hA:10,mEst:8,I:8,mSoc:6}},
+      {icon:'🤔',title:'Hacer una ronda de reflexión: qué aprendimos hoy',hint:'Cerrar el día pensando juntos.',scores:{S:10,I:10,mSoc:8,hS:6}},
+    ];
+
+    var od=document.getElementById('fOpts2');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  // Step 3: Closing reflection
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 3 — CIERRE</div>'+
+      '<div class="aula-prompt">Es tarde. Antes de ir a dormir, mirás el fuego que se apaga. ¿Qué pensás?</div>'+
+      '<div class="aula-opts" id="fOpts3"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🌌',title:'"El universo es enorme y nosotros somos una fogata chiquita en medio de la montaña."',hint:'La inmensidad te inspira.',scores:{hI:10,hA:8,mTeo:8,C:6}},
+      {icon:'👥',title:'"Qué loco que con cuatro cosas y buena compañía alcanza para pasarla bien."',hint:'La simpleza vale.',scores:{S:12,mSoc:10,I:8}},
+      {icon:'🔥',title:'"Me gustaría aprender a prender fuego en cualquier condición."',hint:'La supervivencia te atrae.',scores:{hR:12,D:10,pdcC:8}},
+      {icon:'📷',title:'"Ojalá pudiera guardar este momento para siempre."',hint:'El arte de capturar lo efímero.',scores:{hA:14,mEst:10,mAut:8}},
+    ];
+
+    var od=document.getElementById('fOpts3');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(function(){
+          var crea=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+          var sci=(accum.hI||0)+(accum.mTeo||0)+(accum.C||0);
+          var social=(accum.S||0)+(accum.mSoc||0)+(accum.I||0);
+          var prac=(accum.hR||0)+(accum.D||0)+(accum.pdcC||0);
+          var mx=Math.max(crea,sci,social,prac,1);
+          zoneComplete('fogata',accum,{
+            emoji:'🔥',title:'¡Fogata memorable!',
+            sub:'Lo que elegís para la noche revela qué te emociona.',
+            bars:[
+              {icon:'🎨',color:'#d95040',pct:Math.round(crea/mx*100)},
+              {icon:'🔬',color:'#3dba5e',pct:Math.round(sci/mx*100)},
+              {icon:'👥',color:'#d96a8a',pct:Math.round(social/mx*100)},
+              {icon:'🔧',color:'#9a6ad9',pct:Math.round(prac/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL CRUCE DEL RÍO
+//  Asignar roles bajo timer
+// ═══════════════════════════════════════
+function buildCruce(container){
+  var accum={};var answered=false;var timerRef=null;
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  var MIEMBROS=[
+    {id:'roc',icon:'🧗',name:'Rocío',skill:'Escaladora'},
+    {id:'eze',icon:'🏊',name:'Eze',skill:'Sabe nadar bien'},
+    {id:'lu',icon:'📐',name:'Lu',skill:'Buena con cálculos'},
+    {id:'fran',icon:'💪',name:'Fran',skill:'El más fuerte'},
+    {id:'vale',icon:'🩹',name:'Vale',skill:'Sabe primeros auxilios'},
+    {id:'nico',icon:'🧭',name:'Nico',skill:'Experto en mapas'},
+  ];
+
+  var TAREAS=[
+    {id:'soga',icon:'🪢',title:'Atar la soga al otro lado del río',hint:'Alguien tiene que cruzar primero con la soga.',
+      best:['eze','roc'],scores:{eze:{D:14,S:8,hR:10},roc:{hR:14,D:10,pdcC:8},lu:{hI:6,C:6},fran:{D:10,hR:8,S:4},vale:{S:8,hS:6},nico:{hI:6,C:4,D:4}}},
+    {id:'peso',icon:'⚖️',title:'Calcular cuánto peso aguanta la soga',hint:'Si se pasa, se corta. Hay que ser preciso.',
+      best:['lu'],scores:{roc:{hR:6,D:4},eze:{D:6,hR:4},lu:{hI:14,C:12,mTeo:8},fran:{hR:6,D:6},vale:{C:6,hI:4},nico:{hI:10,C:8,mTeo:4}}},
+    {id:'herido',icon:'🩹',title:'Ayudar a cruzar al que tiene miedo al agua',hint:'Hay uno que está paralizado de miedo.',
+      best:['vale','roc'],scores:{roc:{S:10,hS:8,D:6},eze:{S:8,D:6,hS:4},lu:{hI:4,C:4,S:4},fran:{D:8,S:6,hR:4},vale:{S:14,hS:12,pdcP:10},nico:{S:6,I:6,mSoc:4}}},
+    {id:'mochilas',icon:'🎒',title:'Organizar el pasaje de las mochilas',hint:'Las mochilas pesadas necesitan un sistema.',
+      best:['fran','nico'],scores:{roc:{hR:6,D:6},eze:{D:6,hR:4},lu:{hI:8,C:6,hC:4},fran:{hR:14,D:10,pdcC:8},vale:{S:6,hC:4},nico:{hC:12,I:10,mTra:8}}},
+  ];
+
+  var assignments={};var selectedMiembro=null;
+
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+    d.innerHTML='<div class="apagon-sub">PASO 1 — REACCIÓN</div>'+
+      '<div style="text-align:center;font-size:52px;padding:4px 0;">🌊</div>'+
+      '<div class="apagon-prompt">Llegaron al río. Es ancho, la corriente es fuerte y no hay puente. Hay que cruzar. ¿Cuál es tu primera reacción?</div>'+
+      '<div class="apagon-opts" id="cr1Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🔍',title:'Caminás río arriba y abajo buscando el mejor punto para cruzar',hint:'No todo es fuerza bruta.',scores:{hI:10,C:8,pdcD:6,mTeo:4}},
+      {icon:'🪢',title:'Buscás un tronco o ramas largas para improvisar algo',hint:'Los recursos están en la naturaleza.',scores:{hR:12,D:8,pdcC:6,hI:4}},
+      {icon:'👥',title:'Reunís al grupo y preguntás quién sabe nadar bien',hint:'Conocer las habilidades del equipo.',scores:{I:12,S:8,hC:8,mTra:6}},
+      {icon:'🗺️',title:'Revisás el mapa para ver si hay otro cruce más seguro',hint:'A veces el camino largo es el más inteligente.',scores:{C:10,hI:10,hC:8,mTeo:6}},
+    ];
+
+    var od=document.getElementById('cr1Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='apagon-opt';
+      btn.innerHTML='<div class="apagon-opt-icon">'+opt.icon+'</div><div><div class="apagon-opt-title">'+opt.title+'</div><div class="apagon-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.apagon-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(step2,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function step2(){
+    assignments={};selectedMiembro=null;
+    var timeLeft=50;
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+
+    d.innerHTML='<div class="apagon-sub">PASO 2 — ORGANIZAR CRUCE</div>'+
+      '<div class="apagon-prompt">Hay 4 tareas y 6 personas. Asigná a alguien a cada tarea.</div>'+
+      '<div class="apagon-hint">Tocá una persona ↓ y después tocá la tarea ↓</div>'+
+      '<div class="apagon-timer"><div class="apagon-timer-icon">⏱️</div>'+
+        '<div class="apagon-timer-bar"><div class="apagon-timer-fill" id="crTimerFill" style="width:100%"></div></div>'+
+        '<div class="apagon-timer-val" id="crTimerVal">50</div></div>'+
+      '<div class="apagon-vecinos" id="crMiembros"></div>'+
+      '<div class="apagon-problems" id="crTareas"></div>';
+    container.appendChild(d);
+
+    var md=document.getElementById('crMiembros');
+    MIEMBROS.forEach(function(m){
+      var btn=document.createElement('div');btn.className='apagon-vecino';
+      btn.dataset.id=m.id;
+      btn.innerHTML='<div class="apagon-vecino-icon">'+m.icon+'</div><div class="apagon-vecino-name">'+m.name+'</div><div class="apagon-vecino-skill">'+m.skill+'</div>';
+      btn.addEventListener('click',function(){
+        if(btn.classList.contains('assigned'))return;
+        document.querySelectorAll('.apagon-vecino').forEach(function(v){v.classList.remove('selected');});
+        btn.classList.add('selected');
+        selectedMiembro=m;
+      });
+      md.appendChild(btn);
+    });
+
+    var td=document.getElementById('crTareas');
+    TAREAS.forEach(function(t){
+      var btn=document.createElement('div');btn.className='apagon-problem';
+      btn.dataset.id=t.id;
+      btn.innerHTML='<div class="apagon-problem-icon">'+t.icon+'</div><div class="apagon-problem-info"><div class="apagon-problem-title">'+t.title+'</div><div class="apagon-problem-hint">'+t.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(!selectedMiembro||btn.classList.contains('filled'))return;
+        assignments[t.id]=selectedMiembro.id;
+        var sc=t.scores[selectedMiembro.id]||{D:4,hR:4};
+        addLocal(sc);
+        btn.classList.add('filled');
+        btn.querySelector('.apagon-problem-hint').style.display='none';
+        var aDiv=document.createElement('div');aDiv.className='apagon-problem-assigned';aDiv.textContent='→ '+selectedMiembro.icon+' '+selectedMiembro.name;
+        btn.querySelector('.apagon-problem-info').appendChild(aDiv);
+
+        document.querySelector('.apagon-vecino[data-id="'+selectedMiembro.id+'"]').classList.add('assigned');
+        document.querySelectorAll('.apagon-vecino').forEach(function(v){v.classList.remove('selected');});
+        selectedMiembro=null;
+
+        if(Object.keys(assignments).length>=TAREAS.length){clearInterval(timerRef);setTimeout(step3,600);}
+      });
+      td.appendChild(btn);
+    });
+
+    timerRef=setInterval(function(){
+      timeLeft--;
+      document.getElementById('crTimerVal').textContent=timeLeft;
+      document.getElementById('crTimerFill').style.width=(timeLeft/50*100)+'%';
+      if(timeLeft<=10)document.getElementById('crTimerVal').style.color='var(--red)';
+      if(timeLeft<=0){clearInterval(timerRef);autoFill();setTimeout(step3,600);}
+    },1000);
+  }
+
+  function autoFill(){
+    TAREAS.forEach(function(t){
+      if(!assignments[t.id]){
+        var avail=MIEMBROS.filter(function(m){
+          for(var k in assignments)if(assignments[k]===m.id)return false;
+          return true;
+        });
+        if(avail.length){
+          assignments[t.id]=avail[0].id;
+          addLocal({D:4,hR:2});
+        }
+      }
+    });
+  }
+
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+    d.innerHTML='<div class="apagon-sub">PASO 3 — REFLEXIÓN</div>'+
+      '<div style="text-align:center;font-size:48px;padding:4px 0;">✅</div>'+
+      '<div class="apagon-prompt">¡Cruzaron todos! ¿Qué fue lo más importante del cruce?</div>'+
+      '<div class="apagon-opts" id="cr3Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'👥',title:'Que cada uno hizo lo que mejor sabía hacer',hint:'Los roles claros salvan.',scores:{I:12,hC:10,mTra:8}},
+      {icon:'🧠',title:'Que pensarlo bien antes de tirarse al agua fue clave',hint:'La planificación gana.',scores:{C:12,hI:10,pdcD:8}},
+      {icon:'💪',title:'Que el miedo se supera cuando hay alguien al lado',hint:'El apoyo emocional importa.',scores:{S:14,hS:10,mSoc:8}},
+      {icon:'🔧',title:'Que con ingenio y recursos naturales se puede resolver casi todo',hint:'La creatividad práctica.',scores:{hR:14,hI:8,pdcC:8}},
+    ];
+
+    var od=document.getElementById('cr3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='apagon-opt';
+      btn.innerHTML='<div class="apagon-opt-icon">'+opt.icon+'</div><div><div class="apagon-opt-title">'+opt.title+'</div><div class="apagon-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.apagon-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(function(){
+          var team=(accum.I||0)+(accum.hC||0)+(accum.mTra||0);
+          var brain=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+          var heart=(accum.S||0)+(accum.hS||0)+(accum.pdcP||0);
+          var hands=(accum.hR||0)+(accum.D||0)+(accum.pdcC||0);
+          var mx=Math.max(team,brain,heart,hands,1);
+          zoneComplete('cruce',accum,{
+            emoji:'🌊',title:'¡Río cruzado!',
+            sub:'Organizar al grupo bajo presión reveló tu estilo de liderazgo.',
+            bars:[
+              {icon:'👥',color:'#e8a838',pct:Math.round(team/mx*100)},
+              {icon:'🧠',color:'#3dba5e',pct:Math.round(brain/mx*100)},
+              {icon:'💗',color:'#d96a8a',pct:Math.round(heart/mx*100)},
+              {icon:'🔧',color:'#9a6ad9',pct:Math.round(hands/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL CAMPAMENTO
+//  Gestión de recursos — 100 puntos
+// ═══════════════════════════════════════
+function buildCampamento(container){
+  var budget=100;var selected=[];var accum={};var answered=false;
+
+  var PRODUCTS=[
+    {id:'lena',icon:'🪵',name:'Pack de leña seca',price:25,hint:'Para la fogata de las 3 noches.',scores:{hR:8,D:6,pdcC:6}},
+    {id:'comida',icon:'🥫',name:'Provisiones extra de comida',price:25,hint:'Raciones para el grupo completo.',scores:{S:8,hS:6,I:6}},
+    {id:'kit',icon:'🧪',name:'Kit de exploración científica',price:25,hint:'Lupa, tubos de ensayo, pinzas.',scores:{hI:10,mTeo:8,C:6}},
+    {id:'soga',icon:'🪢',name:'Soga de escalada profesional',price:25,hint:'30 metros, aguanta 200 kg.',scores:{hR:10,hC:8,pdcC:6}},
+  ];
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  function budgetHTML(){
+    var pct=Math.round(budget/100*100);
+    return '<div class="kiosco-budget">'+
+      '<div class="kiosco-budget-icon">🎒</div>'+
+      '<div class="kiosco-budget-info"><div class="kiosco-budget-label">TU PRESUPUESTO</div>'+
+      '<div class="kiosco-budget-bar"><div class="kiosco-budget-fill" style="width:'+pct+'%"></div></div></div>'+
+      '<div class="kiosco-budget-val">$'+budget+'</div></div>';
+  }
+
+  function receiptHTML(){
+    if(!selected.length)return '';
+    var items='';
+    selected.forEach(function(p){items+='<div class="kiosco-receipt-item"><span>'+p.icon+'</span> '+p.name+'</div>';});
+    return '<div class="kiosco-receipt">'+items+'</div>';
+  }
+
+  function step1(){
+    selected=[];budget=100;answered=false;
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 1 DE 4</div>'+budgetHTML()+
+      '<div class="kiosco-prompt">Tienen $100 para equipar el campamento. Podés elegir 2 de estas 4 cosas. ¿Qué comprás?</div>'+
+      '<div class="kiosco-hint">Tocá para seleccionar (máximo 2)</div>'+
+      '<div class="kiosco-items" id="cpItems"></div>'+
+      '<button class="btn btn-warm" id="cpConfirm" disabled style="align-self:center;margin-top:4px;">Confirmar compra →</button>';
+    container.appendChild(d);
+
+    var id=document.getElementById('cpItems');
+    PRODUCTS.forEach(function(p){
+      var btn=document.createElement('div');btn.className='kiosco-item';
+      btn.innerHTML='<div class="kiosco-item-icon">'+p.icon+'</div><div class="kiosco-item-info"><div class="kiosco-item-name">'+p.name+'</div><div class="kiosco-item-hint">'+p.hint+'</div></div><div class="kiosco-item-price">$'+p.price+'</div>';
+      btn.addEventListener('click',function(){
+        if(btn.classList.contains('selected')){
+          btn.classList.remove('selected');selected=selected.filter(function(s){return s.id!==p.id;});budget+=p.price;
+        }else{
+          if(selected.length>=2||budget<p.price)return;
+          btn.classList.add('selected');selected.push(p);budget-=p.price;
+        }
+        document.getElementById('cpConfirm').disabled=selected.length<2;
+      });
+      id.appendChild(btn);
+    });
+
+    document.getElementById('cpConfirm').addEventListener('click',function(){
+      selected.forEach(function(p){addLocal(p.scores);});
+      step2();
+    });
+  }
+
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 2 DE 4</div>'+receiptHTML()+
+      '<div class="kiosco-prompt">Con los $50 que sobraron, ¿qué hacés?</div>'+
+      '<div class="kiosco-opts" id="cp2Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'💰',title:'Los guardás para emergencias del viaje',hint:'Nunca se sabe qué puede pasar.',scores:{C:10,hC:8,hI:6}},
+      {icon:'🍕',title:'Invitás a todos a comer algo rico antes de salir',hint:'Que arranquen con buena energía y onda.',scores:{S:10,I:8,mSoc:8}},
+      {icon:'📦',title:'Comprás pilas extra, cinta y un silbato',hint:'Las cosas chicas salvan en momentos clave.',scores:{hR:10,D:8,pdcC:6}},
+      {icon:'📚',title:'Comprás una guía de plantas y hongos locales',hint:'Conocimiento del terreno.',scores:{hI:10,mTeo:8,C:6}},
+    ];
+
+    var od=document.getElementById('cp2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 3 DE 4</div>'+
+      '<div class="kiosco-prompt">Segundo día: se rompió una carpa. ¿Cómo lo resolvés?</div>'+
+      '<div class="kiosco-opts" id="cp3Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🛠️',title:'La reparás con lo que hay: cinta, ramas, ingenio',hint:'Siempre se puede arreglar algo.',scores:{hR:14,D:10,pdcC:8}},
+      {icon:'⛺',title:'Organizás para que duerman de a más en las carpas sanas',hint:'Redistribuir recursos.',scores:{I:12,hC:10,mTra:8}},
+      {icon:'🌿',title:'Armás un refugio con ramas y hojas',hint:'La naturaleza provee si sabés mirar.',scores:{hR:10,hI:10,hA:6,pdcC:6}},
+      {icon:'📋',title:'Anotás qué falló para mejorar el equipo la próxima',hint:'Aprender del error para que no se repita.',scores:{C:12,hI:10,mTeo:8,pdcD:6}},
+    ];
+
+    var od=document.getElementById('cp3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(step4,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function step4(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 4 DE 4</div>'+
+      '<div class="kiosco-prompt">Último día. Te sobró equipo. ¿Qué hacés con lo que no usaste?</div>'+
+      '<div class="kiosco-opts" id="cp4Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🎁',title:'Se lo regalás al grupo que viene después',hint:'Pagar adelante.',scores:{S:12,mSoc:10,I:8,hS:6}},
+      {icon:'📦',title:'Lo guardás organizado para la próxima expedición',hint:'Orden y previsión.',scores:{hC:10,C:8,mTra:8,hI:6}},
+      {icon:'♻️',title:'Separás lo reciclable y lo llevás de vuelta',hint:'La montaña hay que cuidarla.',scores:{hR:8,mTra:6,S:6,pdcC:6}},
+      {icon:'🧪',title:'Usás lo que sobra para un último experimento',hint:'Siempre hay algo más para descubrir.',scores:{hI:12,mTeo:8,C:8,hA:4}},
+    ];
+
+    var od=document.getElementById('cp4Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(function(){
+          var plan=(accum.C||0)+(accum.hI||0)+(accum.mTeo||0);
+          var prac=(accum.hR||0)+(accum.D||0)+(accum.pdcC||0);
+          var social=(accum.S||0)+(accum.I||0)+(accum.mSoc||0);
+          var sys=(accum.hC||0)+(accum.mTra||0)+(accum.hE||0);
+          var mx=Math.max(plan,prac,social,sys,1);
+          zoneComplete('campamento',accum,{
+            emoji:'🎒',title:'¡Campamento equipado!',
+            sub:'Cómo administrás recursos revela tus prioridades.',
+            bars:[
+              {icon:'🧠',color:'#3dba5e',pct:Math.round(plan/mx*100)},
+              {icon:'🔧',color:'#9a6ad9',pct:Math.round(prac/mx*100)},
+              {icon:'👥',color:'#d96a8a',pct:Math.round(social/mx*100)},
+              {icon:'📋',color:'#e8a838',pct:Math.round(sys/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA HUERTA SILVESTRE
+//  Naturaleza: recolectar plantas
+// ═══════════════════════════════════════
+function buildHuerta(container){
+  var accum={};var answered=false;var garden=[];var maxPicks=3;
+
+  var PLANTS=[
+    {icon:'🫐',name:'Frutos silvestres',scores:{S:6,hS:4,hR:4}},
+    {icon:'🌿',name:'Hierbas medicinales',scores:{hI:8,hS:6,mTeo:4}},
+    {icon:'🍄',name:'Hongos comestibles',scores:{hI:8,C:6,mTeo:6}},
+    {icon:'🌸',name:'Flores aromáticas',scores:{hA:8,mEst:6,S:4}},
+    {icon:'🌾',name:'Semillas nutritivas',scores:{hR:6,C:6,pdcC:4}},
+    {icon:'🍃',name:'Hojas para infusión',scores:{S:6,hI:4,mTeo:4}},
+    {icon:'🪵',name:'Corteza de sauce (analgésica)',scores:{hI:10,hS:8,mTeo:6}},
+    {icon:'🥬',name:'Verdolaga silvestre',scores:{hR:6,S:4,C:4}},
+  ];
+
+  function step1(){
+    garden=[];answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='terraza-wrap fade-in';
+    d.innerHTML='<div class="terraza-sub">PASO 1 — RECOLECTAR</div>'+
+      '<div class="terraza-prompt">Encontrás un claro en el monte con plantas útiles. Elegí 3 para llevar al campamento.</div>'+
+      '<div class="terraza-hint">Cada planta tiene un uso distinto.</div>'+
+      '<div class="terraza-garden" id="hGarden"><div class="terraza-garden-label">🌿 TU RECOLECCIÓN</div></div>'+
+      '<div class="terraza-plants" id="hPlants"></div>'+
+      '<button class="btn btn-warm" id="hConfirm" disabled style="align-self:center;margin-top:4px;">Confirmar selección →</button>';
+    container.appendChild(d);
+
+    var pd=document.getElementById('hPlants');
+    PLANTS.forEach(function(pl){
+      var btn=document.createElement('div');btn.className='terraza-plant';
+      btn.innerHTML='<div class="terraza-plant-icon">'+pl.icon+'</div><div class="terraza-plant-name">'+pl.name+'</div><div class="terraza-plant-check">✓</div>';
+      btn.addEventListener('click',function(){
+        if(btn.classList.contains('selected')){
+          btn.classList.remove('selected');garden=garden.filter(function(g){return g!==pl;});
+        }else{
+          if(garden.length>=maxPicks)return;
+          btn.classList.add('selected');garden.push(pl);
+        }
+        updateGarden();
+        document.getElementById('hConfirm').disabled=garden.length<maxPicks;
+        document.querySelectorAll('.terraza-plant').forEach(function(e){
+          if(!e.classList.contains('selected'))e.classList.toggle('disabled',garden.length>=maxPicks);
+        });
+      });
+      pd.appendChild(btn);
+    });
+
+    document.getElementById('hConfirm').addEventListener('click',function(){
+      garden.forEach(function(pl){for(var k in pl.scores)accum[k]=(accum[k]||0)+pl.scores[k];});
+      step2();
+    });
+  }
+
+  function updateGarden(){
+    var g=document.getElementById('hGarden');
+    g.innerHTML='<div class="terraza-garden-label">🌿 TU RECOLECCIÓN</div>';
+    garden.forEach(function(pl){
+      var s=document.createElement('span');s.className='terraza-garden-item';s.textContent=pl.icon;
+      g.appendChild(s);
+    });
+  }
+
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='terraza-wrap fade-in';
+    d.innerHTML='<div class="terraza-sub">PASO 2 — DILEMA</div>'+
+      '<div class="terraza-prompt">Encontrás una planta que no reconocés. Tiene frutos rojos brillantes. Un compañero dice que "se pueden comer". ¿Qué hacés?</div>'+
+      '<div class="terraza-opts" id="hOpts2"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'📖',title:'La comparás con la guía de flora antes de tocarla',hint:'Nunca comer sin identificar.',scores:{hI:14,C:10,mTeo:8,pdcD:6}},
+      {icon:'🔬',title:'Le sacás foto y la olés con cuidado, buscando señales',hint:'Los sentidos también dan información.',scores:{hI:10,C:8,mTeo:6,hA:4}},
+      {icon:'⚠️',title:'"No toquemos nada que no conozcamos. Punto."',hint:'La precaución salva vidas.',scores:{hC:12,S:8,mTra:8,D:6}},
+      {icon:'🧪',title:'Frotás un poquito en la piel para ver si irrita',hint:'Test básico de toxicidad.',scores:{hI:8,D:10,hR:8,C:4}},
+    ];
+
+    var od=document.getElementById('hOpts2');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='terraza-opt';
+      btn.innerHTML='<div class="terraza-opt-icon">'+opt.icon+'</div><div><div class="terraza-opt-title">'+opt.title+'</div><div class="terraza-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.terraza-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='terraza-wrap fade-in';
+    d.innerHTML='<div class="terraza-sub">PASO 3 — REFLEXIÓN</div>'+
+      '<div class="terraza-prompt">De vuelta en el campamento, ¿qué hacés con lo que recolectaste?</div>'+
+      '<div class="terraza-opts" id="hOpts3"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🫖',title:'Preparás un té con las hierbas para todo el grupo',hint:'Compartir lo que encontraste.',scores:{S:12,I:10,mSoc:8,hS:6}},
+      {icon:'📓',title:'Dibujás y anotás cada planta en tu cuaderno de campo',hint:'Registro científico de la expedición.',scores:{hI:12,C:10,hA:8,mTeo:6}},
+      {icon:'🌱',title:'Guardás semillas para plantar en tu casa cuando vuelvas',hint:'Llevar un pedazo del monte con vos.',scores:{hR:10,pdcC:8,mTra:6,hA:6}},
+      {icon:'🧑‍🏫',title:'Le enseñás al grupo qué aprendiste sobre cada planta',hint:'El conocimiento se multiplica cuando se comparte.',scores:{mTra:10,pdcP:8,I:8,hI:6}},
+    ];
+
+    var od=document.getElementById('hOpts3');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='terraza-opt';
+      btn.innerHTML='<div class="terraza-opt-icon">'+opt.icon+'</div><div><div class="terraza-opt-title">'+opt.title+'</div><div class="terraza-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.terraza-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(function(){
+          var sci=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+          var care=(accum.S||0)+(accum.hS||0)+(accum.pdcP||0);
+          var prac=(accum.hR||0)+(accum.D||0)+(accum.pdcC||0);
+          var social=(accum.I||0)+(accum.mSoc||0)+(accum.mTra||0);
+          var mx=Math.max(sci,care,prac,social,1);
+          zoneComplete('huerta',accum,{
+            emoji:'🌿',title:'¡Huerta completa!',
+            sub:'Tu conexión con la naturaleza muestra qué te interesa del mundo.',
+            bars:[
+              {icon:'🔬',color:'#3dba5e',pct:Math.round(sci/mx*100)},
+              {icon:'💗',color:'#d96a8a',pct:Math.round(care/mx*100)},
+              {icon:'🔧',color:'#9a6ad9',pct:Math.round(prac/mx*100)},
+              {icon:'👥',color:'#e8a838',pct:Math.round(social/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  step1();
+}
+
+
+
+// ═══ PATHFINDER SYNC MODULE ═══
+var PF_SUPABASE_URL = 'https://mnmdqqlppwuzejxibqso.supabase.co;  // ← Reemplazar con tu URL de Supabase
+var PF_SUPABASE_KEY = 'sb_publishable_iWdGYjRwe18ortlRznDj9w_HpM0M1Hf';  // ← Reemplazar con tu anon key
+var PF_PATH_NUMBER = 2;
+
+var PF_MAPPING = {
+  salud:['S','hS','mSoc','pdcP'], exactas:['hI','mTeo','pdcD','C'],
+  ing:['hR','hC','D','pdcC'], sociales:['I','hS','S','mSoc'],
+  eco:['hE','mEco','D','hC'], arte:['hA','mEst','mAut'],
+  agro:['hR','pdcC','mTra'], edu:['mTra','pdcP','mSoc','S']
+};
+var PF_CAPS = {salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+
+function pfComputeAreas(rawScores) {
+  var result = {};
+  for (var area in PF_MAPPING) {
+    var sum = 0;
+    PF_MAPPING[area].forEach(function(d){ sum += (rawScores[d]||0); });
+    var cap = PF_CAPS[area] || 160;
+    result[area] = Math.min(100, Math.round(sum / cap * 100));
+  }
+  return result;
+}
+
+function pfSyncResults() {
+  var areaPercentages = pfComputeAreas(GS.scores);
+  var payload = {
+    p_email: GS.email,
+    p_name: GS.name,
+    p_school_code: GS.schoolCode,
+    p_path_number: PF_PATH_NUMBER,
+    p_raw_scores: GS.scores,
+    p_area_percentages: areaPercentages
+  };
+
+  // Show sync status
+  var syncEl = document.getElementById('pf-sync-status');
+  if (syncEl) syncEl.textContent = 'Guardando resultados...';
+
+  fetch(PF_SUPABASE_URL + '/rest/v1/rpc/upsert_path_result', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': PF_SUPABASE_KEY,
+      'Authorization': 'Bearer ' + PF_SUPABASE_KEY
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (syncEl) {
+      if (data && data.success) {
+        syncEl.innerHTML = '✓ Resultados guardados · <a href="dashboard-alumno.html?email=' + encodeURIComponent(GS.email) + '" style="color:var(--warm,#f5a623);text-decoration:underline;">Ver mi evolución →</a>';
+      } else {
+        syncEl.textContent = '✓ Resultados guardados';
+      }
+    }
+  })
+  .catch(function(err){
+    console.error('PathFinder sync error:', err);
+    if (syncEl) syncEl.textContent = 'No se pudieron guardar (sin conexión). Tus resultados están en pantalla.';
+  });
+}
+// ═══ END SYNC MODULE ═══
+
+</script>
+</body>
+</html>

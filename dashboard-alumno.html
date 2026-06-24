@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PathFinder · Mi Evolución</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Gabarito:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+:root{
+  --bg:#1a1a2e;--card:#24243e;--border:#3a3a5c;
+  --text:#e8e6e0;--muted:#9a98a0;
+  --warm:#f5a623;--warm-soft:rgba(245,166,35,.12);
+  --accent1:#5b9bf5;--accent2:#4ecb71;--accent3:#b07af0;
+  --accent4:#f07a9a;--accent5:#f5a623;--accent6:#f06050;
+  --accent7:#7ad8b0;--accent8:#e0a860;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Nunito,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;}
+h1{font-family:Gabarito,sans-serif;font-size:24px;font-weight:900;margin-bottom:4px;}
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:24px;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:360px;width:100%;text-align:center;display:flex;flex-direction:column;gap:16px;align-items:center;}
+.login-card label{font-size:12px;color:var(--muted);text-align:left;width:100%;}
+.login-card input{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-family:Nunito,sans-serif;font-size:16px;color:var(--text);outline:none;width:100%;}
+.login-card input:focus{border-color:var(--warm);}
+.btn{font-family:Gabarito,sans-serif;font-weight:700;border:none;border-radius:12px;padding:12px 24px;font-size:16px;cursor:pointer;transition:all .2s;}
+.btn-warm{background:var(--warm);color:#1a1a2e;}
+.btn-warm:hover{filter:brightness(1.1);}
+.btn-warm:disabled{opacity:.4;cursor:not-allowed;}
+.dashboard{max-width:720px;width:100%;display:none;flex-direction:column;gap:20px;}
+.dashboard.active{display:flex;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.card-title{font-family:Gabarito,sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.student-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+.paths-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.badge{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--warm-soft);color:var(--warm);font-weight:700;}
+.chart-container{position:relative;width:100%;max-width:400px;margin:0 auto;}
+.area-bars{display:flex;flex-direction:column;gap:10px;}
+.area-row{display:flex;align-items:center;gap:10px;}
+.area-icon{font-size:20px;min-width:28px;text-align:center;}
+.area-name{font-size:12px;color:var(--muted);min-width:80px;}
+.area-track{flex:1;height:20px;background:var(--bg);border-radius:10px;overflow:hidden;display:flex;gap:1px;}
+.area-segment{height:100%;border-radius:10px;transition:width .8s ease;position:relative;display:flex;align-items:center;justify-content:center;}
+.area-segment span{font-size:9px;font-weight:700;color:rgba(0,0,0,.7);}
+.legend{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:12px;}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-state .emoji{font-size:48px;margin-bottom:12px;}
+.back-btn{font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;margin-top:8px;}
+.evolution-table{width:100%;border-collapse:collapse;font-size:13px;}
+.evolution-table th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;font-size:11px;}
+.evolution-table td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.04);}
+.evolution-table .val{text-align:center;font-weight:700;font-family:Gabarito,sans-serif;}
+.trend-up{color:#4ecb71;}
+.trend-down{color:#f06050;}
+.trend-same{color:var(--muted);}
+@media(max-width:480px){
+  body{padding:12px;}
+  .card{padding:16px;}
+  h1{font-size:20px;}
+  .area-name{min-width:60px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <h1>🧭 PathFinder</h1>
+  <p class="subtitle">Descubrí cómo evolucionan tus intereses</p>
+  <div class="login-card">
+    <div style="width:100%">
+      <label>Tu email (el mismo que usaste en los paths)</label>
+      <input type="email" id="emailInput" placeholder="nombre@email.com" autocomplete="email">
+    </div>
+    <button class="btn btn-warm" id="loginBtn" disabled onclick="loadEvolution()">Ver mi evolución →</button>
+    <div id="loginError" style="font-size:12px;color:#f06050;display:none;"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="dashboard">
+  <div class="student-header">
+    <div>
+      <h1 id="dashName">Mi Evolución</h1>
+      <p class="subtitle" id="dashSchool"></p>
+    </div>
+    <div class="paths-badges" id="dashBadges"></div>
+  </div>
+
+  <!-- Radar chart -->
+  <div class="card">
+    <div class="card-title">Tu perfil de intereses</div>
+    <div class="card-sub">Cada eje muestra qué tan fuerte es tu afinidad con esa área</div>
+    <div class="chart-container">
+      <canvas id="radarChart"></canvas>
+    </div>
+    <div class="legend" id="radarLegend"></div>
+  </div>
+
+  <!-- Evolution bars -->
+  <div class="card">
+    <div class="card-title">Evolución por área</div>
+    <div class="card-sub">Cómo cambiaron tus afinidades path a path</div>
+    <div class="area-bars" id="areaBars"></div>
+    <div class="legend" id="barsLegend"></div>
+  </div>
+
+  <!-- Data table -->
+  <div class="card">
+    <div class="card-title">Detalle numérico</div>
+    <div class="card-sub">Porcentaje por área en cada path (▲ subió, ▼ bajó)</div>
+    <div style="overflow-x:auto;">
+      <table class="evolution-table" id="evoTable"></table>
+    </div>
+  </div>
+
+  <div class="back-btn" onclick="showLogin()">← Buscar otro email</div>
+</div>
+
+<script>
+// ═══ CONFIG ═══
+var SUPABASE_URL = 'https://mnmdqqlppwuzejxibqso.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_iWdGYjRwe18ortlRznDj9w_HpM0M1Hf';
+
+var AREAS = [
+  {id:'salud',name:'Salud',icon:'🩺',color:'#5b9bf5'},
+  {id:'exactas',name:'Exactas',icon:'🔬',color:'#4ecb71'},
+  {id:'ing',name:'Ingeniería',icon:'⚙️',color:'#b07af0'},
+  {id:'sociales',name:'Sociales',icon:'🌍',color:'#f07a9a'},
+  {id:'eco',name:'Económicas',icon:'📊',color:'#f5a623'},
+  {id:'arte',name:'Arte',icon:'🎨',color:'#f06050'},
+  {id:'agro',name:'Agro',icon:'🌱',color:'#7ad8b0'},
+  {id:'edu',name:'Educación',icon:'📚',color:'#e0a860'}
+];
+
+var PATH_NAMES = {1:'El Barrio',2:'La Expedición',3:'La Ciudad Invisible',4:'La Fundación',5:'El Congreso'};
+var PATH_COLORS = ['#5b9bf5','#4ecb71','#b07af0','#f07a9a','#f5a623'];
+
+// ═══ LOGIN ═══
+var emailIn = document.getElementById('emailInput');
+var loginBtn = document.getElementById('loginBtn');
+
+emailIn.addEventListener('input', function(){
+  loginBtn.disabled = !emailIn.value.includes('@');
+});
+
+// Check URL params for pre-filled email
+var urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('email')) {
+  emailIn.value = urlParams.get('email');
+  loginBtn.disabled = false;
+}
+
+function showLogin(){
+  document.getElementById('loginScreen').style.display = '';
+  document.getElementById('dashboard').classList.remove('active');
+}
+
+// ═══ LOAD DATA ═══
+function loadEvolution(){
+  var email = emailIn.value.trim().toLowerCase();
+  var errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Cargando...';
+
+  fetch(SUPABASE_URL + '/rest/v1/rpc/get_student_evolution', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY
+    },
+    body: JSON.stringify({p_email: email})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    loginBtn.textContent = 'Ver mi evolución →';
+    loginBtn.disabled = false;
+
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      errEl.textContent = 'No encontramos resultados para ese email. ¿Completaste algún path?';
+      errEl.style.display = '';
+      return;
+    }
+
+    renderDashboard(data, email);
+  })
+  .catch(function(err){
+    loginBtn.textContent = 'Ver mi evolución →';
+    loginBtn.disabled = false;
+    errEl.textContent = 'Error de conexión. Intentá de nuevo.';
+    errEl.style.display = '';
+    console.error(err);
+  });
+}
+
+// ═══ RENDER DASHBOARD ═══
+var radarChartInstance = null;
+
+function renderDashboard(results, email) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').classList.add('active');
+
+  // Header
+  var name = results[0].student_name || email;
+  document.getElementById('dashName').textContent = name;
+  document.getElementById('dashSchool').textContent = results[0].school_name || '';
+
+  // Badges
+  var badgesEl = document.getElementById('dashBadges');
+  badgesEl.innerHTML = '';
+  results.forEach(function(r){
+    var b = document.createElement('span');
+    b.className = 'badge';
+    b.textContent = 'Path ' + r.path_number + ': ' + PATH_NAMES[r.path_number];
+    badgesEl.appendChild(b);
+  });
+
+  // ── Radar Chart ──
+  var labels = AREAS.map(function(a){ return a.icon + ' ' + a.name; });
+  var datasets = results.map(function(r, i){
+    return {
+      label: 'Path ' + r.path_number,
+      data: AREAS.map(function(a){ return r.area_percentages[a.id] || 0; }),
+      borderColor: PATH_COLORS[r.path_number - 1],
+      backgroundColor: PATH_COLORS[r.path_number - 1] + '22',
+      borderWidth: 2,
+      pointRadius: 4,
+      pointBackgroundColor: PATH_COLORS[r.path_number - 1]
+    };
+  });
+
+  if (radarChartInstance) radarChartInstance.destroy();
+  radarChartInstance = new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: { labels: labels, datasets: datasets },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { stepSize: 25, color: '#9a98a0', backdropColor: 'transparent', font: { size: 10 } },
+          grid: { color: 'rgba(255,255,255,.08)' },
+          pointLabels: { color: '#e8e6e0', font: { size: 11, family: 'Nunito' } },
+          angleLines: { color: 'rgba(255,255,255,.06)' }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx){ return ctx.dataset.label + ': ' + ctx.raw + '%'; }
+          }
+        }
+      }
+    }
+  });
+
+  // Radar legend
+  var rl = document.getElementById('radarLegend');
+  rl.innerHTML = '';
+  results.forEach(function(r){
+    rl.innerHTML += '<div class="legend-item"><div class="legend-dot" style="background:' + PATH_COLORS[r.path_number-1] + '"></div>' + PATH_NAMES[r.path_number] + '</div>';
+  });
+
+  // ── Evolution Bars ──
+  var barsEl = document.getElementById('areaBars');
+  barsEl.innerHTML = '';
+  AREAS.forEach(function(a){
+    var row = document.createElement('div');
+    row.className = 'area-row';
+    row.innerHTML = '<div class="area-icon">' + a.icon + '</div><div class="area-name">' + a.name + '</div>';
+    var track = document.createElement('div');
+    track.className = 'area-track';
+    results.forEach(function(r){
+      var pct = r.area_percentages[a.id] || 0;
+      var seg = document.createElement('div');
+      seg.className = 'area-segment';
+      seg.style.width = '0%';
+      seg.style.background = PATH_COLORS[r.path_number - 1];
+      seg.innerHTML = '<span>' + pct + '</span>';
+      setTimeout(function(){ seg.style.width = Math.max(pct, 4) + '%'; }, 100);
+      track.appendChild(seg);
+    });
+    row.appendChild(track);
+    barsEl.appendChild(row);
+  });
+
+  // Bars legend
+  var bl = document.getElementById('barsLegend');
+  bl.innerHTML = '';
+  results.forEach(function(r){
+    bl.innerHTML += '<div class="legend-item"><div class="legend-dot" style="background:' + PATH_COLORS[r.path_number-1] + '"></div>P' + r.path_number + '</div>';
+  });
+
+  // ── Data Table ──
+  var table = document.getElementById('evoTable');
+  var thead = '<tr><th>Área</th>';
+  results.forEach(function(r){ thead += '<th style="text-align:center">Path ' + r.path_number + '</th>'; });
+  if (results.length > 1) thead += '<th style="text-align:center">Tendencia</th>';
+  thead += '</tr>';
+
+  var tbody = '';
+  AREAS.forEach(function(a){
+    tbody += '<tr><td>' + a.icon + ' ' + a.name + '</td>';
+    var values = [];
+    results.forEach(function(r){
+      var v = r.area_percentages[a.id] || 0;
+      values.push(v);
+      tbody += '<td class="val">' + v + '%</td>';
+    });
+    if (values.length > 1) {
+      var diff = values[values.length - 1] - values[0];
+      var cls = diff > 0 ? 'trend-up' : diff < 0 ? 'trend-down' : 'trend-same';
+      var arrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '=';
+      tbody += '<td class="val ' + cls + '">' + arrow + ' ' + Math.abs(diff) + '</td>';
+    }
+    tbody += '</tr>';
+  });
+
+  table.innerHTML = thead + tbody;
+}
+</script>
+</body>
+</html>

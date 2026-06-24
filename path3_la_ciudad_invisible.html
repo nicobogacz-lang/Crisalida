@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Path 3 — La Ciudad Invisible</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Gabarito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#0a0e1a;color:#e0dde8;}
+body{font-family:'Nunito',sans-serif;display:flex;flex-direction:column;position:relative;}
+
+.screen{display:none;flex-direction:column;height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
+.screen.active{display:flex;}
+.fade-in{animation:fadeIn .45s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.7}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 6px rgba(212,168,69,.3))}50%{filter:drop-shadow(0 0 14px rgba(212,168,69,.5))}}
+
+:root{
+  --sky:#0a0e1a;--sky2:#10162a;
+  --warm:#d4a845;--warm-soft:rgba(212,168,69,.1);--warm-border:rgba(212,168,69,.2);
+  --green:#3db8a0;--green-soft:rgba(61,184,160,.08);
+  --blue:#4a7ad9;--red:#d96060;--purple:#8b6cc7;--pink:#d96a8a;
+  --text:#e0dde8;--muted:rgba(224,221,232,.45);--muted2:rgba(224,221,232,.25);
+  --card:rgba(255,255,255,.04);--border:rgba(255,255,255,.07);
+  --amber:#d4a845;--amber-soft:rgba(212,168,69,.1);--amber-border:rgba(212,168,69,.2);
+  --sage:#5a9a8a;--sage-soft:rgba(90,154,138,.1);
+}
+
+/* ══ INTRO ══ */
+#intro{align-items:center;justify-content:center;gap:1.2rem;padding:2rem;text-align:center;background:radial-gradient(ellipse at 50% 80%,#141a2e,#0a0e1a);}
+.intro-badge{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.18em;color:var(--warm);background:var(--warm-soft);padding:5px 16px;border-radius:20px;border:1px solid var(--warm-border);}
+.intro-icon{font-size:64px;animation:glow 3s ease-in-out infinite;}
+.intro-title{font-family:Gabarito,sans-serif;font-size:30px;font-weight:700;color:#fff;line-height:1.2;}
+.intro-sub{font-size:15px;color:var(--muted);line-height:1.6;max-width:300px;}
+.intro-input{display:flex;flex-direction:column;gap:6px;width:100%;max-width:260px;}
+.intro-input label{font-size:12px;color:var(--muted);text-align:left;}
+.intro-input input{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-family:Nunito,sans-serif;font-size:16px;color:#fff;outline:none;width:100%;}
+
+.intro-input-group{display:flex;flex-direction:column;gap:10px;width:100%;max-width:260px;}
+.intro-input-group .intro-input{margin:0;}
+#pf-sync-status{font-size:11px;color:var(--muted,#888);text-align:center;margin-top:8px;min-height:16px;}
+.intro-input input:focus{border-color:var(--warm);}
+.btn{font-family:Gabarito,sans-serif;font-size:14px;font-weight:600;padding:11px 28px;border-radius:12px;border:none;cursor:pointer;touch-action:manipulation;transition:all .15s;}
+.btn:active{transform:scale(.96);}
+.btn-warm{background:var(--warm);color:#1a0800;}
+.btn-warm:disabled{opacity:.25;}
+.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border);}
+
+/* ══ MAP ══ */
+#map-screen{background:radial-gradient(ellipse at 50% 30%,#10162a,#0a0e1a);}
+.map-header{padding:14px 16px 6px;flex-shrink:0;}
+.map-header-row{display:flex;justify-content:space-between;align-items:center;}
+.map-header h2{font-family:Gabarito,sans-serif;font-size:18px;font-weight:600;color:#fff;}
+.map-header-meta{display:flex;gap:8px;align-items:center;}
+.map-header-tag{font-family:Gabarito,sans-serif;font-size:10px;letter-spacing:.08em;color:var(--warm);background:var(--warm-soft);border:1px solid var(--warm-border);padding:3px 8px;border-radius:8px;}
+.map-header-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.map-header-sub span{color:var(--warm);font-weight:700;}
+
+.map-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 14px 20px;}
+
+/* Zone cards grid */
+.map-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.zone-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px 12px;border-radius:16px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .25s;text-align:center;position:relative;opacity:0;animation:fadeIn .4s ease forwards;}
+.zone-card:active{transform:scale(.95);}
+.zone-card.completed{opacity:.35;pointer-events:none;}
+.zone-card-ring{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;transition:transform .2s;}
+.zone-card-ring::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid;opacity:.3;animation:pulse 3s ease infinite;}
+.zone-card-name{font-family:Gabarito,sans-serif;font-size:12px;font-weight:700;color:#fff;line-height:1.2;}
+.zone-card-desc{font-size:10px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.zone-card-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;}
+.zone-card.completed .zone-card-check{display:flex;}
+
+/* Central city icon */
+.map-compass{grid-column:2;display:flex;align-items:center;justify-content:center;padding:10px;}
+.compass-svg{width:80px;height:80px;animation:glow 4s ease-in-out infinite;}
+
+/* ══ GAME ══ */
+#game-screen{background:#0a0e1a;}
+.game-top{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(0,0,0,.4);border-bottom:1px solid var(--border);}
+.game-back{font-size:13px;color:var(--muted);cursor:pointer;touch-action:manipulation;}
+.game-label{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.12em;color:var(--warm);opacity:.7;}
+.game-body{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Narrative */
+.campo-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.campo-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.campo-visual{text-align:center;font-size:52px;padding:4px 0;flex-shrink:0;}
+.campo-bubble{padding:8px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;}
+.campo-bubble-label{font-size:11px;color:var(--muted2);}
+.campo-bubble-text{font-size:14px;color:var(--warm);font-style:italic;margin-top:2px;}
+.campo-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.campo-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.campo-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.campo-opt:active{transform:scale(.98);}
+.campo-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+.campo-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.campo-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.campo-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* Zone result */
+.zone-result{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;text-align:center;}
+.zr-icon{font-size:56px;animation:pulse 1.5s ease infinite;}
+.zr-title{font-family:Gabarito,sans-serif;font-size:20px;font-weight:700;color:#fff;}
+.zr-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:300px;}
+.zr-bars{width:100%;max-width:280px;display:flex;flex-direction:column;gap:8px;}
+.zr-bar{display:flex;align-items:center;gap:10px;}
+.zr-bar-icon{font-size:16px;width:24px;text-align:center;}
+.zr-bar-track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.zr-bar-fill{height:100%;border-radius:3px;transition:width 1s ease .3s;}
+.zr-bar-pct{font-size:11px;color:var(--muted);min-width:32px;text-align:right;}
+
+/* ══ CLASSIFICATION ══ */
+.biblio-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.biblio-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.biblio-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.biblio-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.biblio-progress{font-size:12px;color:var(--muted);text-align:center;}
+.biblio-progress span{font-family:Gabarito,sans-serif;color:var(--warm);font-weight:700;}
+.biblio-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(212,168,69,.06);border:2px solid rgba(212,168,69,.15);text-align:left;animation:slideUp .35s ease;}
+.biblio-item-icon{font-size:28px;flex-shrink:0;}
+.biblio-item-name{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.biblio-item-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.3;}
+.biblio-shelves{display:flex;flex-direction:column;gap:8px;}
+.biblio-shelf{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.biblio-shelf:active{transform:scale(.98);}
+.biblio-shelf.picked{border-color:var(--warm);background:var(--warm-soft);}
+.biblio-shelf-icon{font-size:22px;flex-shrink:0;}
+.biblio-shelf-info{flex:1;}
+.biblio-shelf-name{font-size:13px;font-weight:600;color:#fff;}
+.biblio-shelf-count{font-size:11px;color:var(--muted);margin-top:2px;}
+.biblio-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.biblio-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.biblio-opt:active{transform:scale(.98);}
+.biblio-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+.biblio-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.biblio-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.biblio-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ BINARY CHOICES ══ */
+.esquina-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 16px;gap:14px;overflow:hidden;}
+.esquina-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.esquina-counter{font-family:Gabarito,sans-serif;font-size:13px;color:var(--muted);}
+.esquina-counter span{color:var(--sage);font-weight:700;}
+.esquina-prompt{font-family:Gabarito,sans-serif;font-size:15px;font-weight:600;color:#fff;text-align:center;line-height:1.4;}
+.esquina-vs{display:flex;align-items:stretch;gap:12px;width:100%;max-width:340px;animation:fadeIn .3s ease;}
+.esquina-card{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 10px;border-radius:16px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;text-align:center;}
+.esquina-card:active{transform:scale(.95);}
+.esquina-card.picked{border-color:var(--sage);background:var(--sage-soft);transform:scale(1.03);}
+.esquina-card.not-picked{opacity:.25;transform:scale(.95);}
+.esquina-card-icon{font-size:40px;}
+.esquina-card-name{font-family:Gabarito,sans-serif;font-size:14px;font-weight:600;color:#fff;}
+.esquina-or{font-family:Gabarito,sans-serif;font-size:12px;color:var(--muted2);align-self:center;}
+.esquina-bar{width:100%;max-width:340px;height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+.esquina-bar-fill{height:100%;background:var(--sage);border-radius:2px;transition:width .3s ease;}
+.esquina-opts{display:flex;flex-direction:column;gap:8px;width:100%;max-width:340px;}
+.esquina-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.esquina-opt:active{transform:scale(.98);}
+.esquina-opt.picked{border-color:var(--sage);background:var(--sage-soft);}
+.esquina-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.esquina-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.esquina-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ CHAT SIM ══ */
+.recreo-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.recreo-chat{flex:1;display:flex;flex-direction:column;gap:8px;padding:14px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.recreo-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;padding:4px 0;}
+.recreo-scene{font-size:12px;color:var(--muted);text-align:center;font-style:italic;padding:4px 12px;line-height:1.5;}
+.recreo-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;animation:slideUp .35s ease;}
+.recreo-msg.them{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;}
+.recreo-msg.them .recreo-msg-name{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:3px;}
+.recreo-msg.me{align-self:flex-end;background:rgba(74,122,217,.12);border:1px solid rgba(74,122,217,.2);color:#fff;border-bottom-right-radius:4px;}
+.recreo-msg.narrator{align-self:center;max-width:90%;background:none;border:none;font-size:12px;color:var(--muted);text-align:center;font-style:italic;padding:6px 0;}
+.recreo-choices{padding:10px 16px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;border-top:1px solid var(--border);background:rgba(0,0,0,.3);}
+.recreo-choice{padding:11px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;font-size:13px;color:var(--text);line-height:1.4;}
+.recreo-choice:active{transform:scale(.98);}
+.recreo-choice.picked{border-color:var(--blue);background:rgba(74,122,217,.1);color:#fff;}
+.recreo-choice-hint{font-size:11px;color:var(--muted);margin-top:3px;}
+.recreo-typing{align-self:flex-start;padding:8px 14px;font-size:12px;color:var(--muted);animation:pulse 1s ease infinite;}
+
+/* ══ CREATIVE ══ */
+.aula-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.aula-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.aula-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.aula-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.aula-wall{position:relative;width:100%;aspect-ratio:5/3;border-radius:14px;background:linear-gradient(180deg,#0e1428 0%,#121a30 100%);border:2px solid rgba(212,168,69,.15);overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:12px;}
+.aula-wall-label{position:absolute;top:6px;left:10px;font-size:10px;color:rgba(212,168,69,.35);font-family:Gabarito,sans-serif;letter-spacing:.1em;}
+.aula-wall-item{font-size:28px;animation:slideUp .4s ease;opacity:0;animation-fill-mode:forwards;}
+.aula-wall-item:nth-child(2){animation-delay:.1s;}
+.aula-wall-item:nth-child(3){animation-delay:.2s;}
+.aula-wall-item:nth-child(4){animation-delay:.3s;}
+.aula-palette{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.aula-elem{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.aula-elem:active{transform:scale(.96);}
+.aula-elem.selected{border-color:var(--warm);background:var(--warm-soft);}
+.aula-elem.disabled{opacity:.3;pointer-events:none;}
+.aula-elem-icon{font-size:24px;flex-shrink:0;}
+.aula-elem-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3;}
+.aula-elem-check{width:18px;height:18px;border-radius:50%;background:var(--warm);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;margin-left:auto;flex-shrink:0;}
+.aula-elem.selected .aula-elem-check{display:flex;}
+.aula-confirm{align-self:center;margin-top:4px;}
+.aula-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+
+/* ══ TIMER/ROLES ══ */
+.apagon-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.apagon-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.apagon-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.apagon-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.apagon-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.apagon-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.apagon-opt:active{transform:scale(.98);}
+.apagon-opt.picked{border-color:var(--purple);background:rgba(139,108,199,.08);}
+.apagon-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.apagon-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.apagon-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.apagon-timer{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:rgba(139,108,199,.06);border:1px solid rgba(139,108,199,.15);}
+.apagon-timer-icon{font-size:16px;}
+.apagon-timer-bar{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.apagon-timer-fill{height:100%;background:var(--purple);border-radius:2px;transition:width 1s linear;}
+.apagon-timer-val{font-family:Gabarito,sans-serif;font-size:13px;color:var(--purple);min-width:24px;text-align:right;}
+.apagon-vecinos{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.apagon-vecino{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;width:90px;}
+.apagon-vecino:active{transform:scale(.96);}
+.apagon-vecino.selected{border-color:var(--purple);background:rgba(139,108,199,.08);}
+.apagon-vecino.assigned{opacity:.3;pointer-events:none;}
+.apagon-vecino-icon{font-size:24px;}
+.apagon-vecino-name{font-size:11px;font-weight:600;color:#fff;}
+.apagon-vecino-skill{font-size:10px;color:var(--muted);}
+.apagon-problems{display:flex;flex-direction:column;gap:8px;}
+.apagon-problem{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.apagon-problem:active{transform:scale(.96);}
+.apagon-problem.filled{border-color:var(--purple);background:rgba(139,108,199,.06);}
+.apagon-problem-icon{font-size:22px;}
+.apagon-problem-info{flex:1;}
+.apagon-problem-title{font-size:13px;font-weight:600;color:#fff;}
+.apagon-problem-hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.apagon-problem-assigned{font-size:11px;color:var(--purple);font-weight:600;margin-top:2px;}
+
+/* Kiosco/Taller budget */
+.kiosco-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.kiosco-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.kiosco-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.kiosco-hint{font-size:12px;color:var(--muted);text-align:center;}
+.kiosco-budget{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(212,168,69,.06);border:1px solid rgba(212,168,69,.15);}
+.kiosco-budget-icon{font-size:20px;}
+.kiosco-budget-info{flex:1;}
+.kiosco-budget-label{font-size:10px;color:var(--muted);letter-spacing:.08em;font-family:Gabarito,sans-serif;}
+.kiosco-budget-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-top:3px;}
+.kiosco-budget-fill{height:100%;background:var(--warm);border-radius:2px;transition:width .3s;}
+.kiosco-budget-val{font-family:Gabarito,sans-serif;font-size:15px;color:var(--warm);font-weight:700;}
+.kiosco-items{display:flex;flex-direction:column;gap:8px;}
+.kiosco-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.kiosco-item:active{transform:scale(.98);}
+.kiosco-item.selected{border-color:var(--warm);background:var(--warm-soft);}
+.kiosco-item.disabled{opacity:.3;pointer-events:none;}
+.kiosco-item-icon{font-size:24px;flex-shrink:0;}
+.kiosco-item-info{flex:1;}
+.kiosco-item-name{font-size:13px;font-weight:600;color:#fff;}
+.kiosco-item-hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.kiosco-item-price{font-family:Gabarito,sans-serif;font-size:13px;color:var(--warm);font-weight:700;flex-shrink:0;}
+.kiosco-receipt{display:flex;flex-direction:column;gap:4px;padding:8px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);}
+.kiosco-receipt-item{font-size:12px;color:var(--text);display:flex;align-items:center;gap:6px;}
+.kiosco-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.kiosco-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.kiosco-opt:active{transform:scale(.98);}
+.kiosco-opt.picked{border-color:var(--warm);background:var(--warm-soft);}
+
+/* Selection/items */
+.terraza-wrap{flex:1;display:flex;flex-direction:column;padding:14px 16px;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.terraza-sub{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted2);text-align:center;}
+.terraza-prompt{font-family:Gabarito,sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;}
+.terraza-hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.terraza-garden{position:relative;width:100%;aspect-ratio:5/3;border-radius:14px;background:linear-gradient(180deg,#0a1220 0%,#0e1628 100%);border:2px solid rgba(61,184,160,.15);overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:12px;}
+.terraza-garden-label{position:absolute;top:6px;left:10px;font-size:10px;color:rgba(61,184,160,.35);font-family:Gabarito,sans-serif;letter-spacing:.1em;}
+.terraza-garden-item{font-size:28px;animation:slideUp .4s ease;opacity:0;animation-fill-mode:forwards;}
+.terraza-garden-item:nth-child(2){animation-delay:.1s;}
+.terraza-garden-item:nth-child(3){animation-delay:.2s;}
+.terraza-garden-item:nth-child(4){animation-delay:.3s;}
+.terraza-plants{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.terraza-plant{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.terraza-plant:active{transform:scale(.96);}
+.terraza-plant.selected{border-color:var(--green);background:var(--green-soft);}
+.terraza-plant.disabled{opacity:.3;pointer-events:none;}
+.terraza-plant-icon{font-size:24px;flex-shrink:0;}
+.terraza-plant-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3;}
+.terraza-plant-check{width:18px;height:18px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;margin-left:auto;flex-shrink:0;}
+.terraza-plant.selected .terraza-plant-check{display:flex;}
+.terraza-opts{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+.terraza-opt{display:flex;align-items:flex-start;gap:12px;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;touch-action:manipulation;transition:all .2s;}
+.terraza-opt:active{transform:scale(.98);}
+.terraza-opt.picked{border-color:var(--green);background:var(--green-soft);}
+.terraza-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.terraza-opt-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.terraza-opt-hint{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ══ ZONE INTRO ══ */
+.zone-intro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:radial-gradient(ellipse at 50% 40%,rgba(212,168,69,.06),transparent);}
+.zi-icon{font-size:72px;animation:float 3s ease-in-out infinite;}
+.zi-name{font-family:Gabarito,sans-serif;font-size:24px;font-weight:700;color:#fff;}
+.zi-desc{font-size:14px;color:var(--text);line-height:1.7;max-width:300px;opacity:.85;}
+.zi-mechanic{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;background:var(--card);border:1px solid var(--border);max-width:300px;}
+.zi-mechanic-icon{font-size:20px;flex-shrink:0;}
+.zi-mechanic-text{font-size:12px;color:var(--muted);line-height:1.5;text-align:left;}
+.zi-start{margin-top:6px;}
+
+/* ══ RESULTS ══ */
+#results-screen{align-items:center;justify-content:flex-start;padding:20px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;background:radial-gradient(ellipse at 50% 20%,#141a2e,#0a0e1a);}
+.res-badge{font-family:Gabarito,sans-serif;font-size:11px;letter-spacing:.15em;color:var(--warm);background:var(--warm-soft);padding:5px 14px;border-radius:20px;border:1px solid var(--warm-border);margin-bottom:4px;}
+.res-icon{font-size:56px;margin:8px 0;}
+.res-title{font-family:Gabarito,sans-serif;font-size:22px;font-weight:700;color:#fff;text-align:center;}
+.res-sub{font-size:13px;color:var(--muted);text-align:center;max-width:300px;margin-bottom:8px;}
+.res-areas{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;}
+.res-row{display:flex;align-items:center;gap:10px;}
+.res-row-icon{font-size:20px;width:28px;text-align:center;}
+.res-row-info{flex:1;}
+.res-row-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:3px;}
+.res-row-track{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.res-row-fill{height:100%;border-radius:3px;transition:width 1.2s ease .5s;}
+.res-row-pct{font-size:12px;min-width:36px;text-align:right;font-weight:700;}
+.res-note{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.6;text-align:center;max-width:340px;}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div class="intro-badge">AÑO 3 · 15 AÑOS</div>
+  <div class="intro-icon">🌃</div>
+  <div class="intro-title">La Ciudad Invisible</div>
+  <div class="intro-sub">Detrás de la ciudad que todos ven, hay otra. Pasajes ocultos, talleres secretos, muros que hablan. Descubrí qué rol ocupás cuando nadie te obliga.</div>
+  <div class="intro-input-group">
+  <div class="intro-input">
+    <label>Tu nombre para entrar a la ciudad</label>
+    <input type="text" id="nameInput" placeholder="Escribí tu nombre..." maxlength="20">
+  </div>
+  <div class="intro-input">
+    <label>Tu email (para guardar tu evolución)</label>
+    <input type="email" id="pfEmail" placeholder="nombre@email.com" maxlength="60" autocomplete="email">
+  </div>
+  <div class="intro-input">
+    <label>Código del colegio</label>
+    <input type="text" id="pfSchoolCode" placeholder="Ej: SJB-2025" maxlength="20" autocomplete="off">
+  </div>
+
+  </div>
+  <button class="btn btn-warm" id="startBtn" disabled>Entrar a la ciudad →</button>
+</div>
+
+<!-- MAP -->
+<div id="map-screen" class="screen">
+  <div class="map-header">
+    <div class="map-header-row">
+      <h2 id="mapHi">Hola</h2>
+      <div class="map-header-meta">
+        <div class="map-header-tag">v3.0</div>
+        <div class="map-header-tag" id="mapDate"></div>
+      </div>
+    </div>
+    <div class="map-header-sub">Elegí una zona para explorar.<br>Zonas descubiertas: <span id="zDone">0</span>/8</div>
+  </div>
+  <div class="map-scroll" id="mapScroll"></div>
+</div>
+
+<!-- GAME -->
+<div id="game-screen" class="screen">
+  <div class="game-top">
+    <div class="game-back" onclick="backToMap()">← Mapa</div>
+    <div class="game-label" id="gLabel"></div>
+  </div>
+  <div class="game-body" id="gBody"></div>
+</div>
+
+<!-- RESULTS -->
+<div id="results-screen" class="screen">
+  <div class="res-badge">PERFIL AÑO 3</div>
+  <div class="res-icon">🌃</div>
+  <div class="res-title">Ciudad descubierta</div>
+  <div class="res-sub" id="resName"></div>
+  <div class="res-areas" id="resAreas"></div>
+  <div id="pf-sync-status"></div>
+  <div class="res-note" id="resNote"></div>
+</div>
+
+<script>
+// ═══ STATE ═══
+var GS={name:'',email:'',schoolCode:'',done:{},scores:{},order:[]};
+function addScores(sc){for(var k in sc)GS.scores[k]=(GS.scores[k]||0)+sc[k];}
+
+var AREAS=[
+  {id:'salud',name:'Ciencias de la Salud',icon:'🩺',color:'#4a7ad9'},
+  {id:'exactas',name:'Ciencias Exactas y Naturales',icon:'🔬',color:'#3db8a0'},
+  {id:'ing',name:'Ingeniería y Tecnología',icon:'⚙️',color:'#8b6cc7'},
+  {id:'sociales',name:'Ciencias Sociales y Humanas',icon:'🌍',color:'#d96a8a'},
+  {id:'eco',name:'Ciencias Económicas',icon:'📊',color:'#d4a845'},
+  {id:'arte',name:'Arte, Diseño y Arquitectura',icon:'🎨',color:'#d96060'},
+  {id:'agro',name:'Ciencias Agropecuarias',icon:'🌱',color:'#5a9a8a'},
+  {id:'edu',name:'Educación y Pedagogía',icon:'📚',color:'#c9985a'},
+];
+
+var ZONES=[
+  {id:'pasaje',     icon:'🚪',name:'El Pasaje',       color:'#d96a8a',glow:'rgba(217,106,138,.15)',desc:'Una entrada secreta, una historia por vivir.'},
+  {id:'taller',     icon:'🔧',name:'El Taller',       color:'#d4a845',glow:'rgba(212,168,69,.15)',desc:'Recursos limitados, decisiones infinitas.'},
+  {id:'fachada',    icon:'🏗️',name:'La Fachada',      color:'#3db8a0',glow:'rgba(61,184,160,.15)',desc:'Lo que esconden los edificios.'},
+  {id:'invernadero',icon:'🌱',name:'El Invernadero',  color:'#8b6cc7',glow:'rgba(139,108,199,.15)',desc:'Un jardín secreto que necesita un equipo.'},
+  {id:'mural',      icon:'🎨',name:'El Mural',        color:'#d96060',glow:'rgba(217,96,96,.15)',desc:'Un muro en blanco que pide tu voz.'},
+  {id:'frecuencia', icon:'📡',name:'La Frecuencia',   color:'#4a7ad9',glow:'rgba(74,122,217,.15)',desc:'Una radio pirata con voces que importan.'},
+  {id:'archivo',    icon:'📂',name:'El Archivo',       color:'#c9985a',glow:'rgba(201,152,90,.15)',desc:'Los secretos de la ciudad, por clasificar.'},
+  {id:'umbral',     icon:'⚡',name:'El Umbral',        color:'#5a9a8a',glow:'rgba(90,154,138,.15)',desc:'La puerta entre dos mundos. Elegí rápido.'},
+];
+
+// ═══ SCREENS ═══
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById(id);el.classList.add('active');el.classList.add('fade-in');
+}
+
+// ═══ INTRO ═══
+var ni=document.getElementById('nameInput'),sb=document.getElementById('startBtn');
+var pfEmailEl=document.getElementById('pfEmail'),pfSchoolEl=document.getElementById('pfSchoolCode');
+function pfCheckStart(){sb.disabled=!(ni.value.trim()&&pfEmailEl.value.includes('@')&&pfSchoolEl.value.trim().length>=2);}
+ni.addEventListener('input',pfCheckStart);
+pfEmailEl.addEventListener('input',pfCheckStart);
+pfSchoolEl.addEventListener('input',pfCheckStart);
+sb.addEventListener('click',function(){
+  GS.name=ni.value.trim();
+  GS.email=pfEmailEl.value.trim().toLowerCase();
+  GS.schoolCode=pfSchoolEl.value.trim().toUpperCase();
+  document.getElementById('mapHi').textContent='Hola, '+GS.name;
+  buildMap();showScreen('map-screen');
+});
+
+// ═══ MAP ═══
+function buildMap(){
+  var scroll=document.getElementById('mapScroll');
+  scroll.innerHTML='';
+  var now=new Date();var dd=now.getDate();var mm=now.getMonth()+1;
+  document.getElementById('mapDate').textContent=dd+'/'+mm;
+  var grid=document.createElement('div');
+  grid.className='map-grid';
+  var layout=['pasaje','taller','fachada','invernadero','__compass__','mural','frecuencia','archivo','umbral'];
+
+  layout.forEach(function(id,i){
+    if(id==='__compass__'){
+      var comp=document.createElement('div');comp.className='map-compass';
+      comp.innerHTML='<svg class="compass-svg" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">'+
+        '<defs><radialGradient id="cg"><stop offset="0%" stop-color="rgba(212,168,69,.2)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>'+
+        '<circle cx="40" cy="40" r="38" fill="url(#cg)" stroke="rgba(212,168,69,.15)" stroke-width=".5"/>'+
+        '<circle cx="40" cy="40" r="24" fill="none" stroke="rgba(212,168,69,.12)" stroke-width=".5"/>'+
+        '<circle cx="40" cy="40" r="12" fill="none" stroke="rgba(212,168,69,.2)" stroke-width=".5"/>'+
+        '<text x="40" y="36" text-anchor="middle" font-size="16" fill="rgba(212,168,69,.5)">🌃</text>'+
+        '<text x="40" y="48" text-anchor="middle" font-size="5" fill="rgba(212,168,69,.4)" font-family="Gabarito,sans-serif">CIUDAD</text>'+
+        '</svg>';
+      grid.appendChild(comp);
+      return;
+    }
+    var z=ZONES.find(function(zone){return zone.id===id;});
+    if(!z)return;
+    var card=document.createElement('div');
+    card.className='zone-card'+(GS.done[z.id]?' completed':'');
+    card.style.animationDelay=(i*60)+'ms';
+    card.innerHTML=
+      '<div class="zone-card-ring" style="background:'+z.glow+';border:1.5px solid '+z.color+';box-shadow:0 0 16px '+z.glow+'">'+
+        '<span style="filter:drop-shadow(0 2px 4px '+z.glow+')">'+z.icon+'</span>'+
+      '</div>'+
+      '<div class="zone-card-name">'+z.name+'</div>'+
+      '<div class="zone-card-desc">'+z.desc+'</div>'+
+      '<div class="zone-card-check">✓</div>';
+    var style=document.createElement('style');
+    style.textContent='.zone-card:nth-child('+(i+1)+') .zone-card-ring::after{border-color:'+z.color+';}';
+    card.appendChild(style);
+    card.addEventListener('click',function(){if(!GS.done[z.id])enterZone(z.id);});
+    grid.appendChild(card);
+  });
+  scroll.appendChild(grid);
+  updateMapUI();
+}
+
+function updateMapUI(){
+  var n=Object.keys(GS.done).length;
+  document.getElementById('zDone').textContent=n;
+}
+
+var ZONE_INTROS={
+  pasaje:{
+    desc:'Encontrás una puerta escondida detrás de una cortina de hiedra. Del otro lado, un pasaje lleno de puestos y gente. Están armando un kiosco cooperativo para el barrio y necesitan decidir cómo organizarlo.',
+    mechIcon:'🌿',mechText:'Narrativa con decisiones. Cada elección abre un camino diferente. No hay respuestas correctas, solo las tuyas.'
+  },
+  taller:{
+    desc:'Bajás por una escalera oculta y llegás a un taller subterráneo. Hay herramientas, materiales y un problema: el último experimento dio resultados que nadie esperaba. Hay que investigar con lo que hay.',
+    mechIcon:'💰',mechText:'Gestión de recursos. Elegí en qué gastar, decidí qué hacer con lo que sobra, y resolvé los imprevistos del camino.'
+  },
+  fachada:{
+    desc:'Detrás de la fachada de un edificio abandonado, descubrís un parque histórico que quieren demoler para construir un shopping. La comunidad invisible necesita tu ayuda para defenderlo.',
+    mechIcon:'🌱',mechText:'Selección y dilema. Elegí qué herramientas usar, enfrentá el conflicto, y decidí cómo actuar.'
+  },
+  invernadero:{
+    desc:'En la azotea más alta de la ciudad invisible hay un invernadero que alimenta a toda la comunidad. Pero hay un problema con la tierra y el equipo necesita organizarse rápido.',
+    mechIcon:'⏱️',mechText:'Asignación de roles bajo presión. Tenés 50 segundos para decidir quién hace qué. ¡El reloj corre!'
+  },
+  mural:{
+    desc:'Un muro enorme en el corazón de la ciudad invisible está en blanco. Es tu oportunidad de dejar tu marca. Pero no todo el mundo va a estar de acuerdo con lo que hagas.',
+    mechIcon:'✨',mechText:'Composición creativa. Elegí los elementos para tu mural, proponé un estilo, y enfrentá la crítica.'
+  },
+  frecuencia:{
+    desc:'En un sótano con antenas improvisadas funciona una radio pirata. Hoy llegó un mensaje: alguien del grupo se siente excluido. La frecuencia se abre para vos.',
+    mechIcon:'💬',mechText:'Chat simulado. Leé lo que dicen los demás y elegí cómo responder. Lo que digas cambia la dinámica del grupo.'
+  },
+  archivo:{
+    desc:'El archivo de la ciudad invisible guarda todo: planos, cartas, recetas, fórmulas. Pero está todo mezclado. Alguien tiene que poner orden, y hay un compañero que necesita ayuda para entender.',
+    mechIcon:'📦',mechText:'Clasificación. Asigná cada ítem a su categoría correcta. Tu forma de organizar revela cómo pensás.'
+  },
+  umbral:{
+    desc:'El umbral es la puerta entre la ciudad visible y la invisible. Cada vez que cruzás, tenés que elegir: una cosa o la otra. No hay tiempo para dudar.',
+    mechIcon:'⚡',mechText:'Decisiones binarias. 7 elecciones rápidas, una tras otra. Instinto puro.'
+  }
+};
+
+function enterZone(zoneId){
+  GS.currentZone=zoneId;
+  var z=ZONES.find(function(z){return z.id===zoneId;});
+  document.getElementById('gLabel').textContent=z.name.toUpperCase();
+  showScreen('game-screen');
+  var body=document.getElementById('gBody');body.innerHTML='';
+  var intro=ZONE_INTROS[zoneId];
+  if(intro){
+    var d=document.createElement('div');d.className='zone-intro fade-in';
+    d.innerHTML='<div class="zi-icon">'+z.icon+'</div>'+
+      '<div class="zi-name">'+z.name+'</div>'+
+      '<div class="zi-desc">'+intro.desc+'</div>'+
+      '<div class="zi-mechanic"><div class="zi-mechanic-icon">'+intro.mechIcon+'</div><div class="zi-mechanic-text">'+intro.mechText+'</div></div>'+
+      '<button class="btn btn-warm zi-start" id="ziStart">Empezar →</button>';
+    body.appendChild(d);
+    document.getElementById('ziStart').addEventListener('click',function(){
+      body.innerHTML='';
+      startZoneGame(zoneId,body);
+    });
+  }else{
+    startZoneGame(zoneId,body);
+  }
+}
+
+function startZoneGame(zoneId,body){
+  switch(zoneId){
+    case 'pasaje':buildPasaje(body);break;
+    case 'taller':buildTaller(body);break;
+    case 'fachada':buildFachada(body);break;
+    case 'invernadero':buildInvernadero(body);break;
+    case 'mural':buildMural(body);break;
+    case 'frecuencia':buildFrecuencia(body);break;
+    case 'archivo':buildArchivo(body);break;
+    case 'umbral':buildUmbral(body);break;
+    default:buildPlaceholder(body,ZONES.find(function(z){return z.id===zoneId;}));break;
+  }
+}
+
+function buildPlaceholder(c,z){
+  c.innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;">'+
+    '<div style="font-size:48px;">'+z.icon+'</div>'+
+    '<div style="font-family:Gabarito,sans-serif;font-size:18px;font-weight:600;color:#fff;">'+z.name+'</div>'+
+    '<div style="font-size:13px;color:var(--muted);">Próximamente</div>'+
+    '<button class="btn btn-ghost" onclick="backToMap()">← Volver</button></div>';
+}
+
+function backToMap(){buildMap();showScreen('map-screen');}
+
+function zoneComplete(zoneId,scores,display){
+  addScores(scores);GS.done[zoneId]=true;GS.order.push(zoneId);
+  var body=document.getElementById('gBody');
+  var barsHtml='';
+  if(display.bars)display.bars.forEach(function(b){
+    barsHtml+='<div class="zr-bar"><div class="zr-bar-icon">'+b.icon+'</div>'+
+      '<div class="zr-bar-track"><div class="zr-bar-fill" style="width:0%;background:'+b.color+'" data-pct="'+b.pct+'"></div></div>'+
+      '<div class="zr-bar-pct">'+b.pct+'%</div></div>';
+  });
+  body.innerHTML='<div class="zone-result fade-in"><div class="zr-icon">'+display.emoji+'</div>'+
+    '<div class="zr-title">'+display.title+'</div><div class="zr-sub">'+display.sub+'</div>'+
+    '<div class="zr-bars">'+barsHtml+'</div>'+
+    '<button class="btn btn-warm" onclick="afterZone()">'+(Object.keys(GS.done).length>=8?'Ver mi perfil →':'Siguiente zona →')+'</button></div>';
+  setTimeout(function(){document.querySelectorAll('.zr-bar-fill').forEach(function(el){el.style.width=el.dataset.pct+'%';});},200);
+}
+
+function afterZone(){Object.keys(GS.done).length>=8?showResults():backToMap();}
+
+// ═══ RESULTS ═══
+function showResults(){
+  var areaScores={};AREAS.forEach(function(a){areaScores[a.id]=0;});
+  var mapping={
+    salud:['S','hS','mSoc','pdcP'],exactas:['hI','mTeo','pdcD','C'],
+    ing:['hR','hC','D','pdcC'],sociales:['I','hS','S','mSoc'],
+    eco:['hE','mEco','D','hC'],arte:['hA','mEst','mAut'],
+    agro:['hR','pdcC','mTra'],edu:['mTra','pdcP','mSoc','S'],
+  };
+  for(var a in mapping)mapping[a].forEach(function(d){areaScores[a]+=(GS.scores[d]||0);});
+  var areaCap={salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+  var sorted=AREAS.slice().sort(function(a,b){return areaScores[b.id]-areaScores[a.id];});
+  var c=document.getElementById('resAreas');c.innerHTML='';
+  document.getElementById('resName').textContent=GS.name+', así se ve tu forma de habitar la ciudad';
+  sorted.forEach(function(a){
+    var cap=areaCap[a.id]||160;
+    var pct=Math.min(100,Math.round(areaScores[a.id]/cap*100));
+    var r=document.createElement('div');r.className='res-row';
+    r.innerHTML='<div class="res-row-icon">'+a.icon+'</div><div class="res-row-info"><div class="res-row-name">'+a.name+'</div>'+
+      '<div class="res-row-track"><div class="res-row-fill" style="width:0%;background:'+a.color+'" data-pct="'+pct+'"></div></div></div>'+
+      '<div class="res-row-pct" style="color:'+a.color+'">'+pct+'%</div>';
+    c.appendChild(r);
+  });
+  var notes={salud:'cuidado de personas y empatía',exactas:'pensamiento analítico y curiosidad',ing:'resolución técnica de problemas',
+    sociales:'interés por las personas y la sociedad',eco:'pensamiento estratégico y resultados',arte:'expresión creativa',
+    agro:'conexión con la naturaleza',edu:'vocación de enseñanza'};
+  document.getElementById('resNote').textContent=GS.name+' muestra tendencia hacia '+notes[sorted[0].id]+
+    ' y '+notes[sorted[1].id]+'. Este perfil se compara con los años anteriores para ver tu evolución.';
+  showScreen('results-screen');
+  pfSyncResults();
+  setTimeout(function(){document.querySelectorAll('.res-row-fill').forEach(function(el){el.style.width=el.dataset.pct+'%';});},300);
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL PASAJE
+//  Narrativa: kiosco cooperativo del barrio
+// ═══════════════════════════════════════
+function buildPasaje(container){
+  var TREE={
+    s1:{visual:'🚪',status:'Una puerta se abre...',thought:'¿Qué hay del otro lado?',sub:'DECISIÓN 1 DE 4',
+      prompt:'Cruzás el pasaje y llegás a un mercado oculto. Un grupo de vecinos quiere armar un kiosco cooperativo para el barrio. Te piden ayuda. ¿Qué priorizás?',
+      options:[
+        {id:'a',icon:'💰',title:'Que genere ganancias para reinvertir en el barrio',hint:'Sin plata no hay proyecto que dure.',next:'s2a',scores:{hE:12,D:10,hC:8,mEco:6}},
+        {id:'b',icon:'🎨',title:'Que ofrezca variedad: productos locales, artesanías, comida casera',hint:'Un kiosco distinto a todos los demás.',next:'s2b',scores:{hA:12,mEst:8,hI:6,mAut:6}},
+        {id:'c',icon:'🤝',title:'Que tenga precios accesibles para que todos puedan comprar',hint:'Si no es para todos, no es cooperativo.',next:'s2c',scores:{S:12,I:10,mSoc:8,hS:6}},
+        {id:'d',icon:'📊',title:'Que funcione como un sistema eficiente: stock, horarios, turnos',hint:'La organización es la base de todo.',next:'s2d',scores:{hC:12,C:10,mTra:8,hI:6}},
+      ]},
+    s2a:{visual:'💰',status:'El plan económico...',thought:'Los números tienen que cerrar.',sub:'DECISIÓN 2 DE 4',
+      prompt:'Tu plan de ganancias funciona, pero una vecina dice que los precios dejan afuera a las familias con menos recursos. ¿Qué hacés?',
+      options:[
+        {id:'a1',icon:'📉',title:'Creás una línea de productos más baratos junto a los premium',hint:'Dos segmentos, dos precios.',next:'s3a',scores:{hE:14,hC:10,hI:8,mEco:6}},
+        {id:'a2',icon:'🎫',title:'Proponés un sistema de descuentos comunitarios para familias',hint:'Solidaridad con criterio.',next:'s3b',scores:{S:14,I:10,hE:8,mSoc:6}},
+        {id:'a3',icon:'📋',title:'Pedís datos: cuántas familias, cuánto pueden pagar, qué necesitan',hint:'Antes de decidir hay que entender.',next:'s3a',scores:{hI:14,C:12,mTeo:8}},
+      ]},
+    s2b:{visual:'🎨',status:'El kiosco toma forma...',thought:'Esto tiene que ser especial.',sub:'DECISIÓN 2 DE 4',
+      prompt:'La variedad es increíble, pero no hay lugar para todo. Un artesano local te pide espacio que ya le prometiste a otro. ¿Cómo resolvés?',
+      options:[
+        {id:'b1',icon:'🗓️',title:'Organizás turnos rotativos: cada semana, puestos diferentes',hint:'Todos tienen su momento.',next:'s3a',scores:{hC:14,I:10,mTra:8,hE:6}},
+        {id:'b2',icon:'🎤',title:'Armás una reunión para que los artesanos decidan entre ellos',hint:'Que la comunidad se autogestione.',next:'s3b',scores:{I:14,S:10,mSoc:8,pdcP:6}},
+        {id:'b3',icon:'📐',title:'Rediseñás el espacio para que entren más puestos',hint:'A veces la solución es técnica.',next:'s3a',scores:{hR:12,hI:10,D:8,pdcC:6}},
+      ]},
+    s2c:{visual:'🤝',status:'Precios para todos...',thought:'¿Pero es sostenible?',sub:'DECISIÓN 2 DE 4',
+      prompt:'Los precios son accesibles, pero el proveedor mayorista dice que a esos márgenes no puede vender. ¿Qué hacés?',
+      options:[
+        {id:'c1',icon:'🌾',title:'Buscás productores locales que vendan directo, sin intermediarios',hint:'Acortar la cadena baja los precios.',next:'s3a',scores:{hR:12,hI:10,pdcC:8,mTra:6}},
+        {id:'c2',icon:'📢',title:'Organizás una compra comunitaria: juntás pedidos para bajar el costo',hint:'La unión hace la fuerza.',next:'s3b',scores:{I:14,hC:10,S:8,mSoc:6}},
+        {id:'c3',icon:'🧮',title:'Recalculás los márgenes y proponés un precio intermedio justo',hint:'El punto de equilibrio existe.',next:'s3a',scores:{hI:12,C:10,hE:8,mEco:6}},
+      ]},
+    s2d:{visual:'📊',status:'El sistema funciona...',thought:'Cada pieza en su lugar.',sub:'DECISIÓN 2 DE 4',
+      prompt:'Tu sistema de stock y turnos es perfecto en papel, pero un vecino dice que es demasiado rígido y que la gente no lo va a seguir. ¿Qué hacés?',
+      options:[
+        {id:'d1',icon:'🔄',title:'Simplificás el sistema: menos reglas, más sentido común',hint:'Lo perfecto es enemigo de lo bueno.',next:'s3a',scores:{D:12,hR:8,hC:8,I:6}},
+        {id:'d2',icon:'📱',title:'Creás una app simple para que todos puedan ver turnos y stock',hint:'La tecnología al servicio de la comunidad.',next:'s3a',scores:{hI:14,hC:12,hR:8,pdcC:6}},
+        {id:'d3',icon:'👥',title:'Reunís al grupo para que adapten las reglas a su realidad',hint:'Las mejores reglas son las que se construyen entre todos.',next:'s3b',scores:{I:14,S:10,mSoc:8,mTra:6}},
+      ]},
+    s3a:{visual:'🏪',status:'El kiosco abre...',thought:'¡Primer día!',sub:'DECISIÓN 3 DE 4',
+      prompt:'Primer día de apertura. Viene mucha gente, pero también surgen problemas: faltó cambio, un producto estaba vencido, y un vecino se queja del horario. ¿Qué atendés primero?',
+      options:[
+        {id:'e1',icon:'⚠️',title:'Lo del producto vencido: es un tema de salud',hint:'La seguridad no espera.',next:'s4',scores:{S:14,hS:12,pdcP:8,C:6}},
+        {id:'e2',icon:'🗣️',title:'La queja del vecino: si pierde confianza, pierde el kiosco un aliado',hint:'La relación con la comunidad es todo.',next:'s4',scores:{I:12,S:10,mSoc:8,hS:6}},
+        {id:'e3',icon:'📋',title:'Lo del cambio: sin sistema de caja, mañana pasa lo mismo',hint:'Los problemas operativos se resuelven con procesos.',next:'s4',scores:{hC:12,C:10,mTra:8,hE:6}},
+      ]},
+    s3b:{visual:'💬',status:'La comunidad opina...',thought:'Todos quieren algo distinto.',sub:'DECISIÓN 3 DE 4',
+      prompt:'En la asamblea de vecinos hay posturas fuertes: unos quieren más ganancias, otros más inclusión, otros más control. Vos tenés que mediar. ¿Cómo lo hacés?',
+      options:[
+        {id:'f1',icon:'🎯',title:'Proponés que voten los tres temas en orden de prioridad',hint:'La democracia decide.',next:'s4',scores:{I:14,hC:10,S:8,mTra:6}},
+        {id:'f2',icon:'📝',title:'Escuchás a cada grupo y armás una propuesta que integre las tres posturas',hint:'El consenso lleva más tiempo pero dura más.',next:'s4',scores:{S:12,hI:10,I:10,mSoc:8}},
+        {id:'f3',icon:'📊',title:'Presentás datos concretos: qué funciona en otras cooperativas similares',hint:'Los hechos enfrían las emociones.',next:'s4',scores:{hI:14,C:12,mTeo:8,hE:6}},
+      ]},
+    s4:{visual:'🌆',status:'El pasaje se ilumina',thought:'Esto recién empieza.',sub:'ÚLTIMA DECISIÓN',
+      prompt:'El kiosco cooperativo funciona. Un medio local quiere hacer una nota. ¿Qué mensaje querés que quede?',
+      options:[
+        {id:'g1',icon:'💡',title:'"Que se puede armar algo económicamente viable desde la comunidad"',hint:'Emprender juntos.',next:'fin',scores:{hE:12,D:10,hC:8,mEco:6}},
+        {id:'g2',icon:'❤️',title:'"Que cuando la gente se organiza, el barrio cambia"',hint:'La fuerza está en la unión.',next:'fin',scores:{S:12,I:10,mSoc:10,hS:6}},
+        {id:'g3',icon:'🔬',title:'"Que con datos, planificación y buenas preguntas se pueden resolver problemas reales"',hint:'El método importa.',next:'fin',scores:{hI:12,C:10,mTeo:8,pdcD:6}},
+        {id:'g4',icon:'🎨',title:'"Que un espacio donde conviven artesanos, productores y vecinos es arte vivo"',hint:'La diversidad es belleza.',next:'fin',scores:{hA:12,mEst:10,mAut:8,I:6}},
+      ]}
+  };
+
+  var accum={};var answered=false;
+
+  function render(sid){
+    var sc=TREE[sid];answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='campo-wrap fade-in';
+    d.innerHTML='<div class="campo-sub">'+sc.sub+'</div><div class="campo-visual">'+sc.visual+'</div>'+
+      '<div class="campo-bubble"><div class="campo-bubble-label">'+sc.thought+'</div><div class="campo-bubble-text">'+sc.status+'</div></div>'+
+      '<div class="campo-prompt">'+sc.prompt+'</div><div class="campo-opts" id="cOpts"></div>';
+    container.appendChild(d);
+    var od=document.getElementById('cOpts');
+    sc.options.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(function(){opt.next==='fin'?finish():render(opt.next);},550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function finish(){
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var act=(accum.D||0)+(accum.hE||0)+(accum.hR||0);
+    var sys=(accum.hC||0)+(accum.mTra||0)+(accum.I||0);
+    var mx=Math.max(emp,ana,act,sys,1);
+    zoneComplete('pasaje',accum,{
+      emoji:'🚪',title:'¡Pasaje recorrido!',
+      sub:'Cada decisión mostró cómo construís con otros cuando hay que elegir.',
+      bars:[
+        {icon:'💗',color:'#d96a8a',pct:Math.round(emp/mx*100)},
+        {icon:'🔍',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'⚡',color:'#d4a845',pct:Math.round(act/mx*100)},
+        {icon:'🔗',color:'#8b6cc7',pct:Math.round(sys/mx*100)},
+      ]
+    });
+  }
+
+  render('s1');
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL TALLER
+//  Gestión de presupuesto: experimento inesperado
+// ═══════════════════════════════════════
+function buildTaller(container){
+  var budget=100;var selected=[];var accum={};var answered=false;
+
+  var PRODUCTS=[
+    {id:'micro',icon:'🔬',name:'Microscopio digital',price:25,hint:'Para analizar muestras en detalle.',scores:{hI:10,mTeo:8,C:6}},
+    {id:'impre',icon:'🖨️',name:'Impresora 3D básica',price:25,hint:'Para fabricar prototipos y piezas.',scores:{hR:10,D:8,pdcC:6}},
+    {id:'senso',icon:'📡',name:'Kit de sensores ambientales',price:25,hint:'Miden temperatura, humedad, calidad del aire.',scores:{hI:8,C:8,hC:6}},
+    {id:'arte',icon:'🎨',name:'Materiales de arte y diseño',price:25,hint:'Pinturas, telas, herramientas de corte.',scores:{hA:10,mEst:8,mAut:6}},
+  ];
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  function budgetHTML(){
+    var pct=Math.round(budget/100*100);
+    return '<div class="kiosco-budget">'+
+      '<div class="kiosco-budget-icon">🔧</div>'+
+      '<div class="kiosco-budget-info"><div class="kiosco-budget-label">PRESUPUESTO DEL TALLER</div>'+
+      '<div class="kiosco-budget-bar"><div class="kiosco-budget-fill" style="width:'+pct+'%"></div></div></div>'+
+      '<div class="kiosco-budget-val">$'+budget+'</div></div>';
+  }
+
+  function receiptHTML(){
+    if(!selected.length)return '';
+    var items='';
+    selected.forEach(function(p){items+='<div class="kiosco-receipt-item"><span>'+p.icon+'</span> '+p.name+'</div>';});
+    return '<div class="kiosco-receipt">'+items+'</div>';
+  }
+
+  function step1(){
+    selected=[];budget=100;answered=false;
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 1 DE 4</div>'+budgetHTML()+
+      '<div class="kiosco-prompt">El taller tiene $100 para equiparse. Podés elegir 2 de estas 4 cosas. ¿Qué comprás?</div>'+
+      '<div class="kiosco-hint">Tocá para seleccionar (máximo 2)</div>'+
+      '<div class="kiosco-items" id="cpItems"></div>'+
+      '<button class="btn btn-warm" id="cpConfirm" disabled style="align-self:center;margin-top:4px;">Confirmar compra →</button>';
+    container.appendChild(d);
+
+    var id=document.getElementById('cpItems');
+    PRODUCTS.forEach(function(p){
+      var btn=document.createElement('div');btn.className='kiosco-item';
+      btn.innerHTML='<div class="kiosco-item-icon">'+p.icon+'</div><div class="kiosco-item-info"><div class="kiosco-item-name">'+p.name+'</div><div class="kiosco-item-hint">'+p.hint+'</div></div><div class="kiosco-item-price">$'+p.price+'</div>';
+      btn.addEventListener('click',function(){
+        if(btn.classList.contains('selected')){
+          btn.classList.remove('selected');selected=selected.filter(function(s){return s.id!==p.id;});budget+=p.price;
+        }else{
+          if(selected.length>=2||budget<p.price)return;
+          btn.classList.add('selected');selected.push(p);budget-=p.price;
+        }
+        document.getElementById('cpConfirm').disabled=selected.length<2;
+      });
+      id.appendChild(btn);
+    });
+
+    document.getElementById('cpConfirm').addEventListener('click',function(){
+      selected.forEach(function(p){addLocal(p.scores);});
+      step2();
+    });
+  }
+
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 2 DE 4</div>'+receiptHTML()+
+      '<div class="kiosco-prompt">Con los $50 que sobraron, ¿qué hacés?</div>'+
+      '<div class="kiosco-opts" id="cp2Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'💡',title:'Comprás libros técnicos y manuales de referencia',hint:'El conocimiento es la mejor inversión.',scores:{hI:10,mTeo:8,C:6}},
+      {icon:'🛡️',title:'Comprás elementos de seguridad: guantes, antiparras, matafuego',hint:'Sin seguridad no hay taller.',scores:{S:10,hS:8,hC:6}},
+      {icon:'🔌',title:'Comprás cables, conectores y herramientas básicas extras',hint:'Las cosas chicas hacen funcionar las grandes.',scores:{hR:10,D:8,pdcC:6}},
+      {icon:'🍕',title:'Invitás al grupo a comer algo y planificar juntos el primer proyecto',hint:'El equipo antes que el equipamiento.',scores:{S:8,I:10,mSoc:8}},
+    ];
+
+    var od=document.getElementById('cp2Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 3 DE 4</div>'+
+      '<div class="kiosco-prompt">Tu experimento dio resultados completamente distintos a lo que decía el manual. ¿Qué hacés?</div>'+
+      '<div class="kiosco-opts" id="cp3Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🔄',title:'Repetís el experimento paso a paso para ver si fue un error',hint:'Reproducibilidad es la base de la ciencia.',scores:{C:14,hI:10,mTeo:8,pdcD:6}},
+      {icon:'📝',title:'Reportás la diferencia y la documentás como hallazgo',hint:'Lo inesperado puede ser lo más valioso.',scores:{hI:14,C:12,mTeo:8}},
+      {icon:'🔍',title:'Investigás por qué la diferencia: variables, condiciones, materiales',hint:'Entender la causa antes de juzgar el resultado.',scores:{hI:12,C:10,pdcD:8,mTeo:6}},
+      {icon:'👥',title:'Consultás con otros del taller para ver si les pasó lo mismo',hint:'La ciencia es comunitaria.',scores:{I:12,S:8,mSoc:8,mTra:6}},
+    ];
+
+    var od=document.getElementById('cp3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(step4,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function step4(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='kiosco-wrap fade-in';
+    d.innerHTML='<div class="kiosco-sub">PASO 4 DE 4</div>'+
+      '<div class="kiosco-prompt">El taller cierra por hoy. ¿Qué hacés con lo que aprendiste?</div>'+
+      '<div class="kiosco-opts" id="cp4Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'📓',title:'Lo anotás en un cuaderno para seguir mañana donde dejaste',hint:'La continuidad del conocimiento.',scores:{C:12,hI:10,mTeo:8,pdcD:6}},
+      {icon:'🧑‍🏫',title:'Le enseñás a alguien más lo que descubriste',hint:'Enseñar es la mejor forma de aprender.',scores:{mTra:12,pdcP:10,I:8,S:6}},
+      {icon:'🛠️',title:'Dejás todo armado para que mañana sea más eficiente',hint:'La organización de hoy es el tiempo de mañana.',scores:{hC:10,hR:8,mTra:8,D:6}},
+      {icon:'💡',title:'Se te ocurre una idea nueva basada en el error de hoy',hint:'Los errores son el combustible de la innovación.',scores:{hI:10,hA:8,mAut:8,C:6}},
+    ];
+
+    var od=document.getElementById('cp4Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='kiosco-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.kiosco-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(function(){
+          var plan=(accum.C||0)+(accum.hI||0)+(accum.mTeo||0);
+          var prac=(accum.hR||0)+(accum.D||0)+(accum.pdcC||0);
+          var social=(accum.S||0)+(accum.I||0)+(accum.mSoc||0);
+          var sys=(accum.hC||0)+(accum.mTra||0)+(accum.hE||0);
+          var mx=Math.max(plan,prac,social,sys,1);
+          zoneComplete('taller',accum,{
+            emoji:'🔧',title:'¡Taller en marcha!',
+            sub:'Cómo administrás recursos y reaccionás a lo inesperado revela tus prioridades.',
+            bars:[
+              {icon:'🧠',color:'#3db8a0',pct:Math.round(plan/mx*100)},
+              {icon:'🔧',color:'#8b6cc7',pct:Math.round(prac/mx*100)},
+              {icon:'👥',color:'#d96a8a',pct:Math.round(social/mx*100)},
+              {icon:'📋',color:'#d4a845',pct:Math.round(sys/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA FACHADA
+//  Selección: defender el parque histórico
+// ═══════════════════════════════════════
+function buildFachada(container){
+  var accum={};var answered=false;var garden=[];var maxPicks=3;
+
+  var PLANTS=[
+    {icon:'📸',name:'Cámara para documentar',scores:{hA:8,mEst:6,hI:4}},
+    {icon:'📋',name:'Petitorio con firmas',scores:{I:8,S:6,mSoc:4}},
+    {icon:'📐',name:'Planos del proyecto alternativo',scores:{hI:8,hR:6,pdcC:4}},
+    {icon:'🎨',name:'Materiales para intervención artística',scores:{hA:10,mEst:8,mAut:4}},
+    {icon:'📊',name:'Informe de impacto ambiental',scores:{hI:8,C:6,mTeo:6}},
+    {icon:'📢',name:'Megáfono para la asamblea',scores:{I:6,S:6,D:4}},
+    {icon:'💻',name:'Computadora para difusión en redes',scores:{hI:6,hC:6,hR:4}},
+    {icon:'📜',name:'Documentos históricos del parque',scores:{C:8,hI:6,mTeo:4}},
+  ];
+
+  function step1(){
+    garden=[];answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='terraza-wrap fade-in';
+    d.innerHTML='<div class="terraza-sub">PASO 1 — PREPARARSE</div>'+
+      '<div class="terraza-prompt">Van a demoler un parque histórico para un shopping. Elegí 3 herramientas para defender el espacio.</div>'+
+      '<div class="terraza-hint">Cada herramienta define tu estrategia.</div>'+
+      '<div class="terraza-garden" id="hGarden"><div class="terraza-garden-label">🏗️ TU ESTRATEGIA</div></div>'+
+      '<div class="terraza-plants" id="hPlants"></div>'+
+      '<button class="btn btn-warm" id="hConfirm" disabled style="align-self:center;margin-top:4px;">Confirmar selección →</button>';
+    container.appendChild(d);
+
+    var pd=document.getElementById('hPlants');
+    PLANTS.forEach(function(pl){
+      var btn=document.createElement('div');btn.className='terraza-plant';
+      btn.innerHTML='<div class="terraza-plant-icon">'+pl.icon+'</div><div class="terraza-plant-name">'+pl.name+'</div><div class="terraza-plant-check">✓</div>';
+      btn.addEventListener('click',function(){
+        if(btn.classList.contains('selected')){
+          btn.classList.remove('selected');garden=garden.filter(function(g){return g!==pl;});
+        }else{
+          if(garden.length>=maxPicks)return;
+          btn.classList.add('selected');garden.push(pl);
+        }
+        updateGarden();
+        document.getElementById('hConfirm').disabled=garden.length<maxPicks;
+        document.querySelectorAll('.terraza-plant').forEach(function(e){
+          if(!e.classList.contains('selected'))e.classList.toggle('disabled',garden.length>=maxPicks);
+        });
+      });
+      pd.appendChild(btn);
+    });
+
+    document.getElementById('hConfirm').addEventListener('click',function(){
+      garden.forEach(function(pl){for(var k in pl.scores)accum[k]=(accum[k]||0)+pl.scores[k];});
+      step2();
+    });
+  }
+
+  function updateGarden(){
+    var g=document.getElementById('hGarden');
+    g.innerHTML='<div class="terraza-garden-label">🏗️ TU ESTRATEGIA</div>';
+    garden.forEach(function(pl){
+      var s=document.createElement('span');s.className='terraza-garden-item';s.textContent=pl.icon;
+      g.appendChild(s);
+    });
+  }
+
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='terraza-wrap fade-in';
+    d.innerHTML='<div class="terraza-sub">PASO 2 — EL CONFLICTO</div>'+
+      '<div class="terraza-prompt">El intendente dice que el shopping traerá empleo y progreso. Los vecinos están divididos. ¿Cómo actuás?</div>'+
+      '<div class="terraza-opts" id="hOpts2"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'📝',title:'Armás una petición con argumentos legales e históricos',hint:'El derecho como herramienta.',scores:{C:14,hI:10,mTeo:8,I:6}},
+      {icon:'🏗️',title:'Diseñás un proyecto alternativo que combine parque y comercio',hint:'No demoler, integrar.',scores:{hR:12,hI:10,hA:8,pdcC:6}},
+      {icon:'📢',title:'Organizás una protesta pacífica con carteles y música',hint:'La voz del pueblo.',scores:{I:12,S:10,hA:6,mSoc:8}},
+      {icon:'📐',title:'Presentás una propuesta técnica con datos de impacto y costo real',hint:'Los números hablan.',scores:{hI:14,C:12,hC:8,mTeo:6}},
+    ];
+
+    var od=document.getElementById('hOpts2');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='terraza-opt';
+      btn.innerHTML='<div class="terraza-opt-icon">'+opt.icon+'</div><div><div class="terraza-opt-title">'+opt.title+'</div><div class="terraza-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.terraza-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='terraza-wrap fade-in';
+    d.innerHTML='<div class="terraza-sub">PASO 3 — REFLEXIÓN</div>'+
+      '<div class="terraza-prompt">Lograron frenar la demolición por ahora. ¿Qué aprendiste de esta lucha?</div>'+
+      '<div class="terraza-opts" id="hOpts3"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'⚖️',title:'Que los derechos hay que defenderlos con información y persistencia',hint:'La justicia no es automática.',scores:{C:12,hI:10,I:8,mTeo:6}},
+      {icon:'🤝',title:'Que la comunidad organizada puede más que cualquier poder económico',hint:'La unión cambia la realidad.',scores:{S:14,I:10,mSoc:8,hS:6}},
+      {icon:'🏗️',title:'Que siempre hay una solución técnica si se piensa con creatividad',hint:'Ingeniería al servicio del bien común.',scores:{hR:12,hI:10,pdcC:8,hA:6}},
+      {icon:'🎨',title:'Que el arte y la cultura son lo que le da identidad a un lugar',hint:'Sin memoria, no hay comunidad.',scores:{hA:14,mEst:10,mAut:8}},
+    ];
+
+    var od=document.getElementById('hOpts3');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='terraza-opt';
+      btn.innerHTML='<div class="terraza-opt-icon">'+opt.icon+'</div><div><div class="terraza-opt-title">'+opt.title+'</div><div class="terraza-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.terraza-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(function(){
+          var sci=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+          var care=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+          var prac=(accum.hR||0)+(accum.D||0)+(accum.pdcC||0);
+          var crea=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+          var mx=Math.max(sci,care,prac,crea,1);
+          zoneComplete('fachada',accum,{
+            emoji:'🏗️',title:'¡Fachada revelada!',
+            sub:'Cómo defendés lo que importa muestra quién sos.',
+            bars:[
+              {icon:'🔬',color:'#3db8a0',pct:Math.round(sci/mx*100)},
+              {icon:'💗',color:'#d96a8a',pct:Math.round(care/mx*100)},
+              {icon:'🔧',color:'#8b6cc7',pct:Math.round(prac/mx*100)},
+              {icon:'🎨',color:'#d96060',pct:Math.round(crea/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL INVERNADERO
+//  Roles con timer: gestión de cultivo
+// ═══════════════════════════════════════
+function buildInvernadero(container){
+  var accum={};var answered=false;var timerRef=null;
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  var MIEMBROS=[
+    {id:'cami',icon:'🌱',name:'Cami',skill:'Sabe de plantas'},
+    {id:'jul',icon:'🧪',name:'Juli',skill:'Buena en química'},
+    {id:'manu',icon:'💪',name:'Manu',skill:'Fuerte y práctico'},
+    {id:'sol',icon:'📊',name:'Sol',skill:'Organiza todo'},
+    {id:'rami',icon:'🎨',name:'Rami',skill:'Creativo y observador'},
+    {id:'lu',icon:'🩺',name:'Lu',skill:'Sabe de biología'},
+  ];
+
+  var TAREAS=[
+    {id:'tierra',icon:'🌍',title:'Analizar la tierra contaminada',hint:'Hay que entender qué le pasa al suelo.',
+      best:['jul','lu'],scores:{jul:{hI:14,C:12,mTeo:8},lu:{hI:12,hS:10,C:8},cami:{hI:8,C:6},manu:{hR:6,D:6},sol:{hC:6,C:4},rami:{hA:4,hI:4}}},
+    {id:'riego',icon:'💧',title:'Reparar el sistema de riego',hint:'Sin agua no crece nada.',
+      best:['manu'],scores:{cami:{hR:6,hI:4},jul:{hI:6,C:4},manu:{hR:14,D:10,pdcC:8},sol:{hC:8,mTra:6},rami:{hA:4,hR:4},lu:{hI:4,S:4}}},
+    {id:'plagas',icon:'🐛',title:'Decidir qué hacer con las plagas',hint:'Pesticidas rápidos o soluciones naturales lentas.',
+      best:['cami','lu'],scores:{cami:{hI:14,mTeo:10,pdcD:8},jul:{hI:10,C:8,mTeo:6},manu:{D:8,hR:6},sol:{hC:6,C:4,mTra:4},rami:{hA:6,mEst:4},lu:{S:10,hS:8,hI:8}}},
+    {id:'distribuir',icon:'🥕',title:'Organizar la distribución de la cosecha',hint:'Hay que repartir justo entre todos.',
+      best:['sol'],scores:{cami:{S:6,I:4},jul:{C:4,hI:4},manu:{D:6,hR:4},sol:{hC:14,I:12,mTra:8},rami:{hA:6,S:4,mEst:4},lu:{S:8,I:6,mSoc:4}}},
+  ];
+
+  var assignments={};var selectedMiembro=null;
+
+  function step1(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+    d.innerHTML='<div class="apagon-sub">PASO 1 — REACCIÓN</div>'+
+      '<div style="text-align:center;font-size:52px;padding:4px 0;">🌱</div>'+
+      '<div class="apagon-prompt">El invernadero de la azotea alimenta a la comunidad, pero las plantas se están muriendo. ¿Cuál es tu primera reacción?</div>'+
+      '<div class="apagon-opts" id="cr1Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🔬',title:'Analizás la tierra y el agua para buscar la causa',hint:'Sin diagnóstico no hay solución.',scores:{hI:10,C:8,pdcD:6,mTeo:4}},
+      {icon:'🌿',title:'Probás con remedios naturales: compost, ceniza, rotación',hint:'La naturaleza se cura sola si sabés cómo.',scores:{hR:12,hI:8,pdcC:6,mTeo:4}},
+      {icon:'👥',title:'Reunís al equipo y repartís tareas para cubrir todo',hint:'En equipo se resuelve más rápido.',scores:{I:12,S:8,hC:8,mTra:6}},
+      {icon:'📖',title:'Investigás en libros y sitios qué le puede estar pasando',hint:'Alguien ya resolvió esto antes.',scores:{C:10,hI:10,mTeo:8,pdcD:6}},
+    ];
+
+    var od=document.getElementById('cr1Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='apagon-opt';
+      btn.innerHTML='<div class="apagon-opt-icon">'+opt.icon+'</div><div><div class="apagon-opt-title">'+opt.title+'</div><div class="apagon-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.apagon-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(step2,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function step2(){
+    assignments={};selectedMiembro=null;
+    var timeLeft=50;
+    container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+    d.innerHTML='<div class="apagon-sub">PASO 2 — ORGANIZAR EQUIPO</div>'+
+      '<div class="apagon-prompt">Hay 4 tareas urgentes y 6 personas. Asigná a alguien a cada tarea.</div>'+
+      '<div class="apagon-hint">Tocá una persona ↓ y después tocá la tarea ↓</div>'+
+      '<div class="apagon-timer"><div class="apagon-timer-icon">⏱️</div>'+
+        '<div class="apagon-timer-bar"><div class="apagon-timer-fill" id="crTimerFill" style="width:100%"></div></div>'+
+        '<div class="apagon-timer-val" id="crTimerVal">50</div></div>'+
+      '<div class="apagon-vecinos" id="crMiembros"></div>'+
+      '<div class="apagon-problems" id="crTareas"></div>';
+    container.appendChild(d);
+
+    var md=document.getElementById('crMiembros');
+    MIEMBROS.forEach(function(m){
+      var btn=document.createElement('div');btn.className='apagon-vecino';
+      btn.dataset.id=m.id;
+      btn.innerHTML='<div class="apagon-vecino-icon">'+m.icon+'</div><div class="apagon-vecino-name">'+m.name+'</div><div class="apagon-vecino-skill">'+m.skill+'</div>';
+      btn.addEventListener('click',function(){
+        if(btn.classList.contains('assigned'))return;
+        document.querySelectorAll('.apagon-vecino').forEach(function(v){v.classList.remove('selected');});
+        btn.classList.add('selected');
+        selectedMiembro=m;
+      });
+      md.appendChild(btn);
+    });
+
+    var td=document.getElementById('crTareas');
+    TAREAS.forEach(function(t){
+      var btn=document.createElement('div');btn.className='apagon-problem';
+      btn.dataset.id=t.id;
+      btn.innerHTML='<div class="apagon-problem-icon">'+t.icon+'</div><div class="apagon-problem-info"><div class="apagon-problem-title">'+t.title+'</div><div class="apagon-problem-hint">'+t.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(!selectedMiembro||btn.classList.contains('filled'))return;
+        assignments[t.id]=selectedMiembro.id;
+        var sc=t.scores[selectedMiembro.id]||{D:4,hR:4};
+        addLocal(sc);
+        btn.classList.add('filled');
+        btn.querySelector('.apagon-problem-hint').style.display='none';
+        var aDiv=document.createElement('div');aDiv.className='apagon-problem-assigned';aDiv.textContent='→ '+selectedMiembro.icon+' '+selectedMiembro.name;
+        btn.querySelector('.apagon-problem-info').appendChild(aDiv);
+        document.querySelector('.apagon-vecino[data-id="'+selectedMiembro.id+'"]').classList.add('assigned');
+        document.querySelectorAll('.apagon-vecino').forEach(function(v){v.classList.remove('selected');});
+        selectedMiembro=null;
+        if(Object.keys(assignments).length>=TAREAS.length){clearInterval(timerRef);setTimeout(step3,600);}
+      });
+      td.appendChild(btn);
+    });
+
+    timerRef=setInterval(function(){
+      timeLeft--;
+      document.getElementById('crTimerVal').textContent=timeLeft;
+      document.getElementById('crTimerFill').style.width=(timeLeft/50*100)+'%';
+      if(timeLeft<=10)document.getElementById('crTimerVal').style.color='var(--red)';
+      if(timeLeft<=0){clearInterval(timerRef);autoFill();setTimeout(step3,600);}
+    },1000);
+  }
+
+  function autoFill(){
+    TAREAS.forEach(function(t){
+      if(!assignments[t.id]){
+        var avail=MIEMBROS.filter(function(m){
+          for(var k in assignments)if(assignments[k]===m.id)return false;
+          return true;
+        });
+        if(avail.length){
+          assignments[t.id]=avail[0].id;
+          addLocal({D:4,hR:2});
+        }
+      }
+    });
+  }
+
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='apagon-wrap fade-in';
+    d.innerHTML='<div class="apagon-sub">PASO 3 — REFLEXIÓN</div>'+
+      '<div style="text-align:center;font-size:48px;padding:4px 0;">🌿</div>'+
+      '<div class="apagon-prompt">El invernadero se recupera. ¿Qué fue lo más importante?</div>'+
+      '<div class="apagon-opts" id="cr3Opts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'👥',title:'Que cada uno aportó desde lo que sabe',hint:'Los equipos diversos resuelven mejor.',scores:{I:12,hC:10,mTra:8}},
+      {icon:'🧠',title:'Que entender la causa fue más importante que actuar rápido',hint:'La ciencia antes que la urgencia.',scores:{C:12,hI:10,pdcD:8}},
+      {icon:'🌱',title:'Que cuidar la tierra es cuidar a la comunidad',hint:'Lo agro y lo social van juntos.',scores:{S:12,hS:8,mSoc:8,hR:6}},
+      {icon:'⚖️',title:'Que hay que pensar en el largo plazo, no solo en la cosecha de hoy',hint:'Sustentabilidad antes que productividad.',scores:{C:10,hI:8,mTeo:8,hC:6}},
+    ];
+
+    var od=document.getElementById('cr3Opts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='apagon-opt';
+      btn.innerHTML='<div class="apagon-opt-icon">'+opt.icon+'</div><div><div class="apagon-opt-title">'+opt.title+'</div><div class="apagon-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.apagon-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(function(){
+          var team=(accum.I||0)+(accum.hC||0)+(accum.mTra||0);
+          var brain=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+          var heart=(accum.S||0)+(accum.hS||0)+(accum.pdcP||0);
+          var hands=(accum.hR||0)+(accum.D||0)+(accum.pdcC||0);
+          var mx=Math.max(team,brain,heart,hands,1);
+          zoneComplete('invernadero',accum,{
+            emoji:'🌱',title:'¡Invernadero salvado!',
+            sub:'Organizar al equipo bajo presión reveló tu estilo.',
+            bars:[
+              {icon:'👥',color:'#d4a845',pct:Math.round(team/mx*100)},
+              {icon:'🧠',color:'#3db8a0',pct:Math.round(brain/mx*100)},
+              {icon:'💗',color:'#d96a8a',pct:Math.round(heart/mx*100)},
+              {icon:'🔧',color:'#8b6cc7',pct:Math.round(hands/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL MURAL
+//  Creatividad: crear y enfrentar la crítica
+// ═══════════════════════════════════════
+function buildMural(container){
+  var accum={};var answered=false;
+  var wall=[];var maxPicks=4;
+
+  var ELEMENTS=[
+    {icon:'🌆',name:'Silueta de la ciudad',scores:{hA:6,mEst:4,hI:4}},
+    {icon:'👥',name:'Retratos de vecinos',scores:{S:8,mSoc:6,hA:4}},
+    {icon:'🌿',name:'Naturaleza urbana',scores:{hR:6,hA:6,mEst:4}},
+    {icon:'✊',name:'Símbolos de protesta',scores:{I:8,S:6,D:4}},
+    {icon:'🔬',name:'Fórmulas y diagramas',scores:{hI:8,mTeo:6,C:4}},
+    {icon:'📝',name:'Frases y poesía',scores:{hA:10,mEst:8,mAut:4}},
+    {icon:'🌈',name:'Colores abstractos',scores:{hA:10,mAut:8,mEst:4}},
+    {icon:'🗺️',name:'Mapa del barrio',scores:{hI:6,hC:6,C:4}},
+    {icon:'🎵',name:'Notas musicales',scores:{hA:8,mEst:6,S:4}},
+    {icon:'⚙️',name:'Engranajes y circuitos',scores:{hR:8,hI:6,pdcC:4}},
+  ];
+
+  function step1(){
+    wall=[];answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 1 — CREAR EL MURAL</div>'+
+      '<div class="aula-prompt">Tenés un muro enorme en blanco. Elegí 4 elementos para tu mural.</div>'+
+      '<div class="aula-hint">Lo que ponés en el muro dice quién sos.</div>'+
+      '<div class="aula-wall" id="fWall"><div class="aula-wall-label">🎨 TU MURAL</div></div>'+
+      '<div class="aula-palette" id="fPalette"></div>'+
+      '<button class="btn btn-warm aula-confirm" id="fConfirm" disabled>Confirmar mural →</button>';
+    container.appendChild(d);
+
+    var pal=document.getElementById('fPalette');
+    ELEMENTS.forEach(function(el){
+      var btn=document.createElement('div');btn.className='aula-elem';
+      btn.innerHTML='<div class="aula-elem-icon">'+el.icon+'</div><div class="aula-elem-name">'+el.name+'</div><div class="aula-elem-check">✓</div>';
+      btn.addEventListener('click',function(){
+        if(btn.classList.contains('selected')){
+          btn.classList.remove('selected');
+          wall=wall.filter(function(w){return w!==el;});
+        }else{
+          if(wall.length>=maxPicks)return;
+          btn.classList.add('selected');wall.push(el);
+        }
+        updateWall();
+        document.getElementById('fConfirm').disabled=wall.length<maxPicks;
+        document.querySelectorAll('.aula-elem').forEach(function(e){
+          if(!e.classList.contains('selected'))e.classList.toggle('disabled',wall.length>=maxPicks);
+        });
+      });
+      pal.appendChild(btn);
+    });
+
+    document.getElementById('fConfirm').addEventListener('click',function(){
+      wall.forEach(function(el){for(var k in el.scores)accum[k]=(accum[k]||0)+el.scores[k];});
+      step2();
+    });
+  }
+
+  function updateWall(){
+    var w=document.getElementById('fWall');
+    w.innerHTML='<div class="aula-wall-label">🎨 TU MURAL</div>';
+    wall.forEach(function(el){
+      var s=document.createElement('span');s.className='aula-wall-item';s.textContent=el.icon;
+      w.appendChild(s);
+    });
+  }
+
+  function step2(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 2 — LA CRÍTICA</div>'+
+      '<div style="text-align:center;font-size:48px;padding:4px 0;">😤</div>'+
+      '<div class="aula-prompt">Tu mural recibe críticas muy duras. Un grupo dice que es feo, que no representa al barrio. ¿Qué hacés?</div>'+
+      '<div class="aula-opts" id="fOpts2"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🔄',title:'Lo modificás incorporando las sugerencias que te parecen válidas',hint:'Adaptarse no es rendirse.',scores:{S:10,I:8,hS:6,mSoc:6}},
+      {icon:'🛡️',title:'Lo defendés: explicás tu visión y por qué elegiste cada elemento',hint:'El arte tiene que bancar sus decisiones.',scores:{hA:12,mAut:10,D:8}},
+      {icon:'🆕',title:'Empezás algo nuevo: la crítica te inspiró una idea mejor',hint:'A veces hay que soltar.',scores:{hA:10,mEst:8,hI:6,C:6}},
+      {icon:'🤔',title:'Escuchás la crítica en profundidad para entender qué no funcionó',hint:'Aprender del feedback es una habilidad.',scores:{C:10,hI:8,S:8,mTeo:6}},
+    ];
+
+    var od=document.getElementById('fOpts2');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(step3,550);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  function step3(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='aula-wrap fade-in';
+    d.innerHTML='<div class="aula-sub">PASO 3 — CIERRE</div>'+
+      '<div class="aula-prompt">El mural está terminado. La gente pasa y lo mira. ¿Qué sentís al verlo?</div>'+
+      '<div class="aula-opts" id="fOpts3"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🌟',title:'"Es mío. No importa si a todos les gusta, yo sé lo que quise decir."',hint:'La autenticidad como valor.',scores:{hA:14,mAut:10,mEst:8}},
+      {icon:'👥',title:'"Lo mejor fue que la gente se enganchó, opinó, discutió. El mural los hizo hablar."',hint:'El arte como disparador social.',scores:{S:12,I:10,mSoc:8}},
+      {icon:'🧠',title:'"Aprendí que crear es un proceso: probar, fallar, ajustar, mejorar."',hint:'El método creativo.',scores:{hI:10,C:10,mTeo:8,pdcD:6}},
+      {icon:'🔧',title:'"Me gustó el desafío técnico: los materiales, las proporciones, el espacio."',hint:'La artesanía del mural.',scores:{hR:12,D:10,pdcC:8}},
+    ];
+
+    var od=document.getElementById('fOpts3');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='campo-opt';
+      btn.innerHTML='<div class="campo-opt-icon">'+opt.icon+'</div><div><div class="campo-opt-title">'+opt.title+'</div><div class="campo-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.campo-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        for(var k in opt.scores)accum[k]=(accum[k]||0)+opt.scores[k];
+        setTimeout(function(){
+          var crea=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+          var sci=(accum.hI||0)+(accum.mTeo||0)+(accum.C||0);
+          var social=(accum.S||0)+(accum.mSoc||0)+(accum.I||0);
+          var prac=(accum.hR||0)+(accum.D||0)+(accum.pdcC||0);
+          var mx=Math.max(crea,sci,social,prac,1);
+          zoneComplete('mural',accum,{
+            emoji:'🎨',title:'¡Mural terminado!',
+            sub:'Lo que creás y cómo enfrentás la crítica dice mucho de vos.',
+            bars:[
+              {icon:'🎨',color:'#d96060',pct:Math.round(crea/mx*100)},
+              {icon:'🔬',color:'#3db8a0',pct:Math.round(sci/mx*100)},
+              {icon:'👥',color:'#d96a8a',pct:Math.round(social/mx*100)},
+              {icon:'🔧',color:'#8b6cc7',pct:Math.round(prac/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  step1();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: LA FRECUENCIA
+//  Chat: radio pirata, compañero excluido
+// ═══════════════════════════════════════
+function buildFrecuencia(container){
+  var accum={};
+  var STEPS=[
+    {msgs:[
+      {type:'narrator',text:'La radio pirata de la ciudad invisible se enciende. Los mensajes llegan uno tras otro.'},
+      {type:'them',name:'Nati',text:'Che, ¿alguien habló con Santi? Hace días que no viene al taller.'},
+      {type:'them',name:'Facu',text:'Ni idea. Yo lo vi el otro día pero estaba raro, se fue sin saludar.'},
+      {type:'them',name:'Nati',text:'Es que el otro día nadie le dio bola cuando propuso su idea para el mural. Se re notó que se sintió mal.'}
+    ],choices:[
+      {text:'"Le escribo yo. Le pregunto cómo está y si quiere que nos juntemos."',hint:'Acompañar en privado.',scores:{S:14,hS:12,pdcP:8,mSoc:6}},
+      {text:'"Tendríamos que hablar como grupo de cómo tratamos las ideas de cada uno."',hint:'Cambiar la dinámica grupal.',scores:{I:12,hC:10,mTra:8,S:6}},
+      {text:'"¿Por qué no le dieron bola? ¿Qué había propuesto?"',hint:'Entender antes de actuar.',scores:{hI:12,C:10,mTeo:8,S:6}},
+    ]},
+    {msgs:[
+      {type:'them',name:'Facu',text:'La verdad que su idea estaba buena, pero todos estaban hablando de lo suyo y nadie lo escuchó.'},
+      {type:'them',name:'Nati',text:'Es que Santi es más callado. Si no te acercás, no te dice nada.'},
+      {type:'narrator',text:'Santi se conecta a la frecuencia. Está escuchando pero no dice nada.'},
+      {type:'them',name:'Nati',text:'¡Santi! ¿Estás ahí?'},
+      {type:'them',name:'Santi',text:'Sí, estoy escuchando.'}
+    ],choices:[
+      {text:'"Santi, tu idea del mural era muy buena. Me gustaría que la cuentes de nuevo."',hint:'Darle espacio y reconocimiento.',scores:{S:14,hS:10,mSoc:8,I:6}},
+      {text:'"Santi, perdón si el otro día no te escuchamos como correspondía."',hint:'Reconocer el error del grupo.',scores:{I:12,S:10,hS:8,mSoc:8}},
+      {text:'"Propongo que cada vez que alguien presente algo, todos escuchemos sin interrumpir."',hint:'Crear un protocolo para que no vuelva a pasar.',scores:{hC:12,I:10,mTra:8,hE:6}},
+    ]},
+    {msgs:[
+      {type:'them',name:'Santi',text:'Gracias. La verdad me sentí invisible. Como que lo que yo decía no importaba.'},
+      {type:'them',name:'Facu',text:'Para nada, man. Estuvo mal de nuestra parte.'},
+      {type:'them',name:'Nati',text:'¿Querés contarnos tu idea ahora?'},
+      {type:'them',name:'Santi',text:'Dale. Era hacer un mural interactivo, que la gente pueda agregar cosas. Un mural vivo.'},
+      {type:'narrator',text:'El grupo se engancha con la idea. La energía cambia.'}
+    ],choices:[
+      {text:'"Me encanta. Podríamos combinar tu idea con lo que ya veníamos haciendo."',hint:'Integrar sin borrar lo anterior.',scores:{I:10,S:8,hA:8,hC:6}},
+      {text:'"¿Y cómo lo haríamos técnicamente? ¿Qué materiales necesitaríamos?"',hint:'Bajar la idea a tierra.',scores:{hI:12,hR:8,C:8,pdcC:6}},
+      {text:'"Lo más valioso es que Santi se animó a compartirlo. Eso vale más que la idea en sí."',hint:'Lo humano primero.',scores:{S:14,hS:12,mSoc:8,pdcP:6}},
+    ]},
+    {msgs:[
+      {type:'narrator',text:'La frecuencia se llena de ideas. Todos aportan.'},
+      {type:'them',name:'Santi',text:'Che, gracias por escucharme. En serio.'},
+      {type:'them',name:'Nati',text:'Siempre, Santi. Y si te volvés a sentir así, decinos.'},
+      {type:'them',name:'Facu',text:'¿Mañana nos juntamos en el taller para arrancar con el mural interactivo?'},
+      {type:'narrator',text:'Te miran esperando tu respuesta.'}
+    ],choices:[
+      {text:'"¡Sí! Pero primero armemos un plan: qué hace cada uno, qué necesitamos."',hint:'Organización antes de acción.',scores:{hC:10,I:8,mTra:8,D:6}},
+      {text:'"Dale. Y que Santi lidere el proyecto, es su idea."',hint:'Darle el protagonismo que merece.',scores:{S:12,I:10,mSoc:8,pdcP:6}},
+      {text:'"Vamos, pero propongo que esta vez documentemos todo el proceso."',hint:'Que quede registro para aprender.',scores:{hI:12,C:10,mTeo:8,hA:6}},
+    ]}
+  ];
+
+  var stepIdx=0;
+
+  function renderStep(){
+    if(stepIdx>=STEPS.length){finishFrecuencia();return;}
+    var step=STEPS[stepIdx];
+    container.innerHTML='';
+    var wrap=document.createElement('div');wrap.className='recreo-wrap';
+    var chat=document.createElement('div');chat.className='recreo-chat';
+    if(stepIdx===0){
+      var sub=document.createElement('div');sub.className='recreo-sub';sub.textContent='RADIO PIRATA';
+      chat.appendChild(sub);
+    }
+    wrap.appendChild(chat);
+    var choicesDiv=document.createElement('div');choicesDiv.className='recreo-choices';choicesDiv.style.display='none';
+    wrap.appendChild(choicesDiv);
+    container.appendChild(wrap);
+
+    var msgIdx=0;
+    function showNextMsg(){
+      if(msgIdx>=step.msgs.length){showChoices();return;}
+      var m=step.msgs[msgIdx];
+      var el=document.createElement('div');el.className='recreo-msg '+m.type;
+      if(m.type==='them')el.innerHTML='<div class="recreo-msg-name">'+m.name+'</div>'+m.text;
+      else if(m.type==='narrator')el.textContent=m.text;
+      else el.textContent=m.text;
+      chat.appendChild(el);
+      chat.scrollTop=chat.scrollHeight;
+      msgIdx++;
+      setTimeout(showNextMsg,600);
+    }
+
+    function showChoices(){
+      choicesDiv.style.display='flex';
+      var answered=false;
+      step.choices.forEach(function(ch){
+        var btn=document.createElement('div');btn.className='recreo-choice';
+        btn.innerHTML=ch.text+'<div class="recreo-choice-hint">'+ch.hint+'</div>';
+        btn.addEventListener('click',function(){
+          if(answered)return;answered=true;btn.classList.add('picked');
+          document.querySelectorAll('.recreo-choice').forEach(function(c){if(c!==btn)c.style.opacity='.3';});
+          for(var k in ch.scores)accum[k]=(accum[k]||0)+ch.scores[k];
+          var myMsg=document.createElement('div');myMsg.className='recreo-msg me';myMsg.textContent=ch.text.replace(/"/g,'');
+          chat.appendChild(myMsg);chat.scrollTop=chat.scrollHeight;
+          setTimeout(function(){stepIdx++;renderStep();},700);
+        });
+        choicesDiv.appendChild(btn);
+      });
+    }
+
+    showNextMsg();
+  }
+
+  function finishFrecuencia(){
+    var emp=(accum.S||0)+(accum.hS||0)+(accum.mSoc||0);
+    var org=(accum.hC||0)+(accum.I||0)+(accum.mTra||0);
+    var ana=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+    var act=(accum.D||0)+(accum.hR||0)+(accum.pdcC||0);
+    var mx=Math.max(emp,org,ana,act,1);
+    zoneComplete('frecuencia',accum,{
+      emoji:'📡',title:'¡Frecuencia sintonizada!',
+      sub:'Cómo escuchás y respondés cuando alguien se siente invisible dice mucho.',
+      bars:[
+        {icon:'💗',color:'#d96a8a',pct:Math.round(emp/mx*100)},
+        {icon:'📋',color:'#d4a845',pct:Math.round(org/mx*100)},
+        {icon:'🔍',color:'#4a7ad9',pct:Math.round(ana/mx*100)},
+        {icon:'⚡',color:'#8b6cc7',pct:Math.round(act/mx*100)},
+      ]
+    });
+  }
+
+  renderStep();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL ARCHIVO
+//  Clasificación: enseñar al que no entiende
+// ═══════════════════════════════════════
+function buildArchivo(container){
+  var ITEMS=[
+    {icon:'📜',name:'Acta fundacional de la ciudad',desc:'Documento legal de 1890.',area:'hist'},
+    {icon:'🧪',name:'Fórmula del agua potabilizada',desc:'Proceso químico para potabilizar.',area:'ciencia'},
+    {icon:'📐',name:'Plano de la primera red eléctrica',desc:'Esquema de ingeniería original.',area:'tecnica'},
+    {icon:'🎨',name:'Boceto del primer mural del barrio',desc:'Dibujo a carbón sobre papel.',area:'arte'},
+    {icon:'📊',name:'Registro censal de 1950',desc:'Datos de población y oficios.',area:'datos'},
+    {icon:'💊',name:'Receta de la farmacia comunitaria',desc:'Preparados medicinales caseros.',area:'ciencia'},
+    {icon:'📖',name:'Diario de un maestro rural',desc:'Crónica escolar de 1920.',area:'hist'},
+    {icon:'⚙️',name:'Manual del molino hidráulico',desc:'Instrucciones técnicas ilustradas.',area:'tecnica'},
+    {icon:'🌿',name:'Herbario con plantas medicinales',desc:'Catálogo botánico ilustrado.',area:'ciencia'},
+    {icon:'🗳️',name:'Actas de la primera asamblea vecinal',desc:'Registro de debates y votaciones.',area:'hist'},
+    {icon:'🎭',name:'Programa del primer teatro del barrio',desc:'Funciones, actores, reseñas.',area:'arte'},
+    {icon:'📈',name:'Estadísticas de cosechas por década',desc:'Rendimiento agrícola histórico.',area:'datos'},
+  ];
+
+  var SHELVES=[
+    {id:'hist',icon:'📜',name:'Historia y memoria',desc:'Lo que cuenta de dónde venimos'},
+    {id:'ciencia',icon:'🔬',name:'Ciencia y salud',desc:'Conocimiento aplicado a la vida'},
+    {id:'tecnica',icon:'⚙️',name:'Técnica e ingeniería',desc:'Cómo se construyeron las cosas'},
+    {id:'arte',icon:'🎨',name:'Arte y cultura',desc:'La expresión de la comunidad'},
+    {id:'datos',icon:'📊',name:'Datos y registros',desc:'Los números que cuentan historias'},
+  ];
+
+  var queue=ITEMS.slice();var shelfCounts={};
+  SHELVES.forEach(function(s){shelfCounts[s.id]=0;});
+  var idx=0;var accum={};var answered=false;
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  var shelfScores={
+    hist:{S:6,I:6,mSoc:6,C:4},
+    ciencia:{hI:8,mTeo:6,C:6,hS:4},
+    tecnica:{hR:8,hI:6,pdcC:6,D:4},
+    arte:{hA:8,mEst:6,mAut:6},
+    datos:{hI:6,C:6,hC:6,mTeo:4},
+  };
+
+  function renderItem(){
+    if(idx>=queue.length){finishSort();return;}
+    answered=false;container.innerHTML='';
+    var item=queue[idx];
+    var d=document.createElement('div');d.className='biblio-wrap fade-in';
+    d.innerHTML='<div class="biblio-sub">CLASIFICAR ARCHIVO</div>'+
+      '<div class="biblio-progress"><span>'+(idx+1)+'/'+queue.length+'</span> documentos clasificados</div>'+
+      '<div class="biblio-item"><div class="biblio-item-icon">'+item.icon+'</div><div><div class="biblio-item-name">'+item.name+'</div><div class="biblio-item-desc">'+item.desc+'</div></div></div>'+
+      '<div class="biblio-prompt">¿En qué sección va?</div>'+
+      '<div class="biblio-shelves" id="bShelves"></div>';
+    container.appendChild(d);
+
+    var sd=document.getElementById('bShelves');
+    SHELVES.forEach(function(shelf){
+      var btn=document.createElement('div');btn.className='biblio-shelf';
+      btn.innerHTML='<div class="biblio-shelf-icon">'+shelf.icon+'</div><div class="biblio-shelf-info"><div class="biblio-shelf-name">'+shelf.name+'</div><div class="biblio-shelf-count">'+shelfCounts[shelf.id]+' docs</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        shelfCounts[shelf.id]++;
+        var correct=shelf.id===item.area;
+        var sc=Object.assign({},shelfScores[shelf.id]);
+        if(correct){for(var k in sc)sc[k]=Math.round(sc[k]*1.4);}
+        addLocal(sc);
+        setTimeout(function(){idx++;renderItem();},400);
+      });
+      sd.appendChild(btn);
+    });
+  }
+
+  function finishSort(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='biblio-wrap fade-in';
+    d.innerHTML='<div class="biblio-sub">REFLEXIÓN FINAL</div>'+
+      '<div class="biblio-prompt">Un compañero no entiende cómo funciona el sistema de clasificación. Tenés que enseñarle. ¿Cómo lo hacés?</div>'+
+      '<div class="biblio-opts" id="bOpts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🔄',title:'Buscás otra forma de explicarlo: con ejemplos, dibujos, analogías',hint:'Si no entiende, el problema es la explicación, no él.',scores:{mTra:14,pdcP:10,S:8,hS:6}},
+      {icon:'📝',title:'Le armás ejercicios prácticos para que clasifique y aprenda haciendo',hint:'Se aprende haciendo, no escuchando.',scores:{hR:12,D:10,pdcC:8,mTra:6}},
+      {icon:'📚',title:'Le recomendás recursos: un video, un libro, una guía paso a paso',hint:'A veces otro formato conecta mejor.',scores:{hI:12,C:10,mTeo:8,pdcD:6}},
+      {icon:'👉',title:'Lo derivás a alguien que sepa explicar mejor que vos',hint:'Reconocer los límites propios también es inteligente.',scores:{I:10,hC:8,S:8,mSoc:6}},
+    ];
+
+    var od=document.getElementById('bOpts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='biblio-opt';
+      btn.innerHTML='<div class="biblio-opt-icon">'+opt.icon+'</div><div><div class="biblio-opt-title">'+opt.title+'</div><div class="biblio-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.biblio-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(function(){
+          var sci=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+          var prac=(accum.hR||0)+(accum.D||0)+(accum.hC||0);
+          var care=(accum.S||0)+(accum.hS||0)+(accum.pdcP||0);
+          var crea=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+          var mx=Math.max(sci,prac,care,crea,1);
+          zoneComplete('archivo',accum,{
+            emoji:'📂',title:'¡Archivo ordenado!',
+            sub:'Tu forma de organizar y enseñar revela cómo pensás.',
+            bars:[
+              {icon:'🔬',color:'#3db8a0',pct:Math.round(sci/mx*100)},
+              {icon:'🔧',color:'#8b6cc7',pct:Math.round(prac/mx*100)},
+              {icon:'💗',color:'#d96a8a',pct:Math.round(care/mx*100)},
+              {icon:'🎨',color:'#d96060',pct:Math.round(crea/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  renderItem();
+}
+
+// ═══════════════════════════════════════
+//  ZONA: EL UMBRAL
+//  Decisiones binarias: colaborar con alguien difícil
+// ═══════════════════════════════════════
+function buildUmbral(container){
+  var PAIRS=[
+    {prompt:'Un proyecto importante. ¿Con quién trabajás?',
+      a:{icon:'🤝',name:'Alguien que te cae bien',scores:{S:8,mSoc:6,I:4}},
+      b:{icon:'🧠',name:'Alguien que sabe mucho pero es difícil',scores:{hI:8,C:6,D:6}}},
+    {prompt:'Tenés que tomar una decisión. ¿Cómo la tomás?',
+      a:{icon:'💭',name:'Pensás mucho antes de actuar',scores:{C:10,hI:8,mTeo:4}},
+      b:{icon:'⚡',name:'Actuás y ajustás sobre la marcha',scores:{D:8,hR:6,pdcC:4}}},
+    {prompt:'Un conflicto en el grupo. ¿Qué hacés?',
+      a:{icon:'🗣️',name:'Lo hablás abiertamente',scores:{S:10,I:8,mSoc:6}},
+      b:{icon:'📝',name:'Escribís un mensaje pensado',scores:{C:8,hI:6,hA:4}}},
+    {prompt:'Te ofrecen liderar un proyecto grande. ¿Qué sentís?',
+      a:{icon:'🔥',name:'Entusiasmo: me encanta coordinar',scores:{I:10,hC:8,hE:6}},
+      b:{icon:'🔬',name:'Prefiero hacer mi parte bien, sin coordinar',scores:{hI:8,C:6,mTeo:4}}},
+    {prompt:'Alguien critica tu trabajo. ¿Cómo reaccionás?',
+      a:{icon:'👂',name:'Escuchás y aprendés',scores:{S:8,C:6,hS:6}},
+      b:{icon:'🛡️',name:'Defendés tu punto de vista',scores:{D:8,hA:6,mAut:6}}},
+    {prompt:'Hay que explicar algo complejo. ¿Cómo lo hacés?',
+      a:{icon:'📊',name:'Con datos y gráficos',scores:{hI:10,C:8,mTeo:4}},
+      b:{icon:'🎭',name:'Con una historia o metáfora',scores:{hA:8,mEst:6,S:4}}},
+    {prompt:'El proyecto terminó. ¿Qué hacés con lo que aprendiste?',
+      a:{icon:'📓',name:'Lo documentás para otros',scores:{mTra:10,pdcP:8,hI:4}},
+      b:{icon:'🚀',name:'Arrancás otro proyecto enseguida',scores:{D:10,hR:8,hE:4}}},
+  ];
+
+  var idx=0;var accum={};var answered=false;
+
+  function addLocal(sc){for(var k in sc)accum[k]=(accum[k]||0)+sc[k];}
+
+  function renderPair(){
+    if(idx>=PAIRS.length){finishUmbral();return;}
+    answered=false;container.innerHTML='';
+    var p=PAIRS[idx];
+    var d=document.createElement('div');d.className='esquina-wrap fade-in';
+    d.innerHTML='<div class="esquina-sub">EL UMBRAL</div>'+
+      '<div class="esquina-counter">Decisión <span>'+(idx+1)+'/'+PAIRS.length+'</span></div>'+
+      '<div class="esquina-bar"><div class="esquina-bar-fill" style="width:'+(idx/PAIRS.length*100)+'%"></div></div>'+
+      '<div class="esquina-prompt">'+p.prompt+'</div>'+
+      '<div class="esquina-vs" id="eCards"></div>';
+    container.appendChild(d);
+    var cd=document.getElementById('eCards');
+
+    [p.a,p.b].forEach(function(opt,oi){
+      if(oi===1){var sep=document.createElement('div');sep.className='esquina-or';sep.textContent='o';cd.appendChild(sep);}
+      var card=document.createElement('div');card.className='esquina-card';
+      card.innerHTML='<div class="esquina-card-icon">'+opt.icon+'</div><div class="esquina-card-name">'+opt.name+'</div>';
+      card.addEventListener('click',function(){
+        if(answered)return;answered=true;card.classList.add('picked');
+        document.querySelectorAll('.esquina-card').forEach(function(c){if(c!==card)c.classList.add('not-picked');});
+        addLocal(opt.scores);
+        setTimeout(function(){idx++;renderPair();},500);
+      });
+      cd.appendChild(card);
+    });
+  }
+
+  function finishUmbral(){
+    answered=false;container.innerHTML='';
+    var d=document.createElement('div');d.className='esquina-wrap fade-in';
+    d.innerHTML='<div class="esquina-sub">REFLEXIÓN</div>'+
+      '<div class="esquina-prompt">Cruzaste el umbral muchas veces. ¿Con cuál te identificás más?</div>'+
+      '<div class="esquina-opts" id="eOpts"></div>';
+    container.appendChild(d);
+
+    var opts=[
+      {icon:'🤝',title:'Soy de los que priorizan las relaciones, incluso si es más difícil',hint:'Las personas importan más que los resultados.',scores:{S:12,I:10,mSoc:8,hS:6}},
+      {icon:'🧠',title:'Soy de los que analizan todo antes de actuar',hint:'La información es poder.',scores:{hI:12,C:10,mTeo:8}},
+      {icon:'⚡',title:'Soy de los que actúan y aprenden en el camino',hint:'La experiencia enseña más que la teoría.',scores:{D:12,hR:10,hE:8}},
+      {icon:'🎨',title:'Soy de los que buscan formas nuevas de hacer las cosas',hint:'La creatividad no es solo arte, es método.',scores:{hA:10,mEst:8,mAut:8,hI:6}},
+    ];
+
+    var od=document.getElementById('eOpts');
+    opts.forEach(function(opt){
+      var btn=document.createElement('div');btn.className='esquina-opt';
+      btn.innerHTML='<div class="esquina-opt-icon">'+opt.icon+'</div><div><div class="esquina-opt-title">'+opt.title+'</div><div class="esquina-opt-hint">'+opt.hint+'</div></div>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;btn.classList.add('picked');
+        document.querySelectorAll('.esquina-opt').forEach(function(o){if(o!==btn)o.style.opacity='.3';});
+        addLocal(opt.scores);
+        setTimeout(function(){
+          var social=(accum.S||0)+(accum.I||0)+(accum.mSoc||0);
+          var explore=(accum.hI||0)+(accum.C||0)+(accum.mTeo||0);
+          var action=(accum.D||0)+(accum.hR||0)+(accum.pdcC||0);
+          var creative=(accum.hA||0)+(accum.mEst||0)+(accum.mAut||0);
+          var mx=Math.max(social,explore,action,creative,1);
+          zoneComplete('umbral',accum,{
+            emoji:'⚡',title:'¡Umbral cruzado!',
+            sub:'En cada decisión rápida se ve qué te mueve.',
+            bars:[
+              {icon:'👥',color:'#d96a8a',pct:Math.round(social/mx*100)},
+              {icon:'🔍',color:'#3db8a0',pct:Math.round(explore/mx*100)},
+              {icon:'⚡',color:'#d4a845',pct:Math.round(action/mx*100)},
+              {icon:'🎨',color:'#d96060',pct:Math.round(creative/mx*100)},
+            ]
+          });
+        },500);
+      });
+      od.appendChild(btn);
+    });
+  }
+
+  renderPair();
+}
+
+
+
+// ═══ PATHFINDER SYNC MODULE ═══
+var PF_SUPABASE_URL = 'https://mnmdqqlppwuzejxibqso.supabase.co';  // ← Reemplazar con tu URL de Supabase
+var PF_SUPABASE_KEY = 'sb_publishable_iWdGYjRwe18ortlRznDj9w_HpM0M1Hf';  // ← Reemplazar con tu anon key
+var PF_PATH_NUMBER = 3;
+
+var PF_MAPPING = {
+  salud:['S','hS','mSoc','pdcP'], exactas:['hI','mTeo','pdcD','C'],
+  ing:['hR','hC','D','pdcC'], sociales:['I','hS','S','mSoc'],
+  eco:['hE','mEco','D','hC'], arte:['hA','mEst','mAut'],
+  agro:['hR','pdcC','mTra'], edu:['mTra','pdcP','mSoc','S']
+};
+var PF_CAPS = {salud:180,exactas:180,ing:180,sociales:180,eco:180,arte:140,agro:140,edu:180};
+
+function pfComputeAreas(rawScores) {
+  var result = {};
+  for (var area in PF_MAPPING) {
+    var sum = 0;
+    PF_MAPPING[area].forEach(function(d){ sum += (rawScores[d]||0); });
+    var cap = PF_CAPS[area] || 160;
+    result[area] = Math.min(100, Math.round(sum / cap * 100));
+  }
+  return result;
+}
+
+function pfSyncResults() {
+  var areaPercentages = pfComputeAreas(GS.scores);
+  var payload = {
+    p_email: GS.email,
+    p_name: GS.name,
+    p_school_code: GS.schoolCode,
+    p_path_number: PF_PATH_NUMBER,
+    p_raw_scores: GS.scores,
+    p_area_percentages: areaPercentages
+  };
+
+  // Show sync status
+  var syncEl = document.getElementById('pf-sync-status');
+  if (syncEl) syncEl.textContent = 'Guardando resultados...';
+
+  fetch(PF_SUPABASE_URL + '/rest/v1/rpc/upsert_path_result', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': PF_SUPABASE_KEY,
+      'Authorization': 'Bearer ' + PF_SUPABASE_KEY
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (syncEl) {
+      if (data && data.success) {
+        syncEl.innerHTML = '✓ Resultados guardados · <a href="dashboard-alumno.html?email=' + encodeURIComponent(GS.email) + '" style="color:var(--warm,#f5a623);text-decoration:underline;">Ver mi evolución →</a>';
+      } else {
+        syncEl.textContent = '✓ Resultados guardados';
+      }
+    }
+  })
+  .catch(function(err){
+    console.error('PathFinder sync error:', err);
+    if (syncEl) syncEl.textContent = 'No se pudieron guardar (sin conexión). Tus resultados están en pantalla.';
+  });
+}
+// ═══ END SYNC MODULE ═══
+
+</script>
+</body>
+</html>

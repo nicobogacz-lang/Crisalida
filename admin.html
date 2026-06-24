@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PathFinder · Super Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Gabarito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1a1a2e;--card:#24243e;--border:#3a3a5c;
+  --text:#e8e6e0;--muted:#9a98a0;
+  --warm:#f5a623;--warm-soft:rgba(245,166,35,.12);
+  --danger:#f06050;--danger-soft:rgba(240,96,80,.12);
+  --success:#4ecb71;--success-soft:rgba(78,203,113,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Nunito,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px;}
+.container{max-width:800px;margin:0 auto;}
+h1{font-family:Gabarito,sans-serif;font-size:24px;font-weight:900;}
+h2{font-family:Gabarito,sans-serif;font-size:18px;font-weight:700;}
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:20px;}
+.login-wrap{display:flex;flex-direction:column;align-items:center;padding-top:80px;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:340px;width:100%;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center;}
+label{font-size:12px;color:var(--muted);text-align:left;display:block;margin-bottom:4px;}
+input,select{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:Nunito,sans-serif;font-size:15px;color:var(--text);outline:none;width:100%;}
+input:focus{border-color:var(--warm);}
+.btn{font-family:Gabarito,sans-serif;font-weight:700;border:none;border-radius:10px;padding:10px 20px;font-size:15px;cursor:pointer;transition:all .15s;}
+.btn-warm{background:var(--warm);color:#1a1a2e;}
+.btn-warm:hover{filter:brightness(1.1);}
+.btn-warm:disabled{opacity:.4;cursor:not-allowed;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--warm);color:var(--warm);}
+.btn-danger{background:var(--danger-soft);color:var(--danger);border:1px solid transparent;}
+.btn-danger:hover{border-color:var(--danger);}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px;}
+
+.dashboard{display:none;}
+.dashboard.active{display:block;}
+
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+.header-actions{display:flex;gap:8px;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
+.stat{background:var(--bg);border-radius:10px;padding:14px;text-align:center;}
+.stat-num{font-family:Gabarito,sans-serif;font-size:26px;font-weight:900;color:var(--warm);}
+.stat-label{font-size:11px;color:var(--muted);margin-top:2px;}
+
+.school-list{display:flex;flex-direction:column;gap:10px;}
+.school-item{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;transition:border-color .15s;}
+.school-item:hover{border-color:rgba(245,166,35,.3);}
+.school-info{flex:1;min-width:200px;}
+.school-name{font-weight:700;font-size:15px;}
+.school-code{font-family:monospace;font-size:13px;color:var(--warm);background:var(--warm-soft);padding:2px 8px;border-radius:6px;display:inline-block;margin-top:4px;}
+.school-meta{font-size:11px;color:var(--muted);margin-top:4px;}
+.school-stats{display:flex;gap:16px;align-items:center;}
+.school-stat{text-align:center;}
+.school-stat-num{font-family:Gabarito,sans-serif;font-size:20px;font-weight:700;}
+.school-stat-label{font-size:10px;color:var(--muted);}
+.school-actions{display:flex;gap:6px;}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:420px;width:100%;}
+.modal h2{margin-bottom:16px;}
+.modal .form-group{margin-bottom:14px;}
+.modal .form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
+.toast.show{opacity:1;}
+.toast.success{border-color:var(--success);color:var(--success);}
+.toast.error{border-color:var(--danger);color:var(--danger);}
+
+.empty{text-align:center;padding:32px;color:var(--muted);font-size:14px;}
+
+#loginError{font-size:12px;color:var(--danger);display:none;min-height:16px;}
+
+@media(max-width:500px){
+  .school-item{flex-direction:column;align-items:flex-start;}
+  .school-stats{width:100%;justify-content:space-around;}
+  .school-actions{width:100%;justify-content:flex-end;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-wrap">
+  <h1>🔐 PathFinder Admin</h1>
+  <p class="subtitle">Panel de administración</p>
+  <div class="login-card">
+    <div style="width:100%">
+      <label>Contraseña de administrador</label>
+      <input type="password" id="pwdInput" placeholder="Contraseña..." autocomplete="current-password">
+    </div>
+    <button class="btn btn-warm" style="width:100%;" id="loginBtn" onclick="doLogin()">Ingresar</button>
+    <div id="loginError"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="dashboard">
+  <div class="header">
+    <div>
+      <h1>🧭 PathFinder Admin</h1>
+      <p class="subtitle" style="margin-bottom:0;">Gestión de colegios y datos</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline btn-sm" onclick="openPasswordModal()">Cambiar contraseña</button>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Salir</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="statsRow"></div>
+
+  <!-- Schools -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2>Colegios</h2>
+      <button class="btn btn-warm btn-sm" onclick="openCreateModal()">+ Nuevo colegio</button>
+    </div>
+    <div class="school-list" id="schoolList">
+      <div class="empty">Cargando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Create/Edit School -->
+<div class="modal-overlay" id="schoolModal">
+  <div class="modal">
+    <h2 id="modalTitle">Nuevo colegio</h2>
+    <div class="form-group">
+      <label>Nombre del colegio</label>
+      <input type="text" id="mName" placeholder="Ej: Colegio San José" maxlength="100">
+    </div>
+    <div class="form-group">
+      <label>Código (lo que usan los alumnos y orientadores)</label>
+      <input type="text" id="mCode" placeholder="Ej: SJB-2025" maxlength="20" style="text-transform:uppercase;font-family:monospace;">
+    </div>
+    <div class="form-group">
+      <label>Email de contacto (opcional)</label>
+      <input type="email" id="mEmail" placeholder="orientador@colegio.edu.ar">
+    </div>
+    <div id="modalError" style="font-size:12px;color:var(--danger);min-height:16px;"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('schoolModal')">Cancelar</button>
+      <button class="btn btn-warm" id="modalSaveBtn" onclick="saveSchool()">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Delete Confirmation -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h2>Eliminar colegio</h2>
+    <p id="deleteMsg" style="font-size:14px;margin-bottom:16px;line-height:1.6;"></p>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">Cancelar</button>
+      <button class="btn btn-danger" id="deleteConfirmBtn" onclick="confirmDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Change Password -->
+<div class="modal-overlay" id="pwdModal">
+  <div class="modal">
+    <h2>Cambiar contraseña</h2>
+    <div class="form-group">
+      <label>Contraseña actual</label>
+      <input type="password" id="pwdCurrent" placeholder="Actual...">
+    </div>
+    <div class="form-group">
+      <label>Nueva contraseña</label>
+      <input type="password" id="pwdNew" placeholder="Nueva...">
+    </div>
+    <div class="form-group">
+      <label>Repetir nueva contraseña</label>
+      <input type="password" id="pwdRepeat" placeholder="Repetir...">
+    </div>
+    <div id="pwdError" style="font-size:12px;color:var(--danger);min-height:16px;"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('pwdModal')">Cancelar</button>
+      <button class="btn btn-warm" onclick="changePassword()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══ CONFIG ═══
+var SUPABASE_URL = 'https://mnmdqqlppwuzejxibqso.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_iWdGYjRwe18ortlRznDj9w_HpM0M1Hf';
+
+var adminAuth = false;
+var currentEditId = null;
+var currentDeleteId = null;
+var schoolsData = [];
+
+// ═══ API HELPER ═══
+function rpc(fn, params) {
+  return fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY
+    },
+    body: JSON.stringify(params || {})
+  }).then(function(r){ return r.json(); });
+}
+
+// ═══ TOAST ═══
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  setTimeout(function(){ t.className = 'toast'; }, 3000);
+}
+
+// ═══ LOGIN ═══
+var pwdIn = document.getElementById('pwdInput');
+pwdIn.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+function doLogin() {
+  var pwd = pwdIn.value;
+  var errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  rpc('admin_login', {p_password: pwd}).then(function(data){
+    if (data && data.success) {
+      adminAuth = true;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').classList.add('active');
+      loadOverview();
+    } else {
+      errEl.textContent = (data && data.error) || 'Contraseña incorrecta';
+      errEl.style.display = '';
+    }
+  }).catch(function(){
+    errEl.textContent = 'Error de conexión';
+    errEl.style.display = '';
+  });
+}
+
+function logout() {
+  adminAuth = false;
+  document.getElementById('loginScreen').style.display = '';
+  document.getElementById('dashboard').classList.remove('active');
+  pwdIn.value = '';
+}
+
+// ═══ LOAD OVERVIEW ═══
+function loadOverview() {
+  rpc('admin_get_overview').then(function(data){
+    if (!data) return;
+
+    // Stats
+    document.getElementById('statsRow').innerHTML =
+      '<div class="stat"><div class="stat-num">' + (data.total_schools||0) + '</div><div class="stat-label">Colegios</div></div>' +
+      '<div class="stat"><div class="stat-num">' + (data.total_students||0) + '</div><div class="stat-label">Alumnos</div></div>' +
+      '<div class="stat"><div class="stat-num">' + (data.total_results||0) + '</div><div class="stat-label">Paths completados</div></div>';
+
+    // Schools
+    schoolsData = data.schools || [];
+    renderSchools();
+  });
+}
+
+function renderSchools() {
+  var list = document.getElementById('schoolList');
+  if (!schoolsData.length) {
+    list.innerHTML = '<div class="empty">No hay colegios registrados. Creá el primero con el botón de arriba.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  schoolsData.forEach(function(s){
+    var paths = (s.paths_used || []).map(function(p){ return 'P'+p; }).join(', ') || '—';
+    var created = s.created_at ? new Date(s.created_at).toLocaleDateString('es-AR') : '';
+    var email = s.contact_email || '—';
+
+    var div = document.createElement('div');
+    div.className = 'school-item';
+    div.innerHTML =
+      '<div class="school-info">' +
+        '<div class="school-name">' + s.name + '</div>' +
+        '<div class="school-code">' + s.code + '</div>' +
+        '<div class="school-meta">Contacto: ' + email + ' · Creado: ' + created + ' · Paths: ' + paths + '</div>' +
+      '</div>' +
+      '<div class="school-stats">' +
+        '<div class="school-stat"><div class="school-stat-num">' + (s.student_count||0) + '</div><div class="school-stat-label">Alumnos</div></div>' +
+        '<div class="school-stat"><div class="school-stat-num">' + (s.result_count||0) + '</div><div class="school-stat-label">Resultados</div></div>' +
+      '</div>' +
+      '<div class="school-actions">' +
+        '<button class="btn btn-outline btn-sm" onclick="openEditModal(\'' + s.id + '\')">Editar</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="openDeleteModal(\'' + s.id + '\')">Eliminar</button>' +
+      '</div>';
+    list.appendChild(div);
+  });
+}
+
+// ═══ CREATE / EDIT SCHOOL ═══
+function openCreateModal() {
+  currentEditId = null;
+  document.getElementById('modalTitle').textContent = 'Nuevo colegio';
+  document.getElementById('modalSaveBtn').textContent = 'Crear';
+  document.getElementById('mName').value = '';
+  document.getElementById('mCode').value = '';
+  document.getElementById('mEmail').value = '';
+  document.getElementById('modalError').textContent = '';
+  document.getElementById('schoolModal').classList.add('active');
+}
+
+function openEditModal(id) {
+  var s = schoolsData.find(function(x){ return x.id === id; });
+  if (!s) return;
+  currentEditId = id;
+  document.getElementById('modalTitle').textContent = 'Editar colegio';
+  document.getElementById('modalSaveBtn').textContent = 'Guardar';
+  document.getElementById('mName').value = s.name;
+  document.getElementById('mCode').value = s.code;
+  document.getElementById('mEmail').value = s.contact_email || '';
+  document.getElementById('modalError').textContent = '';
+  document.getElementById('schoolModal').classList.add('active');
+}
+
+function saveSchool() {
+  var name = document.getElementById('mName').value.trim();
+  var code = document.getElementById('mCode').value.trim().toUpperCase();
+  var email = document.getElementById('mEmail').value.trim() || null;
+  var errEl = document.getElementById('modalError');
+
+  if (!name) { errEl.textContent = 'Ingresá el nombre del colegio'; return; }
+  if (!code || code.length < 2) { errEl.textContent = 'Ingresá un código válido (mínimo 2 caracteres)'; return; }
+
+  errEl.textContent = '';
+  var btn = document.getElementById('modalSaveBtn');
+  btn.disabled = true;
+
+  if (currentEditId) {
+    // Update
+    rpc('admin_update_school', {p_id: currentEditId, p_name: name, p_code: code, p_contact_email: email})
+    .then(function(data){
+      btn.disabled = false;
+      if (data && data.success) {
+        closeModal('schoolModal');
+        showToast('Colegio actualizado', 'success');
+        loadOverview();
+      } else {
+        errEl.textContent = (data && data.error) || 'Error al actualizar';
+      }
+    }).catch(function(){ btn.disabled = false; errEl.textContent = 'Error de conexión'; });
+  } else {
+    // Create
+    rpc('admin_create_school', {p_name: name, p_code: code, p_contact_email: email})
+    .then(function(data){
+      btn.disabled = false;
+      if (data && data.success) {
+        closeModal('schoolModal');
+        showToast('Colegio "' + name + '" creado con código ' + code, 'success');
+        loadOverview();
+      } else {
+        errEl.textContent = (data && data.error) || 'Error al crear';
+      }
+    }).catch(function(){ btn.disabled = false; errEl.textContent = 'Error de conexión'; });
+  }
+}
+
+// ═══ DELETE SCHOOL ═══
+function openDeleteModal(id) {
+  var s = schoolsData.find(function(x){ return x.id === id; });
+  if (!s) return;
+  currentDeleteId = id;
+  var msg = '¿Estás seguro de que querés eliminar <strong>' + s.name + '</strong> (' + s.code + ')?';
+  if (s.student_count > 0) {
+    msg += '<br><br>⚠️ Este colegio tiene <strong>' + s.student_count + ' alumnos</strong> y <strong>' + s.result_count + ' resultados</strong>. Se va a borrar todo.';
+  }
+  document.getElementById('deleteMsg').innerHTML = msg;
+  document.getElementById('deleteModal').classList.add('active');
+}
+
+function confirmDelete() {
+  var btn = document.getElementById('deleteConfirmBtn');
+  btn.disabled = true;
+  btn.textContent = 'Eliminando...';
+
+  rpc('admin_delete_school', {p_id: currentDeleteId, p_force: true})
+  .then(function(data){
+    btn.disabled = false;
+    btn.textContent = 'Eliminar';
+    if (data && data.success) {
+      closeModal('deleteModal');
+      showToast('Colegio eliminado', 'success');
+      loadOverview();
+    } else {
+      showToast((data && data.error) || 'Error al eliminar', 'error');
+    }
+  }).catch(function(){
+    btn.disabled = false;
+    btn.textContent = 'Eliminar';
+    showToast('Error de conexión', 'error');
+  });
+}
+
+// ═══ CHANGE PASSWORD ═══
+function openPasswordModal() {
+  document.getElementById('pwdCurrent').value = '';
+  document.getElementById('pwdNew').value = '';
+  document.getElementById('pwdRepeat').value = '';
+  document.getElementById('pwdError').textContent = '';
+  document.getElementById('pwdModal').classList.add('active');
+}
+
+function changePassword() {
+  var current = document.getElementById('pwdCurrent').value;
+  var newPwd = document.getElementById('pwdNew').value;
+  var repeat = document.getElementById('pwdRepeat').value;
+  var errEl = document.getElementById('pwdError');
+
+  if (!current) { errEl.textContent = 'Ingresá la contraseña actual'; return; }
+  if (newPwd.length < 4) { errEl.textContent = 'La nueva contraseña debe tener al menos 4 caracteres'; return; }
+  if (newPwd !== repeat) { errEl.textContent = 'Las contraseñas no coinciden'; return; }
+
+  rpc('admin_change_password', {p_current: current, p_new: newPwd})
+  .then(function(data){
+    if (data && data.success) {
+      closeModal('pwdModal');
+      showToast('Contraseña actualizada', 'success');
+    } else {
+      errEl.textContent = (data && data.error) || 'Error';
+    }
+  }).catch(function(){ errEl.textContent = 'Error de conexión'; });
+}
+
+// ═══ MODALS ═══
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(function(el){
+  el.addEventListener('click', function(e){
+    if (e.target === el) el.classList.remove('active');
+  });
+});
+
+// Close modals on Escape
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(function(el){
+      el.classList.remove('active');
+    });
+  }
+});
+</script>
+</body>
+</html>
