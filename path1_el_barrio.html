@@ -49,33 +49,29 @@ body{font-family:'Nunito',sans-serif;display:flex;flex-direction:column;position
 .btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border);}
 
 /* ══ MAP ══ */
-#map-screen{background:var(--sky);}
-.map-top{padding:12px 16px 6px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:rgba(0,0,0,.4);border-bottom:1px solid rgba(245,166,35,.08);}
+#map-screen{background:#0c0e2a;}
+.map-top{padding:12px 16px 6px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:rgba(0,0,0,.6);border-bottom:1px solid rgba(245,166,35,.08);position:relative;z-index:2;}
 .map-top-title{font-family:Gabarito,sans-serif;font-size:12px;letter-spacing:.14em;color:var(--warm);opacity:.7;}
 .map-top-progress{font-family:Gabarito,sans-serif;font-size:13px;color:var(--muted);}
 .map-top-progress span{color:var(--warm);font-weight:700;}
-.map-bar{height:3px;background:rgba(255,255,255,.05);flex-shrink:0;}
+.map-bar{height:3px;background:rgba(255,255,255,.05);flex-shrink:0;position:relative;z-index:2;}
 .map-bar-fill{height:100%;background:var(--warm);transition:width .5s ease;}
-.map-greeting{padding:10px 16px 4px;flex-shrink:0;}
+.map-greeting{padding:10px 16px 4px;flex-shrink:0;position:relative;z-index:2;background:rgba(0,0,0,.4);}
 .map-greeting h2{font-family:Gabarito,sans-serif;font-size:17px;font-weight:600;color:#fff;}
 .map-greeting p{font-size:12px;color:var(--muted);margin-top:2px;}
 
-.map-canvas{flex:1;position:relative;overflow:hidden;}
-.map-bg{position:absolute;inset:0;}
+.map-canvas{flex:1;position:relative;overflow:hidden;background:url('map1_barrio.png') center/cover no-repeat;}
 
-/* Zone nodes on map */
-.zone-node{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;touch-action:manipulation;opacity:0;transition:opacity .4s ease,transform .3s;}
+/* Zone hotspots on image */
+.zone-node{position:absolute;cursor:pointer;touch-action:manipulation;opacity:0;transition:opacity .4s ease;border-radius:14px;border:2px solid transparent;}
 .zone-node.visible{opacity:1;}
-.zone-node:active .zone-ring{transform:scale(.9);}
-.zone-node.completed{opacity:.4;pointer-events:none;}
-.zone-ring{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;transition:transform .15s;position:relative;}
-.zone-ring::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid;opacity:.4;animation:pulse 3s ease infinite;}
-.zone-label{font-family:Gabarito,sans-serif;font-size:11px;font-weight:600;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.8);white-space:nowrap;}
-.zone-check{position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;z-index:2;}
+.zone-node:hover,.zone-node:active{border-color:rgba(245,166,35,.6);background:rgba(245,166,35,.08);box-shadow:0 0 20px rgba(245,166,35,.2);}
+.zone-node.completed{opacity:.5;pointer-events:none;border-color:rgba(78,203,113,.3);background:rgba(78,203,113,.08);}
 .zone-node.completed .zone-check{display:flex;}
+.zone-check{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:11px;color:#fff;z-index:2;}
 
 /* Map SVG illustration */
-.map-svg{width:100%;height:100%;}
+/* image map */
 
 /* ══ GAME ══ */
 #game-screen{background:#0c0e18;}
@@ -408,14 +404,14 @@ var AREAS=[
 ];
 
 var ZONES=[
-  {id:'calle',  icon:'👦',name:'La Calle',      x:18,y:22,color:'#f07a9a',glow:'rgba(240,122,154,.15)',desc:'Un nene solo y asustado'},
-  {id:'kiosco', icon:'🛒',name:'El Kiosco',     x:75,y:18,color:'#f5a623',glow:'rgba(245,166,35,.15)',desc:'Hay plata en juego'},
-  {id:'terraza',icon:'🌿',name:'La Terraza',    x:22,y:45,color:'#4ecb71',glow:'rgba(78,203,113,.15)',desc:'La huerta necesita ayuda'},
-  {id:'apagon', icon:'💡',name:'El Apagón',     x:78,y:42,color:'#b07af0',glow:'rgba(176,122,240,.15)',desc:'Se cortó la luz'},
-  {id:'aula',   icon:'🎨',name:'El Aula',       x:15,y:68,color:'#f06050',glow:'rgba(240,96,80,.15)',desc:'Una pared para vos'},
-  {id:'recreo', icon:'💬',name:'El Recreo',     x:72,y:65,color:'#5b9bf5',glow:'rgba(91,155,245,.15)',desc:'Un compañero está solo'},
-  {id:'biblio', icon:'📖',name:'La Biblioteca', x:38,y:82,color:'#e0a860',glow:'rgba(224,168,96,.15)',desc:'Libros para ordenar'},
-  {id:'esquina',icon:'🔀',name:'La Esquina',    x:65,y:85,color:'#7ad8b0',glow:'rgba(122,216,176,.15)',desc:'Decisiones rápidas'},
+  {id:'calle',  icon:'👦',name:'La Calle',      x:3, y:25,w:29,h:17,color:'#f07a9a',desc:'Un nene solo y asustado'},
+  {id:'kiosco', icon:'🛒',name:'El Kiosco',     x:35,y:25,w:29,h:17,color:'#f5a623',desc:'Hay plata en juego'},
+  {id:'terraza',icon:'🌿',name:'La Terraza',    x:67,y:25,w:30,h:17,color:'#4ecb71',desc:'La huerta necesita ayuda'},
+  {id:'apagon', icon:'💡',name:'El Apagón',     x:3, y:46,w:32,h:17,color:'#b07af0',desc:'Se cortó la luz'},
+  {id:'aula',   icon:'🎨',name:'El Aula',       x:65,y:46,w:32,h:17,color:'#f06050',desc:'Una pared para vos'},
+  {id:'recreo', icon:'💬',name:'El Recreo',     x:3, y:70,w:29,h:20,color:'#5b9bf5',desc:'Un compañero está solo'},
+  {id:'biblio', icon:'📖',name:'La Biblioteca', x:35,y:70,w:29,h:20,color:'#e0a860',desc:'Libros para ordenar'},
+  {id:'esquina',icon:'🔀',name:'La Esquina',    x:67,y:70,w:30,h:20,color:'#7ad8b0',desc:'Decisiones rápidas'},
 ];
 
 // ═══ SCREENS ═══
@@ -445,129 +441,19 @@ function buildMap(){
   var canvas=document.getElementById('mapCanvas');
   canvas.innerHTML='';
 
-  // SVG background: barrio illustration
-  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('viewBox','0 0 400 500');
-  svg.setAttribute('preserveAspectRatio','xMidYMid slice');
-  svg.style.cssText='position:absolute;inset:0;width:100%;height:100%;';
-  svg.innerHTML=
-    // Sky gradient
-    '<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">'+
-      '<stop offset="0%" stop-color="#0c0e18"/><stop offset="100%" stop-color="#141828"/>'+
-    '</linearGradient></defs>'+
-    '<rect width="400" height="500" fill="url(#sky)"/>'+
-    // Stars
-    '<circle cx="30" cy="25" r=".8" fill="#fff" opacity=".25"/>'+
-    '<circle cx="90" cy="15" r=".6" fill="#fff" opacity=".3"/>'+
-    '<circle cx="180" cy="30" r=".7" fill="#fff" opacity=".2"/>'+
-    '<circle cx="250" cy="12" r=".5" fill="#fff" opacity=".35"/>'+
-    '<circle cx="320" cy="28" r=".8" fill="#fff" opacity=".2"/>'+
-    '<circle cx="370" cy="45" r=".6" fill="#fff" opacity=".25"/>'+
-    '<circle cx="60" cy="60" r=".5" fill="#fff" opacity=".3"/>'+
-    '<circle cx="340" cy="70" r=".7" fill="#fff" opacity=".2"/>'+
-    '<circle cx="150" cy="55" r=".6" fill="#fff" opacity=".25"/>'+
-    // Moon
-    '<circle cx="320" cy="55" r="18" fill="#f5e6b8" opacity=".08"/>'+
-    '<circle cx="315" cy="50" r="14" fill="#f5e6b8" opacity=".12"/>'+
-    // Ground
-    '<rect x="0" y="380" width="400" height="120" fill="#0a0c14"/>'+
-    '<rect x="0" y="378" width="400" height="3" fill="#1a1e30"/>'+
-    // Streets (horizontal)
-    '<rect x="0" y="200" width="400" height="8" fill="#12141e" rx="1"/>'+
-    '<line x1="0" y1="204" x2="400" y2="204" stroke="#1e2235" stroke-width=".5" stroke-dasharray="8 4"/>'+
-    '<rect x="0" y="360" width="400" height="8" fill="#12141e" rx="1"/>'+
-    '<line x1="0" y1="364" x2="400" y2="364" stroke="#1e2235" stroke-width=".5" stroke-dasharray="8 4"/>'+
-    // Streets (vertical)
-    '<rect x="190" y="0" width="8" fill="#12141e" height="500" rx="1"/>'+
-    '<line x1="194" y1="0" x2="194" y2="500" stroke="#1e2235" stroke-width=".5" stroke-dasharray="8 4"/>'+
-    // Buildings (silhouettes)
-    '<rect x="10" y="100" width="50" height="100" rx="3" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
-    '<rect x="18" y="112" width="8" height="10" rx="1" fill="#1a1e30"/>'+
-    '<rect x="32" y="112" width="8" height="10" rx="1" fill="#f5a623" opacity=".15"/>'+
-    '<rect x="44" y="112" width="8" height="10" rx="1" fill="#1a1e30"/>'+
-    '<rect x="18" y="130" width="8" height="10" rx="1" fill="#5b9bf5" opacity=".12"/>'+
-    '<rect x="32" y="130" width="8" height="10" rx="1" fill="#1a1e30"/>'+
-    '<rect x="44" y="130" width="8" height="10" rx="1" fill="#f5a623" opacity=".1"/>'+
-    '<rect x="18" y="148" width="8" height="10" rx="1" fill="#1a1e30"/>'+
-    '<rect x="32" y="148" width="8" height="10" rx="1" fill="#4ecb71" opacity=".1"/>'+
-    '<rect x="44" y="148" width="8" height="10" rx="1" fill="#1a1e30"/>'+
-    // Building 2
-    '<rect x="70" y="130" width="40" height="70" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
-    '<rect x="78" y="140" width="7" height="8" rx="1" fill="#f07a9a" opacity=".12"/>'+
-    '<rect x="90" y="140" width="7" height="8" rx="1" fill="#1a1e30"/>'+
-    '<rect x="78" y="155" width="7" height="8" rx="1" fill="#1a1e30"/>'+
-    '<rect x="90" y="155" width="7" height="8" rx="1" fill="#b07af0" opacity=".1"/>'+
-    // Building 3 (tall)
-    '<rect x="280" y="80" width="45" height="120" rx="3" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
-    '<rect x="288" y="92" width="7" height="8" rx="1" fill="#f5a623" opacity=".12"/>'+
-    '<rect x="300" y="92" width="7" height="8" rx="1" fill="#1a1e30"/>'+
-    '<rect x="312" y="92" width="7" height="8" rx="1" fill="#5b9bf5" opacity=".1"/>'+
-    '<rect x="288" y="108" width="7" height="8" rx="1" fill="#1a1e30"/>'+
-    '<rect x="300" y="108" width="7" height="8" rx="1" fill="#f06050" opacity=".12"/>'+
-    '<rect x="312" y="108" width="7" height="8" rx="1" fill="#1a1e30"/>'+
-    '<rect x="288" y="124" width="7" height="8" rx="1" fill="#4ecb71" opacity=".1"/>'+
-    '<rect x="300" y="124" width="7" height="8" rx="1" fill="#1a1e30"/>'+
-    '<rect x="312" y="124" width="7" height="8" rx="1" fill="#f5a623" opacity=".1"/>'+
-    '<rect x="288" y="140" width="7" height="8" rx="1" fill="#1a1e30"/>'+
-    '<rect x="300" y="140" width="7" height="8" rx="1" fill="#b07af0" opacity=".1"/>'+
-    '<rect x="312" y="140" width="7" height="8" rx="1" fill="#1a1e30"/>'+
-    // Building 4
-    '<rect x="340" y="130" width="50" height="70" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
-    '<rect x="350" y="140" width="7" height="8" rx="1" fill="#f07a9a" opacity=".1"/>'+
-    '<rect x="364" y="140" width="7" height="8" rx="1" fill="#1a1e30"/>'+
-    '<rect x="378" y="140" width="7" height="8" rx="1" fill="#5b9bf5" opacity=".12"/>'+
-    // Building 5 (low)
-    '<rect x="120" y="160" width="60" height="40" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
-    '<rect x="128" y="168" width="10" height="10" rx="1" fill="#f5a623" opacity=".15"/>'+
-    '<rect x="145" y="168" width="10" height="10" rx="1" fill="#1a1e30"/>'+
-    '<rect x="162" y="168" width="10" height="10" rx="1" fill="#4ecb71" opacity=".12"/>'+
-    // Lower buildings
-    '<rect x="10" y="250" width="70" height="60" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
-    '<rect x="100" y="270" width="80" height="40" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
-    '<rect x="210" y="240" width="55" height="70" rx="3" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
-    '<rect x="300" y="260" width="90" height="50" rx="2" fill="#0e1020" stroke="#1a1e30" stroke-width=".5"/>'+
-    // Trees
-    '<circle cx="140" cy="370" r="12" fill="#0a1a10" opacity=".8"/>'+
-    '<circle cx="260" cy="375" r="10" fill="#0a1a10" opacity=".7"/>'+
-    '<rect x="138" y="370" width="4" height="12" fill="#1a1208"/>'+
-    '<rect x="258" y="375" width="3" height="10" fill="#1a1208"/>'+
-    // Lampposts
-    '<rect x="98" y="180" width="2" height="22" fill="#2a2e3a"/>'+
-    '<circle cx="99" cy="178" r="3" fill="#f5a623" opacity=".15"/>'+
-    '<rect x="298" y="340" width="2" height="22" fill="#2a2e3a"/>'+
-    '<circle cx="299" cy="338" r="3" fill="#f5a623" opacity=".15"/>';
-  canvas.appendChild(svg);
-
-  // Zone nodes
+  // Zone hotspots (transparent clickable areas over the image)
   ZONES.forEach(function(z,i){
     var node=document.createElement('div');
     node.className='zone-node'+(GS.done[z.id]?' completed':'');
-    node.style.left=z.x+'%';node.style.top=z.y+'%';
-    node.style.transform='translate(-50%,-50%)';
-    node.innerHTML=
-      '<div class="zone-ring" style="background:'+z.glow+';border:1.5px solid '+z.color+';">'+
-        '<span style="filter:drop-shadow(0 2px 6px '+z.glow+')">'+z.icon+'</span>'+
-        '<div class="zone-check">✓</div>'+
-      '</div>'+
-      '<div class="zone-label">'+z.name+'</div>';
-    node.style.setProperty('--c',z.color);
-    node.querySelector('.zone-ring::after');
-    var ring=node.querySelector('.zone-ring');
-    ring.style.boxShadow='0 0 20px '+z.glow;
-
+    node.style.left=z.x+'%';
+    node.style.top=z.y+'%';
+    node.style.width=z.w+'%';
+    node.style.height=z.h+'%';
+    node.innerHTML='<div class="zone-check">✓</div>';
     node.addEventListener('click',function(){if(!GS.done[z.id])enterZone(z.id);});
     canvas.appendChild(node);
     setTimeout(function(){node.classList.add('visible');},100+i*80);
   });
-
-  // Apply dynamic ring border animation color
-  var styleEl=document.createElement('style');
-  var css='';
-  ZONES.forEach(function(z){
-    css+='.zone-node[style*="'+z.x+'"] .zone-ring::after{border-color:'+z.color+';}';
-  });
-  styleEl.textContent=css;
-  canvas.appendChild(styleEl);
 
   updateMapUI();
 }
