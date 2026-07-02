@@ -98,6 +98,10 @@ input:focus,select:focus{border-color:var(--warm);}
   </div>
   <div class="tab-content" id="tab-students" style="display:none;">
     <div class="card" id="studentsCard">
+      <div id="sessionFilter" style="display:none;background:var(--warm-soft);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <span style="font-size:13px;">📋 Sesión: <strong id="sessionFilterName"></strong></span>
+        <button class="btn btn-outline btn-sm" onclick="clearSessionFilter()">Ver todos</button>
+      </div>
       <h2>Alumnos</h2><div class="subtitle" id="studentCount"></div>
       <div style="overflow-x:auto;"><table class="students-table"><thead><tr><th>Nombre</th><th>Email</th><th>Paths</th><th>Acciones</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
     </div>
@@ -214,6 +218,7 @@ function renderSessions(sessions){
         '<div class="session-meta" style="font-size:10px;word-break:break-all;">Link: '+pathUrl+'</div>'+
       '</div>'+
       '<div class="session-actions">'+
+        '<button class="btn btn-warm btn-sm" onclick="viewSessionResults(\''+s.id+'\',\''+s.name.replace(/'/g,"\\'")+' ('+s.year+')'+'\''+')">Ver resultados</button>'+
         (s.status==='open'?'<button class="btn btn-outline btn-sm" onclick="toggleSession(\''+s.code+'\',\'close\')">Cerrar</button>':'<button class="btn btn-success btn-sm" onclick="toggleSession(\''+s.code+'\',\'reopen\')">Reabrir</button>')+
         '<button class="btn btn-danger btn-sm" onclick="askDeleteSession(\''+s.id+'\',\''+s.name.replace(/'/g,"\\'")+'\')">Eliminar</button>'+
       '</div>';
@@ -342,6 +347,29 @@ function renderAvgChart(sessionFilter){
   var data=AREAS.map(function(a){return counts[a.id]?Math.round(sums[a.id]/counts[a.id]):0;});
   if(avgChartInstance)avgChartInstance.destroy();
   avgChartInstance=new Chart(document.getElementById('avgChart'),{type:'bar',data:{labels:AREAS.map(function(a){return a.icon+' '+a.name;}),datasets:[{data:data,backgroundColor:AREAS.map(function(a){return a.color+'88';}),borderColor:AREAS.map(function(a){return a.color;}),borderWidth:1,borderRadius:6}]},options:{responsive:true,indexAxis:'y',scales:{x:{max:100,grid:{color:'rgba(255,255,255,.06)'},ticks:{color:'#9a98a0',callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{color:'#e8e6e0',font:{size:12}}}},plugins:{legend:{display:false}}}});
+}
+
+var activeSessionFilter=null;
+function viewSessionResults(sessionId,sessionLabel){
+  activeSessionFilter=sessionId;
+  var students=(schoolData.students||[]).filter(function(s){
+    return s.results&&s.results.some(function(r){return r.session_id===sessionId;});
+  });
+  // Filter each student's results to only show this session
+  var filtered=students.map(function(s){
+    return Object.assign({},s,{results:s.results.filter(function(r){return r.session_id===sessionId;})});
+  });
+  var fEl=document.getElementById('sessionFilter');
+  fEl.style.display='flex';
+  document.getElementById('sessionFilterName').textContent=sessionLabel;
+  renderStudents(filtered);
+  switchTab('students');
+}
+function clearSessionFilter(){
+  activeSessionFilter=null;
+  document.getElementById('sessionFilter').style.display='none';
+  var students=(schoolData.students||[]).filter(function(s){return s.results&&s.results.length>0;});
+  renderStudents(students);
 }
 
 function reload(){rpc('get_school_dashboard',{p_school_code:schoolCode}).then(function(d){if(d&&!d.error){schoolData=d;renderDashboard();}});}
